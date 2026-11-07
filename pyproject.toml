@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resume-analyzer"
+version = "0.1.0"
+description = "Intelligent Resume Analyzer — AI-powered hiring assistant with deterministic core"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0,<3.0",
+    "PyYAML>=6.0,<7.0",
+    "python-dotenv>=1.0,<2.0",
+    "pdfplumber>=0.11",
+    "pypdf>=4.0",
+    "python-docx>=1.0",
+    "rapidfuzz>=3.0,<4.0",
+    "Jinja2>=3.1",
+    "reportlab>=4.0",
+    "openpyxl>=3.1",
+    "streamlit>=1.30",
+    "tqdm>=4.60",
+    "requests>=2.28",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.3",
+    "black>=24.0",
+    "bandit>=1.7",
+    "radon>=6.0",
+    "types-PyYAML",
+    "types-requests",
+]
+
+[project.scripts]
+resume-analyzer = "resume_analyzer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "S",    # flake8-bandit
+    "C90",  # mccabe complexity
+    "D",    # pydocstyle
+]
+ignore = [
+    "D100", # Missing docstring in public module (relaxed where self-evident)
+    "D104", # Missing docstring in public package
+    "D107", # Missing docstring in __init__
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "evaluation: marks evaluation benchmarks (ET-*)",
+    "performance: marks performance benchmark probes (PT-*)",
+    "slow: marks slow running tests",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", "data", "samples", "logs"]
+skips = ["B101"]  # assert used in tests
