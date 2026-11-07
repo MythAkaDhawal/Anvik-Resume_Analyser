@@ -165,3 +165,4 @@ scorring:
         load_settings(bad_yaml)
 
     assert "scorring" in exc_info.value.message or "scorring" in str(exc_info.value)
+

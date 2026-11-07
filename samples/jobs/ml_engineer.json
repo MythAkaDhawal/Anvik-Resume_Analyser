@@ -1,0 +1,26 @@
+{
+  "job_id": "ml-engineer",
+  "job_title": "Machine Learning Engineer",
+  "description": "Machine Learning Engineer to develop, test, and deploy predictive ML models into production.",
+  "required_skills": [
+    "Python",
+    "PyTorch",
+    "Scikit-Learn",
+    "SQL",
+    "MLflow",
+    "Docker"
+  ],
+  "optional_skills": [
+    "Kubernetes",
+    "TensorFlow",
+    "Spark",
+    "FastAPI"
+  ],
+  "min_experience_years": 3.0,
+  "min_education_level": 4,
+  "preferred_fields": [
+    "Computer Science",
+    "Artificial Intelligence",
+    "Mathematics"
+  ]
+}

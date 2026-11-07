@@ -89,3 +89,4 @@ markers = [
 [tool.bandit]
 exclude_dirs = ["tests", "data", "samples", "logs"]
 skips = ["B101"]  # assert used in tests
+

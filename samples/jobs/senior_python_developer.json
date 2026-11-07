@@ -1,0 +1,25 @@
+{
+  "job_id": "senior-python-developer",
+  "job_title": "Senior Python Developer",
+  "description": "Senior backend developer to design, build, and maintain mission-critical Python microservices.",
+  "required_skills": [
+    "Python",
+    "FastAPI",
+    "PostgreSQL",
+    "Docker",
+    "Kubernetes",
+    "Redis"
+  ],
+  "optional_skills": [
+    "GraphQL",
+    "CI/CD",
+    "AWS",
+    "Terraform"
+  ],
+  "min_experience_years": 5.0,
+  "min_education_level": 3,
+  "preferred_fields": [
+    "Computer Science",
+    "Software Engineering"
+  ]
+}

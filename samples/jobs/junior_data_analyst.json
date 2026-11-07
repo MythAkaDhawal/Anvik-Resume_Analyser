@@ -1,0 +1,24 @@
+{
+  "job_id": "junior-data-analyst",
+  "job_title": "Junior Data Analyst",
+  "description": "Junior Data Analyst to perform exploratory data analysis, dashboarding, and metric reporting.",
+  "required_skills": [
+    "Python",
+    "SQL",
+    "Pandas",
+    "Docker",
+    "AWS"
+  ],
+  "optional_skills": [
+    "Git",
+    "Streamlit",
+    "Tableau"
+  ],
+  "min_experience_years": 2.0,
+  "min_education_level": 3,
+  "preferred_fields": [
+    "Computer Science",
+    "Statistics",
+    "Data Science"
+  ]
+}

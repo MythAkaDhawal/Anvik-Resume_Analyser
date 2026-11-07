@@ -103,3 +103,4 @@ def test_wrap_unexpected_error_sanitization() -> None:
     assert "ZeroDivisionError" in wrapped.details.get("exception_type", "")
     assert "resume text" not in wrapped.user_message
     assert "unexpected" in wrapped.user_message.lower()
+

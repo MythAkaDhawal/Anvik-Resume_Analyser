@@ -97,3 +97,4 @@ def test_logs_contain_no_resume_text(tmp_path: Path) -> None:
     assert candidate_phone not in content
     assert "[EMAIL_REDACTED]" in content
     assert "[PHONE_REDACTED]" in content
+

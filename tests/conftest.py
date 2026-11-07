@@ -107,3 +107,4 @@ logging:
     config_file = tmp_path / "valid_config.yaml"
     config_file.write_text(config_content.strip(), encoding="utf-8")
     return config_file
+

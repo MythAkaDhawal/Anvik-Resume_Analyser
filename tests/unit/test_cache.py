@@ -26,3 +26,4 @@ def test_get_settings_cache_hits_and_clearing() -> None:
     info_cleared = get_settings.cache_info()
     assert info_cleared.hits == 0
     assert info_cleared.misses == 0
+
