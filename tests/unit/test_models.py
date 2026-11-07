@@ -248,3 +248,4 @@ def test_analysis_report_json_round_trip() -> None:
     assert reloaded.score.total_score == 65.0
     assert reloaded.score.fit_band == FitBand.MODERATE
     assert reloaded.human_review_notice == DEFAULT_HUMAN_REVIEW_NOTICE
+

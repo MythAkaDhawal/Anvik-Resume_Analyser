@@ -108,3 +108,4 @@ class ComponentStatus(str, Enum):
     NOT_APPLICABLE = "not_applicable"
     UNKNOWN = "unknown"
     NOT_USED = "not_used"
+

@@ -254,3 +254,4 @@ class AnalysisReport(ResultsBaseModel):
     ai: AIInsights = Field(default_factory=AIInsights)
     flags: list[ReportFlag] = Field(default_factory=list)
     human_review_notice: str = DEFAULT_HUMAN_REVIEW_NOTICE
+

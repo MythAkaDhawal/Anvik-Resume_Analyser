@@ -161,3 +161,4 @@ class JobRequirements(BaseModel):
             )
 
         return data
+
