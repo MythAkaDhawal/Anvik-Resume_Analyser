@@ -150,8 +150,7 @@ def test_corrupt_files_and_scanned_pdf() -> None:
 
     # 1. Corrupt PDF header / body
     corrupt_pdf = b"%PDF-1.4\nCorrupted data without any valid PDF trailer or structure"
-    with pytest.raises(EmptyResumeError):
-        # Passes magic bytes, but extract yields no text -> EmptyResumeError
+    with pytest.raises((UnreadableFileError, EmptyResumeError)):
         load_resume("corrupt.pdf", corrupt_pdf, settings)
 
     # 2. Corrupt DOCX

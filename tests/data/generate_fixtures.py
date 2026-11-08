@@ -76,29 +76,48 @@ def create_minimal_docx(paragraphs: list[str]) -> bytes:
 
 
 def create_encrypted_pdf() -> bytes:
-    """Generate a minimal PDF flagged with an /Encrypt dictionary."""
-    content = (
-        b"%PDF-1.4\n"
-        b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
-        b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
-        b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n"
-        b"trailer\n<< /Size 4 /Root 1 0 R /Encrypt << /Filter /Standard /V 1 /R 2 /P -4 >> >>\n"
-        b"%%EOF\n"
-    )
-    return content
+    """Generate a valid PDF encrypted with a password."""
+    try:
+        import pypdf
+
+        writer = pypdf.PdfWriter()
+        writer.add_blank_page(width=72, height=72)
+        writer.encrypt("secret_password")
+        buffer = io.BytesIO()
+        writer.write(buffer)
+        return buffer.getvalue()
+    except Exception:
+        content = (
+            b"%PDF-1.4\n"
+            b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+            b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+            b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n"
+            b"trailer\n<< /Size 4 /Root 1 0 R /Encrypt << /Filter /Standard /V 1 /R 2 /P -4 >> >>\n"
+            b"%%EOF\n"
+        )
+        return content
 
 
 def create_scanned_image_pdf() -> bytes:
     """Generate a valid PDF containing no text streams (image only)."""
-    content = (
-        b"%PDF-1.4\n"
-        b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
-        b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
-        b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n"
-        b"trailer\n<< /Size 4 /Root 1 0 R >>\n"
-        b"%%EOF\n"
-    )
-    return content
+    try:
+        import pypdf
+
+        writer = pypdf.PdfWriter()
+        writer.add_blank_page(width=612, height=792)
+        buf = io.BytesIO()
+        writer.write(buf)
+        return buf.getvalue()
+    except Exception:
+        content = (
+            b"%PDF-1.4\n"
+            b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+            b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+            b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n"
+            b"trailer\n<< /Size 4 /Root 1 0 R >>\n"
+            b"%%EOF\n"
+        )
+        return content
 
 
 def create_macro_docx() -> bytes:
