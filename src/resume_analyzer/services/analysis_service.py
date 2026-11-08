@@ -51,16 +51,61 @@ class AnalysisOptions(BaseModel):
     """User-configurable options controlling analysis execution."""
 
     strategy: str = "weighted"
-    ai_features: set[str] = Field(
-        default_factory=lambda: {
-            "extraction",
-            "categorization",
-            "explanation",
-            "recommendations",
-            "interview_questions",
-        }
-    )
+    ai_features: set[str] = Field(default_factory=set)
     persist: bool = False
+
+    def __init__(
+        self,
+        strategy: str = "weighted",
+        ai_features: set[str] | None = None,
+        persist: bool = False,
+        ai_enabled: bool | None = None,
+        ai_extract_candidate: bool = False,
+        ai_categorize_skills: bool = False,
+        ai_explain_match: bool = False,
+        ai_recommendations: bool = False,
+        ai_interview_questions: bool = False,
+        **data: Any,
+    ) -> None:
+        if ai_features is None:
+            features: set[str] = set()
+            if ai_enabled or (
+                ai_enabled is None
+                and any([
+                    ai_extract_candidate,
+                    ai_categorize_skills,
+                    ai_explain_match,
+                    ai_recommendations,
+                    ai_interview_questions,
+                ])
+            ):
+                if ai_extract_candidate:
+                    features.add("extraction")
+                if ai_categorize_skills:
+                    features.add("categorization")
+                if ai_explain_match:
+                    features.add("explanation")
+                if ai_recommendations:
+                    features.add("recommendations")
+                if ai_interview_questions:
+                    features.add("interview_questions")
+                if not features and ai_enabled:
+                    features = {
+                        "extraction",
+                        "categorization",
+                        "explanation",
+                        "recommendations",
+                        "interview_questions",
+                    }
+        else:
+            features = set(ai_features)
+
+        super().__init__(strategy=strategy, ai_features=features, persist=persist, **data)
+
+    @property
+    def ai_enabled(self) -> bool:
+        return bool(self.ai_features)
+
 
 
 class AnalysisService:

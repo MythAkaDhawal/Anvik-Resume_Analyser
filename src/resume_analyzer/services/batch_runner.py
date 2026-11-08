@@ -137,3 +137,35 @@ class BatchRunner:
 
         return BatchResult(reports=reports, failures=failures)
 
+    def run_paths(
+        self,
+        paths: Sequence[Path | str],
+        job: JobRequirements,
+        options: AnalysisOptions | None = None,
+        progress: ProgressCallback | None = None,
+    ) -> BatchResult:
+        """Read files from disk paths and execute batch analysis with isolation."""
+        file_payloads: list[tuple[str, bytes]] = []
+        path_failures: list[FileFailure] = []
+
+        for p in paths:
+            path_obj = Path(p)
+            try:
+                data = path_obj.read_bytes()
+                file_payloads.append((path_obj.name, data))
+            except Exception as e:
+                logger.warning("Failed to read batch file '%s': %s", path_obj.name, e)
+                path_failures.append(
+                    FileFailure(
+                        display_name=_safe_display_name(path_obj.name),
+                        error_code="E-FILE-001",
+                        user_message=f"Could not read file from disk: {e}",
+                    )
+                )
+
+        batch_res = self.run(file_payloads, job=job, options=options, progress=progress)
+        # Combine disk-read failures with runner failures
+        combined_failures = path_failures + batch_res.failures
+        return BatchResult(reports=batch_res.reports, failures=combined_failures)
+
+

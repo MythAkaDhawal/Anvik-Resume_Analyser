@@ -41,12 +41,29 @@ class JobRequirements(BaseModel):
     min_education_level: EducationLevel = EducationLevel.UNSPECIFIED
     preferred_fields: list[str] = Field(default_factory=list)
 
+    @property
+    def title(self) -> str:
+        """Alias property for job_title."""
+        return self.job_title
+
+    @property
+    def education_level(self) -> EducationLevel:
+        """Alias property for min_education_level."""
+        return self.min_education_level
+
+
     @model_validator(mode="before")
     @classmethod
     def validate_and_normalize_job(cls, data: Any) -> Any:
         """Validate all job fields and collect all issues into JobValidationError."""
         if not isinstance(data, dict):
             return data
+
+        # Map common aliases if present
+        if "title" in data and "job_title" not in data:
+            data["job_title"] = data.pop("title")
+        if "education_level" in data and "min_education_level" not in data:
+            data["min_education_level"] = data.pop("education_level")
 
         errors: list[str] = []
 

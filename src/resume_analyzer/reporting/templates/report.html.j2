@@ -464,9 +464,9 @@
         Education attainment is mapped hierarchically without institution-ranking bias.
       </p>
       <p style="font-size: 0.85rem; color: var(--muted);">
-        Configuration: Strategy: <code>{{ report.config_snapshot.strategy }}</code> &bull;
-        Fuzzy Threshold: {{ report.config_snapshot.fuzzy_threshold }} &bull;
-        AI Provider: <code>{{ report.config_snapshot.ai.provider }}</code>
+        Configuration: Strategy: <code>{{ report.config_snapshot.strategy if report.config_snapshot.strategy else "weighted" }}</code> &bull;
+        Fuzzy Threshold: {{ report.config_snapshot.fuzzy_threshold if report.config_snapshot.fuzzy_threshold else "default" }} &bull;
+        AI Provider: <code>{{ report.config_snapshot.ai.provider if (report.config_snapshot.ai and report.config_snapshot.ai.provider) else "null" }}</code>
       </p>
     </section>
 

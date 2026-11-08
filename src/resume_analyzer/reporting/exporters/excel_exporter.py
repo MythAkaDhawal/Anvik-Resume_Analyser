@@ -287,12 +287,76 @@ class ExcelExporter(Exporter):
 
         _auto_fit_columns(ws)
 
-    def export_batch(self, reports: list[AnalysisReport], out_path: Path | str) -> Path:
-        """Export multi-candidate ranking workbook sorted by total score descending (FR-26).
+    def build_batch_workbook(self, reports: list[AnalysisReport]) -> openpyxl.Workbook:
+        """Construct multi-candidate batch ranking Excel workbook."""
+        wb = openpyxl.Workbook()
+        ws_rank = wb.active
+        ws_rank.title = "Ranking"
+        ws_rank.freeze_panes = "A2"
 
-        Columns:
-            Rank, Candidate ID, Name, Score, Fit band, Coverage, Missing required skills, Flags, Strategy.
-        """
+        headers = [
+            "Rank",
+            "Candidate ID",
+            "Name",
+            "Score",
+            "Fit band",
+            "Coverage",
+            "Missing required skills",
+            "Flags",
+            "Strategy",
+        ]
+        ws_rank.append(headers)
+        _style_header_row(ws_rank, 1, len(headers))
+
+        sorted_reports = sorted(
+            reports,
+            key=lambda r: (
+                -r.score.total_score,
+                -r.match.required_credit,
+                r.candidate.candidate_id,
+            ),
+        )
+
+        for rank, r in enumerate(sorted_reports, start=1):
+            missing_req = [
+                m.target for m in r.match.skill_matches
+                if m.is_required and (m.credit < 0.5 or m.match_type.value == "none")
+            ]
+            missing_str = ", ".join(missing_req) if missing_req else "None"
+            flags_str = ", ".join([f.code for f in r.flags]) if r.flags else "None"
+
+            row = [
+                rank,
+                r.candidate.candidate_id,
+                r.candidate.name or "Not detected",
+                r.score.total_score,
+                r.score.fit_band.value.upper(),
+                f"{r.score.coverage * 100:.0f}%",
+                missing_str,
+                flags_str,
+                r.score.strategy_name,
+            ]
+
+            r_idx = rank + 1
+            for c_idx, val in enumerate(row, start=1):
+                cell = ws_rank.cell(row=r_idx, column=c_idx, value=sanitize_excel_value(val))
+                cell.font = BODY_FONT
+                cell.border = BORDER
+                if c_idx in (1, 4):  # Rank and Score
+                    cell.alignment = Alignment(horizontal="center")
+
+        _auto_fit_columns(ws_rank)
+        return wb
+
+    def export_batch_bytes(self, reports: list[AnalysisReport]) -> bytes:
+        """Render batch ranking workbook to in-memory bytes."""
+        wb = self.build_batch_workbook(reports)
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        return buffer.getvalue()
+
+    def export_batch(self, reports: list[AnalysisReport], out_path: Path | str) -> Path:
+        """Export multi-candidate batch ranking workbook atomically."""
         target = Path(out_path).resolve()
         parent_dir = target.parent
 
@@ -307,68 +371,10 @@ class ExcelExporter(Exporter):
         temp_file = parent_dir / f"{target.stem}.{uuid.uuid4().hex[:8]}.tmp"
 
         try:
-            wb = openpyxl.Workbook()
-            ws_rank = wb.active
-            ws_rank.title = "Ranking"
-            ws_rank.freeze_panes = "A2"
-
-            headers = [
-                "Rank",
-                "Candidate ID",
-                "Name",
-                "Score",
-                "Fit band",
-                "Coverage",
-                "Missing required skills",
-                "Flags",
-                "Strategy",
-            ]
-            ws_rank.append(headers)
-            _style_header_row(ws_rank, 1, len(headers))
-
-            # Sort reports: Score desc, required_credit desc, candidate_id asc
-            sorted_reports = sorted(
-                reports,
-                key=lambda r: (
-                    -r.score.total_score,
-                    -r.match.required_credit,
-                    r.candidate.candidate_id,
-                ),
-            )
-
-            for rank, r in enumerate(sorted_reports, start=1):
-                missing_req = [
-                    m.target for m in r.match.skill_matches
-                    if m.is_required and (m.credit < 0.5 or m.match_type.value == "none")
-                ]
-                missing_str = ", ".join(missing_req) if missing_req else "None"
-                flags_str = ", ".join([f.code for f in r.flags]) if r.flags else "None"
-
-                row = [
-                    rank,
-                    r.candidate.candidate_id,
-                    r.candidate.name or "Not detected",
-                    r.score.total_score,
-                    r.score.fit_band.value.upper(),
-                    f"{r.score.coverage * 100:.0f}%",
-                    missing_str,
-                    flags_str,
-                    r.score.strategy_name,
-                ]
-
-                r_idx = rank + 1
-                for c_idx, val in enumerate(row, start=1):
-                    cell = ws_rank.cell(row=r_idx, column=c_idx, value=sanitize_excel_value(val))
-                    cell.font = BODY_FONT
-                    cell.border = BORDER
-                    if c_idx in (1, 4):  # Rank and Score
-                        cell.alignment = Alignment(horizontal="center")
-
-            _auto_fit_columns(ws_rank)
-
+            wb = self.build_batch_workbook(reports)
             wb.save(temp_file)
             os.replace(temp_file, target)
-            logger.info("Batch ranking workbook written path=%s count=%d", target, len(sorted_reports))
+            logger.info("Batch ranking workbook written path=%s count=%d", target, len(reports))
             return target
         except Exception as e:
             if temp_file.exists():
@@ -380,4 +386,5 @@ class ExcelExporter(Exporter):
                 f"Failed to export batch workbook to '{target}': {e}",
                 details={"path": str(target), "error": str(e)},
             ) from e
+
 

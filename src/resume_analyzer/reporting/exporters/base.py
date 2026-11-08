@@ -29,6 +29,15 @@ class Exporter(ABC):
         """Render report into byte payload for this exporter's format."""
         ...
 
+    def export_bytes(self, report: AnalysisReport) -> bytes:
+        """Render report into byte payload (alias for render_bytes)."""
+        return self.render_bytes(report)
+
+    def export_to_file(self, report: AnalysisReport, out_path: Path | str) -> Path:
+        """Export report to file path atomically (alias for export)."""
+        return self.export(report, out_path)
+
+
     def export(self, report: AnalysisReport, out_path: Path | str) -> Path:
         """Export report to file path atomically with error handling.
 
@@ -124,17 +133,20 @@ def get_exporter(fmt: Literal["html", "pdf", "xlsx"] | str) -> Exporter:
     return _EXPORTER_REGISTRY[clean_fmt]()
 
 
-def export_batch_workbook(reports: list[AnalysisReport], out_path: Path | str) -> Path:
+def export_batch_workbook(reports: list[AnalysisReport], out_path: Path | str | None = None) -> Path | bytes:
     """Export aggregated multi-candidate ranking workbook.
 
     Args:
         reports: List of analyzed candidate reports.
-        out_path: Output Excel destination path.
+        out_path: Optional output Excel destination path. If None, returns bytes.
 
     Returns:
-        Path to exported workbook.
+        Path to exported workbook, or raw bytes if out_path was None.
     """
     from resume_analyzer.reporting.exporters.excel_exporter import ExcelExporter
 
     exporter = ExcelExporter()
+    if out_path is None:
+        return exporter.export_batch_bytes(reports)
     return exporter.export_batch(reports, out_path)
+

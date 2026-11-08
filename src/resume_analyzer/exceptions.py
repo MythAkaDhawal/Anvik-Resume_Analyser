@@ -457,10 +457,57 @@ class AIBlockedError(AIError):
         )
 
 
-# Backward-compatible convenience aliases
+# Backward-compatible convenience aliases & specialized AI exceptions
 AIServiceError = AIResponseError
-AIProviderUnavailableError = AIProviderError
-AIRateLimitError = AIProviderError
+
+
+class AIProviderUnavailableError(AIProviderError):
+    """Raised when an AI provider is unreachable or unavailable."""
+
+    def __init__(
+        self,
+        message: str = "The AI service is unavailable or timed out.",
+        *,
+        provider: str | None = None,
+        user_message: str = "The AI service is unavailable or timed out.",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        det = dict(details or {})
+        if provider:
+            det["provider"] = provider
+        super().__init__(
+            message,
+            user_message=user_message,
+            details=det,
+        )
+        self.provider = provider
+
+
+class AIRateLimitError(AIProviderError):
+    """Raised when client-side or provider rate limit is encountered."""
+
+    def __init__(
+        self,
+        message: str = "Rate limit reached.",
+        *,
+        provider: str | None = None,
+        retry_after_s: float | None = None,
+        user_message: str = "AI rate limit reached. Please retry shortly.",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        det = dict(details or {})
+        if provider:
+            det["provider"] = provider
+        if retry_after_s is not None:
+            det["retry_after_s"] = retry_after_s
+        super().__init__(
+            message,
+            user_message=user_message,
+            details=det,
+        )
+        self.provider = provider
+        self.retry_after_s = retry_after_s
+
 
 
 # --- Storage ---

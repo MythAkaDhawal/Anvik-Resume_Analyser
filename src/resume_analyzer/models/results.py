@@ -119,6 +119,32 @@ class MatchResult(ResultsBaseModel):
     experience: ExperienceAnalysis
     education: EducationAnalysis
 
+    @property
+    def matched_skills(self) -> list[SkillMatch]:
+        """Matched skills where match_type is not NONE."""
+        return [s for s in self.skill_matches if s.match_type.value != "none"]
+
+    @property
+    def missing_required(self) -> list[str]:
+        """Required target skills that were not matched."""
+        return [s.target for s in self.skill_matches if s.is_required and s.match_type.value == "none"]
+
+    @property
+    def missing_optional(self) -> list[str]:
+        """Optional target skills that were not matched."""
+        return [s.target for s in self.skill_matches if not s.is_required and s.match_type.value == "none"]
+
+    @property
+    def experience_eval(self) -> ExperienceAnalysis:
+        """Alias property for experience."""
+        return self.experience
+
+    @property
+    def education_eval(self) -> EducationAnalysis:
+        """Alias property for education."""
+        return self.education
+
+
 
 class ScoreComponent(ResultsBaseModel):
     """Contribution of a single evaluation dimension to the overall score.
@@ -254,4 +280,10 @@ class AnalysisReport(ResultsBaseModel):
     ai: AIInsights = Field(default_factory=AIInsights)
     flags: list[ReportFlag] = Field(default_factory=list)
     human_review_notice: str = DEFAULT_HUMAN_REVIEW_NOTICE
+
+    @property
+    def strategy_used(self) -> str:
+        """Convenience property for strategy name."""
+        return self.score.strategy_name
+
 
