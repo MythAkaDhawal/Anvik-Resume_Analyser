@@ -332,3 +332,4 @@ def test_ut_score_12_unknown_policy_exclude_vs_zero():
     assert res_zero.coverage == 1.0
     assert "UNKNOWN_TREATED_AS_ZERO" in res_zero.flags
     assert "INCOMPLETE_DATA" not in res_zero.flags
+

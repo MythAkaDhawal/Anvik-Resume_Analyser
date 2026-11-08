@@ -16,3 +16,4 @@ __all__ = [
     "fit_band_for",
     "get_strategy",
 ]
+

@@ -44,3 +44,4 @@ class ScoringStrategy(ABC):
             True if at least one required skill was completely missing.
         """
         return any(m.is_required and m.match_type == MatchType.NONE for m in match.skill_matches)
+

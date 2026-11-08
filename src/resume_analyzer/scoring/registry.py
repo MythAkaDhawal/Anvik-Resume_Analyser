@@ -44,3 +44,4 @@ def get_strategy(name: str, settings: ScoringSettings) -> ScoringStrategy:
         unknown_policy=settings.unknown_policy,
         bands=settings.bands,
     )
+

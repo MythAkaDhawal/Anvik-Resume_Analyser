@@ -457,6 +457,12 @@ class AIBlockedError(AIError):
         )
 
 
+# Backward-compatible convenience aliases
+AIServiceError = AIResponseError
+AIProviderUnavailableError = AIProviderError
+AIRateLimitError = AIProviderError
+
+
 # --- Storage ---
 
 

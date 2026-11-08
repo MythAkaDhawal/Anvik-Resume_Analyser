@@ -134,7 +134,7 @@ class AISettings(BaseConfigModel):
     """AI provider and inference parameters. Never stores API keys."""
 
     enabled: bool = False
-    provider: Literal["null", "gemini", "ollama", "openai_compatible"] = "null"
+    provider: Literal["null", "gemini", "ollama", "openai_compatible", "fake"] = "null"
     model: str = "gemini-1.5-flash"
     temperature: float = Field(default=0.1, ge=0.0, le=2.0)
     max_output_tokens: int = Field(default=2048, gt=0)

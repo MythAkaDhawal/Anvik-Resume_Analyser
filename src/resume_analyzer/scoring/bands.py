@@ -29,3 +29,4 @@ def fit_band_for(score: float, bands: BandThresholds) -> FitBand:
     if score >= bands.limited_min:
         return FitBand.LIMITED
     return FitBand.LOW
+

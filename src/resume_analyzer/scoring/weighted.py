@@ -197,3 +197,4 @@ class WeightedScoringStrategy(ScoringStrategy):
             fit_band=fit_band,
             flags=flags,
         )
+
