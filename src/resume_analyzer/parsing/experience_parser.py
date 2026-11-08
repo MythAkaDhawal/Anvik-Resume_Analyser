@@ -240,6 +240,25 @@ def _extract_title_and_company(
     return None, None
 
 
+def compute_duration_months(
+    start: date | None,
+    end: date | None,
+    is_current: bool = False,
+    reference_date: date | None = None,
+) -> int | None:
+    """Compute duration in months between start and end dates."""
+    if start is None:
+        return None
+    ref = reference_date or date.today()
+    effective_end = end or ref
+    if effective_end < start:
+        return None
+    return max(
+        0,
+        (effective_end.year - start.year) * 12 + (effective_end.month - start.month),
+    )
+
+
 def total_experience_years(
     entries: list[ExperienceEntry],
     reference_date: date,

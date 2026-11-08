@@ -36,3 +36,4 @@ class LLMProvider(Protocol):
             ResumeAnalyzerError: On connection timeout, rate limit, or service error.
         """
         ...
+

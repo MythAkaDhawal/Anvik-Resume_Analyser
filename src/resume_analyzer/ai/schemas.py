@@ -149,3 +149,4 @@ class InterviewQuestionsResult(AIBaseModel):
 
     schema_version: str = "1.0"
     questions: list[InterviewQuestionItem] = Field(default_factory=list)
+

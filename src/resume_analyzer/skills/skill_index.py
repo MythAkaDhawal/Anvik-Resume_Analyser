@@ -13,6 +13,9 @@ import re
 from resume_analyzer.skills.normalizer import normalize_skill
 from resume_analyzer.skills.taxonomy import SkillTaxonomy
 
+from functools import lru_cache
+from pathlib import Path
+
 logger = logging.getLogger(__name__)
 
 # Tokenization regex per TECHNICAL_SPECIFICATION §6.4:
@@ -77,13 +80,26 @@ class SkillIndex:
                 p2_norm = normalize_skill(pair[1])
                 self._confusable_set.add(frozenset([p1_norm, p2_norm]))
 
+    @property
+    def categories(self) -> list[str]:
+        """Return the declared taxonomy category names."""
+        return self.taxonomy.categories
+
     def canonical(self, norm_text: str) -> str | None:
         """Return the canonical skill name for a normalized string or alias, or None."""
         return self.alias_to_canonical.get(norm_text)
 
+    def get_canonical(self, norm_text: str) -> str | None:
+        """Alias for canonical()."""
+        return self.canonical(norm_text)
+
     def category(self, canonical_name: str) -> str | None:
         """Return the taxonomy category for a canonical skill name."""
         return self.category_by_canonical.get(canonical_name)
+
+    def get_category(self, canonical_name: str) -> str | None:
+        """Alias for category()."""
+        return self.category(canonical_name)
 
     def is_confusable(self, a: str, b: str) -> bool:
         """Check whether two skills are declared as confusable pairs."""
@@ -123,4 +139,12 @@ class SkillIndex:
                     counts[canonical_name] += 1
 
         return counts
+
+
+@lru_cache(maxsize=4)
+def get_skill_index(taxonomy_path: Path | str) -> SkillIndex:
+    """Load and index a SkillTaxonomy from a JSON file with LRU caching."""
+    tax = SkillTaxonomy.from_file(taxonomy_path)
+    return SkillIndex(taxonomy=tax)
+
 

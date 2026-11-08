@@ -192,6 +192,12 @@ def parse_education(
     return entries, highest_level, warnings
 
 
+def detect_education_level(degree: str) -> EducationLevel:
+    """Detect educational attainment level from a degree description string."""
+    level, _ = _match_degree_level(degree)
+    return level
+
+
 def _match_degree_level(line: str) -> tuple[EducationLevel, str]:
     """Test a line against degree keyword patterns in priority order."""
     for level, ci_patterns, cs_patterns in DEGREE_KEYWORDS:

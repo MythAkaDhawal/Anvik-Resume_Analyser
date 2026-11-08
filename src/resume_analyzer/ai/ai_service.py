@@ -452,3 +452,4 @@ class AIService:
             model=self.settings.model,
             dropped_items=0,
         )
+

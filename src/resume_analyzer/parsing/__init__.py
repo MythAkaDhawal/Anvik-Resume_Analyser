@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from resume_analyzer.parsing.contact_extractor import extract_email, extract_name
-from resume_analyzer.parsing.education_parser import parse_education
+from resume_analyzer.parsing.education_parser import detect_education_level, parse_education
 from resume_analyzer.parsing.experience_parser import (
+    compute_duration_months,
     parse_experience,
     total_experience_years,
 )
@@ -18,6 +19,8 @@ __all__ = [
     "PARSER_VERSION",
     "ResumeParser",
     "clean_text",
+    "compute_duration_months",
+    "detect_education_level",
     "extract_email",
     "extract_name",
     "extract_skills",

@@ -7,7 +7,7 @@ from resume_analyzer.skills.normalizer import (
     fuzzy_similarity,
     normalize_skill,
 )
-from resume_analyzer.skills.skill_index import SkillIndex
+from resume_analyzer.skills.skill_index import SkillIndex, get_skill_index
 from resume_analyzer.skills.taxonomy import (
     SkillTaxonomy,
     SkillTaxonomyEntry,
@@ -21,6 +21,7 @@ __all__ = [
     "clear_normalizer_caches",
     "clear_taxonomy_cache",
     "fuzzy_similarity",
+    "get_skill_index",
     "normalize_skill",
 ]
 

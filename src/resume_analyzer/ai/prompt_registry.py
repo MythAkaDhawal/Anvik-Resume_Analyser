@@ -62,3 +62,4 @@ def render_prompt(
         user_part = rendered.strip()
 
     return system_part, user_part, active_nonce
+
