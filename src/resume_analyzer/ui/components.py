@@ -242,3 +242,35 @@ def render_export_downloads(report: AnalysisReport) -> None:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True,
         )
+
+
+def render_feedback_widget(report: AnalysisReport) -> None:
+    """Render user feedback submission form for continuous quality evaluation (FR-29)."""
+    st.subheader("Evaluation Feedback")
+    with st.expander("📝 Rate Analysis Quality & Suggest Corrections", expanded=False):
+        with st.form(f"feedback_form_{report.report_id}"):
+            rating = st.slider("Quality Rating (1 = Poor, 5 = Excellent)", min_value=1, max_value=5, value=5)
+            col_t1, col_t2 = st.columns(2)
+            with col_t1:
+                skills_thumb = st.checkbox("Skills match was accurate", value=True)
+            with col_t2:
+                exp_thumb = st.checkbox("Experience analysis was accurate", value=True)
+            corrected_raw = st.text_input("Corrected Skills (comma-separated, if any)", placeholder="e.g. Python, SQL")
+            comment = st.text_area("Reviewer Comments (Max 1000 characters)", max_chars=1000)
+            submitted = st.form_submit_button("Submit Feedback", use_container_width=True)
+
+        if submitted:
+            from resume_analyzer.storage.feedback_store import FeedbackRecord, FeedbackStore
+
+            corrected = [s.strip() for s in corrected_raw.split(",") if s.strip()]
+            record = FeedbackRecord(
+                report_id=report.report_id,
+                rating=rating,
+                comment=comment.strip() or None,
+                section_feedback={"skills": skills_thumb, "experience": exp_thumb},
+                corrected_skills=corrected,
+            )
+            store = FeedbackStore()
+            store.append(record)
+            st.success("Thank you! Your feedback has been safely recorded.")
+

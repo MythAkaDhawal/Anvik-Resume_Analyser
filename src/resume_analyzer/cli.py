@@ -22,8 +22,12 @@ from typing import Any, Sequence
 import yaml
 
 from resume_analyzer.exceptions import (
+    CorruptResultError,
     DataValidationError,
+    InvalidIdentifierError,
+    ResultNotFoundError,
     ResumeAnalyzerError,
+    StorageError,
     UnknownStrategyError,
 )
 from resume_analyzer.models.job import JobRequirements
@@ -31,6 +35,9 @@ from resume_analyzer.models.results import AnalysisReport
 from resume_analyzer.reporting.exporters.base import export_batch_workbook, get_exporter
 from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
 from resume_analyzer.services.batch_runner import BatchRunner
+from resume_analyzer.storage.feedback_store import FeedbackStore
+from resume_analyzer.storage.result_store import ResultStore
+
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +107,14 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         logger.exception("Unexpected error analyzing %s", resume_path)
         sys.stderr.write(f"Unexpected error: {e}\n")
         return 3
+
+    # Persist unless disabled
+    if not args.no_save:
+        try:
+            store = ResultStore()
+            store.save(report)
+        except Exception as se:
+            logger.warning("Failed to save report to storage: %s", se)
 
     # Output summary
     cand_name = report.candidate.name or "Anonymous"
@@ -205,6 +220,15 @@ def cmd_batch(args: argparse.Namespace) -> int:
         print(f"{idx:<5} {cname:<25} {r.score.total_score:<8.1f} {r.score.fit_band.value:<12} {matched_cnt}")
     print("-" * 70)
 
+    # Persist batch reports unless disabled
+    if not getattr(args, "no_save", False):
+        try:
+            store = ResultStore()
+            for r in result.reports:
+                store.save(r)
+        except Exception as se:
+            logger.warning("Failed to save batch reports to storage: %s", se)
+
     # Export if requested
     if args.output_dir and result.reports:
         out_dir = Path(args.output_dir)
@@ -280,34 +304,39 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
 
 def cmd_list(args: argparse.Namespace) -> int:
     """List saved analyses in storage."""
-    results_dir = Path("data/results")
-    if not results_dir.is_dir():
-        print("No saved analyses found (data/results/ directory does not exist).")
-        return 0
-
-    files = list(results_dir.glob("*.json"))
-    if not files:
+    store = ResultStore()
+    summaries = store.list()
+    if not summaries:
         print("No saved analyses found in data/results/.")
         return 0
 
-    print(f"\nFound {len(files)} saved analyses in data/results/:")
-    for f in sorted(files):
-        print(f"  • {f.stem}")
-    print()
+    print(f"\nFound {len(summaries)} saved analyses in data/results/:")
+    print(f"{'Report ID':<35} {'Candidate':<25} {'Score':<8} {'Fit Band':<10} {'Status'}")
+    print("-" * 90)
+    for s in summaries:
+        cand = s.candidate_name or "Anonymous"
+        sc = f"{s.total_score:.1f}" if s.total_score is not None else "—"
+        band = s.fit_band or "—"
+        status = "OK" if s.readable else "UNREADABLE"
+        print(f"{s.report_id:<35} {cand:<25} {sc:<8} {band:<10} {status}")
+    print("-" * 90 + "\n")
     return 0
 
 
 def cmd_export(args: argparse.Namespace) -> int:
     """Re-export a saved analysis report by ID."""
     report_id = args.id
-    target_json = Path(f"data/results/{report_id}.json")
-    if not target_json.is_file():
-        sys.stderr.write(f"Error: Saved report '{report_id}' not found in data/results/.\n")
+    store = ResultStore()
+    try:
+        report = store.load(report_id)
+    except (ResultNotFoundError, InvalidIdentifierError) as e:
+        sys.stderr.write(f"Error: {e}\n")
         return 2
+    except CorruptResultError as e:
+        sys.stderr.write(f"Error: Saved report is corrupt: {e}\n")
+        return 3
 
     try:
-        report_data = json.loads(target_json.read_text(encoding="utf-8"))
-        report = AnalysisReport.model_validate(report_data)
         out_dir = Path(args.output_dir or ".")
         out_dir.mkdir(parents=True, exist_ok=True)
         exporter = get_exporter(args.format)
@@ -323,66 +352,40 @@ def cmd_export(args: argparse.Namespace) -> int:
 def cmd_purge(args: argparse.Namespace) -> int:
     """Delete analyses older than specified days."""
     days = args.days
-    results_dir = Path("data/results")
-    if not results_dir.is_dir():
-        print("No analyses directory found.")
-        return 0
-
-    cutoff_sec = time.time() - (days * 86400)
-    to_delete: list[Path] = []
-    for f in results_dir.glob("*.json"):
-        if f.stat().st_mtime < cutoff_sec:
-            to_delete.append(f)
-
-    if not to_delete:
-        print(f"No analyses older than {days} day(s) found.")
-        return 0
-
+    store = ResultStore()
     if not args.yes:
-        confirm = input(f"Are you sure you want to delete {len(to_delete)} analysis file(s)? [y/N]: ")
+        confirm = input(f"Are you sure you want to purge analyses older than {days} days? [y/N]: ")
         if confirm.strip().lower() != "y":
             print("Purge cancelled.")
             return 0
 
-    deleted = 0
-    for f in to_delete:
-        try:
-            f.unlink()
-            deleted += 1
-        except Exception as e:
-            logger.warning("Failed to delete %s: %e", f, e)
-
-    print(f"Successfully purged {deleted} analysis record(s).")
+    deleted = store.purge_older_than(days)
+    print(f"Successfully purged {deleted} analysis record(s) older than {days} day(s).")
     return 0
 
 
 def cmd_feedback_summary(args: argparse.Namespace) -> int:
     """Print aggregated feedback metrics."""
-    feedback_file = Path("data/feedback.jsonl")
-    if not feedback_file.is_file():
+    store = FeedbackStore()
+    summary = store.summarize()
+    if summary.total_submissions == 0:
         print("No user feedback records recorded yet (data/feedback.jsonl).")
         return 0
 
-    lines = feedback_file.read_text(encoding="utf-8").splitlines()
-    records = []
-    for line in lines:
-        if line.strip():
-            try:
-                records.append(json.loads(line))
-            except Exception:
-                pass
-
-    if not records:
-        print("No valid feedback records found.")
-        return 0
-
-    ratings = [r.get("rating") for r in records if isinstance(r.get("rating"), (int, float))]
-    avg_rating = sum(ratings) / len(ratings) if ratings else 0.0
     print("\n--- FEEDBACK SUMMARY ---")
-    print(f"Total Feedback Submissions: {len(records)}")
-    print(f"Average Star Rating:        {avg_rating:.1f} / 5.0")
+    print(f"Total Feedback Submissions: {summary.total_submissions}")
+    print(f"Average Star Rating:        {summary.average_rating:.2f} / 5.00")
+    if summary.section_positive_ratios:
+        print("\nSection Positive Ratios:")
+        for sec, ratio in summary.section_positive_ratios.items():
+            print(f"  • {sec:<20} {ratio * 100:.1f}%")
+    if summary.top_corrected_skills:
+        print("\nTop Corrected Skills:")
+        for sk, count in summary.top_corrected_skills:
+            print(f"  • {sk:<20} ({count} times)")
     print("------------------------\n")
     return 0
+
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -412,6 +415,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_batch.add_argument("--output-dir", help="Directory to save exported reports")
     p_batch.add_argument("--format", nargs="+", choices=["xlsx", "html", "pdf"], default=["xlsx"], help="Export formats")
     p_batch.add_argument("--workers", type=int, default=1, help="Worker count")
+    p_batch.add_argument("--no-save", action="store_true", help="Do not persist results to disk")
 
     # benchmark
     p_bench = subparsers.add_parser("benchmark", help="Measure deterministic throughput (M-02)")

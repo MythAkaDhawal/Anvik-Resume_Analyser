@@ -185,3 +185,12 @@ def test_it_06_streamlit_app_smoke() -> None:
     assert any("HTML" in lbl for lbl in labels)
     assert any("PDF" in lbl for lbl in labels)
     assert any("Excel" in lbl for lbl in labels)
+
+    # 6. Navigation to History page shows persistence controls and feedback summary (FR-28, FR-29)
+    at.session_state["current_page"] = "5 History"
+    at.session_state["nav_radio"] = "5 History"
+    at.run()
+
+    assert len(at.exception) == 0
+    assert "Step 5: History & Persistence" in at.title[0].value
+

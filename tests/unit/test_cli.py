@@ -132,3 +132,36 @@ def test_cli_benchmark_command(tmp_path: Path, capsys: pytest.CaptureFixture[str
 def test_cli_invalid_command() -> None:
     """Verify invalid CLI command returns code 2."""
     assert cli.main(["invalid_command"]) == 2
+
+
+def test_cli_list_command(capsys: pytest.CaptureFixture[str]) -> None:
+    """Verify list command returns exit code 0."""
+    exit_code = cli.main(["list"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "saved analyses" in captured.out.lower() or "no saved analyses" in captured.out.lower()
+
+
+def test_cli_feedback_summary_command(capsys: pytest.CaptureFixture[str]) -> None:
+    """Verify feedback-summary command returns exit code 0."""
+    exit_code = cli.main(["feedback-summary"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "feedback" in captured.out.lower()
+
+
+def test_cli_purge_command(capsys: pytest.CaptureFixture[str]) -> None:
+    """Verify purge command executes with --yes flag and returns code 0."""
+    exit_code = cli.main(["purge", "--days", "90", "--yes"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "purged" in captured.out.lower()
+
+
+def test_cli_export_missing_record(capsys: pytest.CaptureFixture[str]) -> None:
+    """Verify export command returns code 2 when report ID does not exist."""
+    exit_code = cli.main(["export", "--id", "20261108T120000Z_11112222_3333"])
+    assert exit_code == 2
+    captured = capsys.readouterr()
+    assert "not found" in captured.err.lower()
+

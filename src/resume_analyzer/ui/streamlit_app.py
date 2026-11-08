@@ -13,10 +13,13 @@ from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.reporting.exporters.base import export_batch_workbook
 from resume_analyzer.services.analysis_service import AnalysisOptions
+from resume_analyzer.storage.feedback_store import FeedbackStore
+from resume_analyzer.storage.result_store import ResultStore
 from resume_analyzer.ui.components import (
     render_ai_insights_view,
     render_experience_education_view,
     render_export_downloads,
+    render_feedback_widget,
     render_fit_band_metric,
     render_human_review_notice,
     render_score_breakdown,
@@ -287,6 +290,14 @@ def render_resumes_page() -> None:
         st.session_state["failures"] = result.failures
         st.session_state["selected_report_idx"] = 0
 
+        # Auto-save successfully analyzed reports to persistence store (FR-27)
+        store = ResultStore()
+        for r in result.reports:
+            try:
+                store.save(r)
+            except Exception:
+                pass
+
         st.success(
             f"Analysis complete! {len(result.reports)} succeeded, {len(result.failures)} failed."
         )
@@ -395,6 +406,9 @@ def render_results_page() -> None:
     render_experience_education_view(active_report)
     render_ai_insights_view(active_report)
 
+    # Reviewer evaluation and continuous improvement feedback (FR-29)
+    render_feedback_widget(active_report)
+
     st.divider()
     if st.button("Proceed to Export Reports ➡️"):
         set_page("4 Reports")
@@ -453,21 +467,120 @@ def render_reports_page() -> None:
 # 5. History Page
 # -----------------------------------------------------------------------------
 def render_history_page() -> None:
-    """Render historical analysis viewer and storage manager."""
+    """Render historical analysis viewer, retention manager, and feedback diagnostics (FR-28, NFR-19)."""
     st.title("Step 5: History & Persistence")
-    st.info(
-        "Historical analyses are saved to `data/results/`. Persistent result querying, "
-        "reloading, and data purging are managed here (completed in Phase 12)."
-    )
+    st.caption("Manage saved analyses, reload past evaluations, configure data retention, and review feedback.")
 
-    current_reports = st.session_state.get("reports", [])
-    if current_reports:
-        st.subheader("Active Session Analyses")
-        st.write(f"{len(current_reports)} report(s) loaded in current working session:")
-        for r in current_reports:
-            st.markdown(
-                f"- **{r.candidate.name or 'Anonymous'}** | Score: {r.score.total_score:.1f} | ID: `{r.report_id}`"
+    store = ResultStore()
+    summaries = store.list()
+
+    if not summaries:
+        st.info("No saved analyses found in `data/results/`. Run an analysis in Step 2 to generate records.")
+    else:
+        st.subheader(f"Saved Analyses ({len(summaries)})")
+        table_data = [
+            {
+                "Report ID": s.report_id,
+                "Candidate": s.candidate_name or "Anonymous",
+                "Score": f"{s.total_score:.1f}" if s.total_score is not None else "—",
+                "Fit Band": s.fit_band or "—",
+                "Date (UTC)": s.created_at.strftime("%Y-%m-%d %H:%M") if s.created_at else "—",
+                "Status": "✅ OK" if s.readable else "⚠️ Unreadable",
+            }
+            for s in summaries
+        ]
+        st.dataframe(table_data, use_container_width=True)
+
+        readable_summaries = [s for s in summaries if s.readable]
+        if readable_summaries:
+            st.divider()
+            st.subheader("Manage Saved Analysis")
+            options_labels = [
+                f"{s.candidate_name or 'Anonymous'} — ID: {s.report_id} (Score: {s.total_score or 0.0:.1f})"
+                for s in readable_summaries
+            ]
+            chosen_idx = st.selectbox(
+                "Select analysis record:",
+                range(len(options_labels)),
+                format_func=lambda i: options_labels[i],
+                key="history_selected_record",
             )
+            chosen_summary = readable_summaries[chosen_idx]
+
+            col_load, col_del = st.columns([1, 1])
+            with col_load:
+                if st.button("📥 Reload Analysis into Results", type="primary", use_container_width=True):
+                    try:
+                        loaded = store.load(chosen_summary.report_id)
+                        st.session_state["reports"] = [loaded]
+                        st.session_state["selected_report_idx"] = 0
+                        set_page("3 Results")
+                        st.success(f"Loaded analysis for {loaded.candidate.name or 'Candidate'}")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Failed to reload analysis: {e}")
+
+            with col_del:
+                if st.button(f"🗑️ Delete Analysis ({chosen_summary.report_id[:17]}...)", use_container_width=True):
+                    try:
+                        store.delete(chosen_summary.report_id)
+                        st.success(f"Deleted report `{chosen_summary.report_id}`")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Failed to delete analysis: {e}")
+
+    # Retention & Purging Section (FR-28, NFR-19)
+    st.divider()
+    st.subheader("Data Retention & Cleanup")
+    col_p1, col_p2 = st.columns([2, 1])
+    with col_p1:
+        purge_days = st.number_input(
+            "Purge analyses older than (days):",
+            min_value=1,
+            max_value=365,
+            value=30,
+            step=1,
+        )
+    with col_p2:
+        st.write("")
+        st.write("")
+        if st.button("🧹 Purge Old Records", use_container_width=True):
+            purged = store.purge_older_than(int(purge_days))
+            st.success(f"Purged {purged} analysis record(s) older than {purge_days} day(s).")
+            st.rerun()
+
+    with st.expander("⚠️ Danger Zone: Delete All Data", expanded=False):
+        st.warning("This will permanently remove all saved analysis records from disk.")
+        confirm_delete_all = st.checkbox("I confirm that I want to delete all saved analyses.")
+        if st.button("Permanently Delete All Analyses", type="secondary", disabled=not confirm_delete_all):
+            count = store.delete_all()
+            st.success(f"Successfully deleted all {count} saved analysis file(s).")
+            st.rerun()
+
+    # Reviewer Feedback Summary Section (FR-29)
+    st.divider()
+    st.subheader("Reviewer Feedback & Model Quality Diagnostics")
+    fb_store = FeedbackStore()
+    fb_summary = fb_store.summarize()
+
+    if fb_summary.total_submissions == 0:
+        st.info("No reviewer feedback recorded yet (`data/feedback.jsonl`). Submit feedback in Step 3 to populate.")
+    else:
+        m1, m2 = st.columns(2)
+        with m1:
+            st.metric("Total Submissions", fb_summary.total_submissions)
+        with m2:
+            st.metric("Average Star Rating", f"{fb_summary.average_rating:.2f} / 5.00")
+
+        if fb_summary.section_positive_ratios:
+            st.write("**Section Quality Approval Ratios:**")
+            for sec, ratio in fb_summary.section_positive_ratios.items():
+                st.write(f"- **{sec.title()}**: {ratio * 100:.1f}% positive")
+
+        if fb_summary.top_corrected_skills:
+            st.write("**Top Corrected Skills:**")
+            for sk, cnt in fb_summary.top_corrected_skills:
+                st.write(f"- `{sk}` ({cnt} correction{'s' if cnt > 1 else ''})")
 
 
 if __name__ == "__main__":
