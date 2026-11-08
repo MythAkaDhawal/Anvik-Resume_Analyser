@@ -136,3 +136,4 @@ class BatchRunner:
         )
 
         return BatchResult(reports=reports, failures=failures)
+

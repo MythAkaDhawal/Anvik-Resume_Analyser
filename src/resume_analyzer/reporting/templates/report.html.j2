@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
+  <title>Analysis Report - {{ report.candidate.name or report.candidate.candidate_id }}</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #3b82f6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --strong-fit: #166534;
+      --strong-fit-bg: #dcfce7;
+      --mod-fit: #854d0e;
+      --mod-fit-bg: #fef9c3;
+      --lim-fit: #9a3412;
+      --lim-fit-bg: #ffedd5;
+      --low-fit: #991b1b;
+      --low-fit-bg: #fee2e2;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1, h2, h3 { color: var(--primary); margin-top: 24px; margin-bottom: 12px; }
+    h1 { border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-top: 0; }
+    h2 { font-size: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-rule { background: #e0f2fe; color: #0369a1; }
+    .badge-ai-extracted { background: #ede9fe; color: #6d28d9; }
+    .badge-computed { background: #f1f5f9; color: #475569; }
+    .badge-ai-generated { background: #fef3c7; color: #b45309; }
+    .fit-strong { background: var(--strong-fit-bg); color: var(--strong-fit); }
+    .fit-moderate { background: var(--mod-fit-bg); color: var(--mod-fit); }
+    .fit-limited { background: var(--lim-fit-bg); color: var(--lim-fit); }
+    .fit-low { background: var(--low-fit-bg); color: var(--low-fit); }
+    .alert-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--secondary);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.9rem;
+    }
+    .alert-warning {
+      background: #fffbeb;
+      border-left-color: #f59e0b;
+      color: #92400e;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+    }
+    th {
+      background-color: #f8fafc;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    tr:nth-child(even) { background-color: #fcfdfe; }
+    .score-summary {
+      display: flex;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .score-card {
+      flex: 1;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-align: center;
+      background: #f8fafc;
+    }
+    .score-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .score-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .item-list { padding-left: 20px; }
+    .footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Section 0: Header -->
+    <header>
+      <h1>Resume Analysis Report</h1>
+      <p style="color: var(--muted); margin: 0 0 12px 0;">
+        Report ID: <code>{{ report.report_id }}</code> &bull; Date: {{ report.created_at.strftime("%Y-%m-%d %H:%M UTC") }} &bull; Version: {{ report.app_version }}
+      </p>
+      <div class="alert-box">
+        <strong>Notice:</strong> {{ report.human_review_notice }}
+      </div>
+    </header>
+
+    <!-- Section 1: Candidate Information -->
+    <section>
+      <h2>1. Candidate Information <span class="badge badge-rule">EXTRACTED</span></h2>
+      <table>
+        <tr><th style="width: 25%;">Candidate ID</th><td><code>{{ report.candidate.candidate_id }}</code></td></tr>
+        <tr><th>Name</th><td>{{ report.candidate.name or "Not detected" }}</td></tr>
+        <tr><th>Email</th><td>{{ report.candidate.email or "Not detected" }}</td></tr>
+        <tr><th>Source Format</th><td>{{ report.candidate.source_format.upper() }}</td></tr>
+        {% if report.candidate.parse_warnings %}
+        <tr>
+          <th>Parse Warnings</th>
+          <td>
+            <ul style="margin: 0; padding-left: 18px;">
+              {% for w in report.candidate.parse_warnings %}
+              <li><strong>{{ w.code }}:</strong> {{ w.message }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endif %}
+      </table>
+    </section>
+
+    <!-- Section 2: Job Information -->
+    <section>
+      <h2>2. Job Requirements</h2>
+      <table>
+        <tr><th style="width: 25%;">Target Position</th><td><strong>{{ report.job.job_title }}</strong></td></tr>
+        <tr><th>Required Skills</th><td>{{ report.job.required_skills | join(", ") }}</td></tr>
+        {% if report.job.optional_skills %}
+        <tr><th>Optional Skills</th><td>{{ report.job.optional_skills | join(", ") }}</td></tr>
+        {% endif %}
+        <tr><th>Min Experience</th><td>{{ report.job.min_experience_years }} year(s)</td></tr>
+        <tr><th>Min Education</th><td>{{ report.job.min_education_level.name }}</td></tr>
+        <tr><th>Scoring Strategy</th><td><code>{{ report.score.strategy_name }}</code></td></tr>
+      </table>
+    </section>
+
+    <!-- Section 3: Overall Match Score -->
+    <section>
+      <h2>3. Overall Match Score <span class="badge badge-computed">COMPUTED</span></h2>
+      <div class="score-summary">
+        <div class="score-card">
+          <div class="score-value">{{ "%.1f" | format(report.score.total_score) }}</div>
+          <div class="score-label">Match Score (0-100)</div>
+        </div>
+        <div class="score-card">
+          <div class="score-value">
+            <span class="badge fit-{{ report.score.fit_band.value }}" style="font-size: 1.1rem; padding: 4px 12px;">
+              {{ report.score.fit_band.value | upper }}
+            </span>
+          </div>
+          <div class="score-label">Fit Band</div>
+        </div>
+        <div class="score-card">
+          <div class="score-value">{{ "%.0f" | format(report.score.coverage * 100) }}%</div>
+          <div class="score-label">Data Coverage</div>
+        </div>
+      </div>
+
+      {% if report.flags %}
+      <div class="alert-box alert-warning">
+        <strong>Review Flags:</strong>
+        <ul style="margin: 4px 0 0 0; padding-left: 20px;">
+          {% for flag in report.flags %}
+          <li><strong>{{ flag.code }}:</strong> {{ flag.message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Section 4: Score Breakdown -->
+    <section>
+      <h2>4. Score Component Breakdown <span class="badge badge-computed">COMPUTED</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Status</th>
+            <th>Weight</th>
+            <th>Subscore</th>
+            <th>Points</th>
+            <th>Explanation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comp in report.score.components %}
+          <tr>
+            <td><strong>{{ comp.name }}</strong></td>
+            <td><code>{{ comp.status }}</code></td>
+            <td>{{ "%.0f" | format(comp.weight * 100) }}%</td>
+            <td>{{ "%.2f" | format(comp.subscore) if comp.subscore is not none else "N/A" }}</td>
+            <td>{{ "%.1f" | format(comp.points) if comp.points is not none else "0.0" }}</td>
+            <td>{{ comp.explanation }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 5: Matched Skills -->
+    <section>
+      <h2>5. Matched Skills <span class="badge badge-computed">COMPUTED</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Job Requirement</th>
+            <th>Role Type</th>
+            <th>Candidate Skill Match</th>
+            <th>Match Type</th>
+            <th>Similarity</th>
+            <th>Credit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in report.match.skill_matches if m.credit > 0 %}
+          <tr>
+            <td><strong>{{ m.target }}</strong></td>
+            <td>{{ "Required" if m.is_required else "Optional" }}</td>
+            <td>{{ m.matched_candidate_skill or "—" }}</td>
+            <td><code>{{ m.match_type.value }}</code></td>
+            <td>{{ "%.0f" | format(m.similarity) }}%</td>
+            <td>{{ "%.2f" | format(m.credit) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" style="text-align: center; color: var(--muted);">No matching skills detected.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 6: Missing Skills -->
+    <section>
+      <h2>6. Missing Skills <span class="badge badge-computed">COMPUTED</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Missing Skill</th>
+            <th>Priority</th>
+            <th>Credit Awarded</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in missing_skills %}
+          <tr>
+            <td><strong>{{ m.target }}</strong></td>
+            <td>
+              {% if m.is_required %}
+              <span style="color: #b91c1c; font-weight: 600;">Required (Must-have)</span>
+              {% else %}
+              <span style="color: var(--muted);">Optional (Nice-to-have)</span>
+              {% endif %}
+            </td>
+            <td>0.00</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" style="text-align: center; color: var(--muted);">All requested skills were matched.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 7: Experience Analysis -->
+    <section>
+      <h2>7. Experience Analysis <span class="badge badge-computed">COMPUTED</span></h2>
+      <p>
+        Required: <strong>{{ report.match.experience.required_years }} year(s)</strong> &bull;
+        Candidate: <strong>{{ report.match.experience.candidate_years if report.match.experience.candidate_years is not none else "Unknown" }} year(s)</strong> &bull;
+        Status: <code>{{ report.match.experience.status | upper }}</code>
+      </p>
+      {% if report.candidate.experience %}
+      <table>
+        <thead>
+          <tr>
+            <th>Role Title</th>
+            <th>Company</th>
+            <th>Dates</th>
+            <th>Duration</th>
+            <th>Provenance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for exp in report.candidate.experience %}
+          <tr>
+            <td><strong>{{ exp.job_title or "Unspecified" }}</strong></td>
+            <td>{{ exp.company or "Unspecified" }}</td>
+            <td>
+              {{ exp.start.strftime("%b %Y") if exp.start else "?" }} &ndash;
+              {{ "Present" if exp.is_current else (exp.end.strftime("%b %Y") if exp.end else "?") }}
+            </td>
+            <td>{{ exp.duration_months if exp.duration_months is not none else "?" }} mo</td>
+            <td><span class="badge {{ 'badge-rule' if exp.provenance.value == 'extracted_rule' else 'badge-ai-extracted' }}">{{ exp.provenance.value }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </section>
+
+    <!-- Section 8: Education Analysis -->
+    <section>
+      <h2>8. Education Analysis <span class="badge badge-computed">COMPUTED</span></h2>
+      <p>
+        Required Level: <strong>{{ report.match.education.required_level.name }}</strong> &bull;
+        Candidate Level: <strong>{{ report.match.education.candidate_level.name }}</strong> &bull;
+        Status: <code>{{ report.match.education.status | upper }}</code>
+      </p>
+      {% if report.candidate.education %}
+      <table>
+        <thead>
+          <tr>
+            <th>Degree Description</th>
+            <th>Detected Level</th>
+            <th>Field of Study</th>
+            <th>Institution</th>
+            <th>Provenance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for edu in report.candidate.education %}
+          <tr>
+            <td><strong>{{ edu.degree or "Unspecified" }}</strong></td>
+            <td>{{ edu.level.name }}</td>
+            <td>{{ edu.field_of_study or "—" }}</td>
+            <td>{{ edu.institution or "—" }}</td>
+            <td><span class="badge {{ 'badge-rule' if edu.provenance.value == 'extracted_rule' else 'badge-ai-extracted' }}">{{ edu.provenance.value }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </section>
+
+    <!-- Section 9: Recommendations -->
+    <section>
+      <h2>9. Recommendations <span class="badge badge-ai-generated">AI-GENERATED &mdash; NOT VERIFIED</span></h2>
+      <h3>9a. Reviewer Match Explanation</h3>
+      {% if report.ai and report.ai.explanation and report.ai.explanation.status.value in ("ok", "partial") and report.ai.explanation.data %}
+        <p>{{ report.ai.explanation.data.summary }}</p>
+        {% if report.ai.explanation.data.strengths %}
+        <h4>Identified Strengths:</h4>
+        <ul class="item-list">
+          {% for s in report.ai.explanation.data.strengths %}
+          <li>{{ s.point }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% if report.ai.explanation.data.concerns %}
+        <h4>Gaps and Focus Areas:</h4>
+        <ul class="item-list">
+          {% for c in report.ai.explanation.data.concerns %}
+          <li>{{ c.point }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      {% else %}
+        <p style="color: var(--muted); font-style: italic;">
+          AI-generated content unavailable ({{ report.ai.explanation.status.value if report.ai and report.ai.explanation else "disabled" }}).
+        </p>
+      {% endif %}
+
+      <h3>9b. Candidate Development Suggestions</h3>
+      {% if report.ai and report.ai.recommendations and report.ai.recommendations.status.value in ("ok", "partial") and report.ai.recommendations.data %}
+        <ul class="item-list">
+          {% for r in report.ai.recommendations.data %}
+          <li>
+            <strong>[{{ r.priority | upper }} Priority]</strong> {{ r.action }}
+            <br><small style="color: var(--muted);">{{ r.rationale }}</small>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p style="color: var(--muted); font-style: italic;">
+          AI-generated content unavailable ({{ report.ai.recommendations.status.value if report.ai and report.ai.recommendations else "disabled" }}).
+        </p>
+      {% endif %}
+    </section>
+
+    <!-- Section 10: Hiring-Suitability Assessment -->
+    <section>
+      <h2>10. Alignment &amp; Suitability Assessment <span class="badge badge-computed">COMPUTED</span></h2>
+      <p>
+        Candidate profile demonstrates <strong>{{ report.score.fit_band.value | upper }}</strong> alignment with position requirements based on deterministic scoring criteria (Score: {{ "%.1f" | format(report.score.total_score) }}/100, Coverage: {{ "%.0f" | format(report.score.coverage * 100) }}%).
+      </p>
+      {% if report.flags %}
+      <p><strong>Assessment Considerations:</strong></p>
+      <ul class="item-list">
+        {% for f in report.flags %}
+        <li>{{ f.message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <p style="font-size: 0.85rem; color: var(--muted);">
+        Disclaimer: Alignment scores evaluate lexical and structured criteria extracted from the submitted resume text. Human reviewers must verify qualifications, conduct interviews, and assess contextual factors before reaching employment conclusions.
+      </p>
+    </section>
+
+    <!-- Section 11: Suggested Interview Questions -->
+    <section>
+      <h2>11. Suggested Interview Questions <span class="badge badge-ai-generated">AI-GENERATED &mdash; NOT VERIFIED</span></h2>
+      {% if report.ai and report.ai.interview_questions and report.ai.interview_questions.status.value in ("ok", "partial") and report.ai.interview_questions.data %}
+      <ol class="item-list">
+        {% for q in report.ai.interview_questions.data %}
+        <li style="margin-bottom: 12px;">
+          <strong>{{ q.question }}</strong>
+          {% if q.target_skill %}<span class="badge badge-rule">{{ q.target_skill }}</span>{% endif %}
+          <br><small style="color: var(--muted);">Rationale: {{ q.rationale }}</small>
+        </li>
+        {% endfor %}
+      </ol>
+      {% else %}
+      <p style="color: var(--muted); font-style: italic;">
+        AI-generated content unavailable ({{ report.ai.interview_questions.status.value if report.ai and report.ai.interview_questions else "disabled" }}).
+      </p>
+      {% endif %}
+    </section>
+
+    <!-- Section 12: Appendix -->
+    <section>
+      <h2>12. Appendix &amp; System Limitations</h2>
+      <p style="font-size: 0.85rem; color: var(--muted);">
+        <strong>Scoring Model Limitations:</strong>
+        Lexical matching may miss semantic equivalents not captured in the taxonomy.
+        Experience calculations assume continuous employment within month intervals.
+        Education attainment is mapped hierarchically without institution-ranking bias.
+      </p>
+      <p style="font-size: 0.85rem; color: var(--muted);">
+        Configuration: Strategy: <code>{{ report.config_snapshot.strategy }}</code> &bull;
+        Fuzzy Threshold: {{ report.config_snapshot.fuzzy_threshold }} &bull;
+        AI Provider: <code>{{ report.config_snapshot.ai.provider }}</code>
+      </p>
+    </section>
+
+    <div class="footer">
+      Generated by Intelligent Resume Analyzer v{{ report.app_version }} &bull; Report ID: {{ report.report_id }}
+    </div>
+  </div>
+</body>
+</html>
