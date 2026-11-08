@@ -23,3 +23,4 @@ __all__ = [
     "fuzzy_similarity",
     "normalize_skill",
 ]
+

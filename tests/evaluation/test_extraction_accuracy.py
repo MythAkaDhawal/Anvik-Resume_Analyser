@@ -175,3 +175,4 @@ def test_et_01_baseline_extraction_accuracy(parser: ResumeParser):
     assert precision >= 0.70, f"Extraction precision ({precision:.3f}) below 0.70 baseline target"
     assert email_matches / n_samples >= 0.85, "Email extraction accuracy below 85%"
     assert edu_matches / n_samples >= 0.85, "Education extraction accuracy below 85%"
+

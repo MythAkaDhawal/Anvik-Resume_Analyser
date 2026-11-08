@@ -123,3 +123,4 @@ class SkillIndex:
                     counts[canonical_name] += 1
 
         return counts
+

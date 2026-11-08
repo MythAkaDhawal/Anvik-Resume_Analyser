@@ -86,3 +86,4 @@ def test_injection_indicators_scanning():
     assert "ROLE_OVERRIDE" in indicators
     assert "SCORE_MANIPULATION" in indicators
     assert "OUTPUT_FORMAT_HIJACK" in indicators
+

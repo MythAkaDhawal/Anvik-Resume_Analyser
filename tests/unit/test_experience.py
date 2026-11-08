@@ -121,3 +121,4 @@ def test_ut_exp_06_intern_handling():
     without_intern = total_experience_years(entries, REF_DATE, count_internships=False)
     assert with_intern is not None and without_intern is not None
     assert with_intern > without_intern
+

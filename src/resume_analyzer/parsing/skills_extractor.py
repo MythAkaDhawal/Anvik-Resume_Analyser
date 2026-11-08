@@ -177,3 +177,4 @@ def _extract_from_skills_section(
                     )
                 else:
                     skills_map[key].mentions += 1
+

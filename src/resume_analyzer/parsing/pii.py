@@ -117,3 +117,4 @@ def scan_injection_indicators(text: str) -> list[str]:
             break
 
     return sorted(set(indicators))
+

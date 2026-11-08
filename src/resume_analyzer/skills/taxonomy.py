@@ -196,3 +196,4 @@ def _load_taxonomy_cached(resolved_path_str: str) -> SkillTaxonomy:
 def clear_taxonomy_cache() -> None:
     """Clear cached taxonomy instances (called in test fixtures)."""
     _load_taxonomy_cached.cache_clear()
+

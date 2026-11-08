@@ -67,3 +67,4 @@ def test_ut_edu_04_highest_education_level():
     empty_entries, highest_empty, warnings_empty = parse_education("")
     assert highest_empty == EducationLevel.UNSPECIFIED
     assert any(w.code == "NO_EDUCATION" for w in warnings_empty)
+

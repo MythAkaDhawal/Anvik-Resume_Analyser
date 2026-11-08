@@ -158,3 +158,4 @@ def split_sections(text: str) -> tuple[dict[str, str], list[str]]:
 
     result = {k: "\n".join(v).strip() for k, v in sections.items()}
     return result, warnings
+

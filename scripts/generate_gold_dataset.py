@@ -488,3 +488,4 @@ for p in PROFILES:
     gold_file.write_text(json.dumps(gold_data, indent=2), encoding="utf-8")
 
 print(f"Generated {len(PROFILES)} resumes in {resumes_dir} and gold annotations in {gold_dir}")
+
