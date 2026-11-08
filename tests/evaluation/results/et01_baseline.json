@@ -1,0 +1,293 @@
+{
+  "evaluation_name": "ET-01 Baseline Extraction Accuracy",
+  "sample_count": 15,
+  "format_distribution": {
+    "txt": 15
+  },
+  "skills_micro_metrics": {
+    "tp": 78,
+    "fp": 15,
+    "fn": 0,
+    "precision": 0.8387,
+    "recall": 1.0,
+    "f1": 0.9123
+  },
+  "exact_match_rates": {
+    "email_accuracy": 1.0,
+    "name_accuracy": 1.0,
+    "education_accuracy": 1.0,
+    "experience_accuracy": 0.8
+  },
+  "detailed": [
+    {
+      "id": "cand_01_asha_verma",
+      "filename": "cand_01_asha_verma.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 2.3,
+      "gold_exp": 2.2
+    },
+    {
+      "id": "cand_02_marcus_chen",
+      "filename": "cand_02_marcus_chen.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 8,
+        "tp": 6,
+        "fp": 2,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.7,
+      "gold_exp": 4.5
+    },
+    {
+      "id": "cand_03_sarah_connor",
+      "filename": "cand_03_sarah_connor.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 8,
+        "tp": 6,
+        "fp": 2,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 5.3,
+      "gold_exp": 5.0
+    },
+    {
+      "id": "cand_04_elena_rostova",
+      "filename": "cand_04_elena_rostova.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 9,
+        "tp": 6,
+        "fp": 3,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": false,
+      "extracted_exp": 3.9,
+      "gold_exp": 3.0
+    },
+    {
+      "id": "cand_05_david_kim",
+      "filename": "cand_05_david_kim.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 8,
+        "tp": 6,
+        "fp": 2,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.0,
+      "gold_exp": 3.5
+    },
+    {
+      "id": "cand_06_fatima_mansoor",
+      "filename": "cand_06_fatima_mansoor.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 9,
+        "tp": 6,
+        "fp": 3,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.3,
+      "gold_exp": 4.0
+    },
+    {
+      "id": "cand_07_alex_morgan",
+      "filename": "cand_07_alex_morgan.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.0,
+      "gold_exp": 3.7
+    },
+    {
+      "id": "cand_08_rajesh_sharma",
+      "filename": "cand_08_rajesh_sharma.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 5,
+        "extracted_count": 5,
+        "tp": 5,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.3,
+      "gold_exp": 4.2
+    },
+    {
+      "id": "cand_09_clara_schmidt",
+      "filename": "cand_09_clara_schmidt.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 2.9,
+      "gold_exp": 2.5
+    },
+    {
+      "id": "cand_10_james_wilson",
+      "filename": "cand_10_james_wilson.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 5,
+        "extracted_count": 6,
+        "tp": 5,
+        "fp": 1,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 5.3,
+      "gold_exp": 5.0
+    },
+    {
+      "id": "cand_11_priya_patel",
+      "filename": "cand_11_priya_patel.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 5,
+        "extracted_count": 6,
+        "tp": 5,
+        "fp": 1,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 3.3,
+      "gold_exp": 2.8
+    },
+    {
+      "id": "cand_12_lucas_silva",
+      "filename": "cand_12_lucas_silva.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 4,
+        "extracted_count": 5,
+        "tp": 4,
+        "fp": 1,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": false,
+      "extracted_exp": 4.0,
+      "gold_exp": 3.0
+    },
+    {
+      "id": "cand_13_ananya_iyer",
+      "filename": "cand_13_ananya_iyer.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 5,
+        "extracted_count": 5,
+        "tp": 5,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": false,
+      "extracted_exp": 4.6,
+      "gold_exp": 3.5
+    },
+    {
+      "id": "cand_14_minimal_candidate",
+      "filename": "cand_14_minimal_candidate.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 3,
+        "extracted_count": 3,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": null,
+      "gold_exp": null
+    },
+    {
+      "id": "cand_15_sparse_candidate",
+      "filename": "cand_15_sparse_candidate.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 3,
+        "extracted_count": 3,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": null,
+      "gold_exp": null
+    }
+  ]
+}

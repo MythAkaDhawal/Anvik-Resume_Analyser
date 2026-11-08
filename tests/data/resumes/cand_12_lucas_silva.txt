@@ -1,0 +1,23 @@
+Lucas Silva
+lucas.silva@security.io
+Miami, FL
+
+SUMMARY
+Information Security Analyst skilled in threat detection, vulnerability analysis, and network hardening.
+
+KEY SKILLS
+Cybersecurity, Linux, Python, Network Security, Bash
+
+EXPERIENCE
+Security Analyst at Shield Security Systems
+May 2022 - Present
+- Monitored network security telemetry and responded to security incidents.
+- Developed threat hunting scripts in Python and Bash.
+
+IT Support Specialist at Miami Tech
+May 2020 - April 2022
+- Administered Linux servers and enforced network security policies.
+
+EDUCATION
+Associate Degree in Cyber Security
+Miami Dade College

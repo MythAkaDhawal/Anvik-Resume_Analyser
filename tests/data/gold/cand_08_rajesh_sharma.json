@@ -1,0 +1,15 @@
+{
+  "id": "cand_08_rajesh_sharma",
+  "resume_filename": "cand_08_rajesh_sharma.txt",
+  "name": "Rajesh Sharma",
+  "email": "rajesh.sharma@mobileapps.in",
+  "skills": [
+    "Kotlin",
+    "Java",
+    "Swift",
+    "RESTful APIs",
+    "Git"
+  ],
+  "total_experience_years": 4.2,
+  "highest_education_level": "BACHELOR"
+}

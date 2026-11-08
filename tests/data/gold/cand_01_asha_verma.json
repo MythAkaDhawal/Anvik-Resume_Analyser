@@ -1,0 +1,16 @@
+{
+  "id": "cand_01_asha_verma",
+  "resume_filename": "cand_01_asha_verma.txt",
+  "name": "Asha Verma",
+  "email": "asha.verma@example.com",
+  "skills": [
+    "Python",
+    "SQL",
+    "Pandas",
+    "Tableau",
+    "Docker",
+    "AWS"
+  ],
+  "total_experience_years": 2.2,
+  "highest_education_level": "BACHELOR"
+}

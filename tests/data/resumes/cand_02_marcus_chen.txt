@@ -1,0 +1,23 @@
+Marcus Chen
+marcus.chen@example.org
+Seattle, WA
+
+PROFESSIONAL SUMMARY
+Senior Backend Engineer with 4+ years architecting microservices with Go and Kubernetes.
+
+TECHNICAL SKILLS
+Go, Docker, Kubernetes, PostgreSQL, Redis, gRPC, Linux
+
+WORK EXPERIENCE
+Senior Backend Engineer @ CloudScale Technologies
+March 2021 - Present
+- Architected Go microservices processing 10k req/sec.
+- Managed PostgreSQL and Redis persistence tiers.
+
+Software Engineer at MicroSys
+September 2019 - February 2021
+- Deployed distributed container clusters using Docker and Kubernetes.
+
+EDUCATION
+Master of Science in Software Engineering
+University of Washington

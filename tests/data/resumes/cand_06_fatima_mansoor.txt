@@ -1,0 +1,23 @@
+Fatima Mansoor
+fatima.mansoor@devops.org
+Chicago, IL
+
+SUMMARY
+DevOps Engineer experienced in continuous delivery, Kubernetes cluster administration, and automated configuration.
+
+SKILLS
+Kubernetes, Docker, Jenkins, Ansible, Linux, Git, Bash
+
+WORK HISTORY
+DevOps Engineer at Midwest Logistics
+January 2022 - Present
+- Maintained production Kubernetes clusters and Docker containers.
+- Orchestrated automated Jenkins builds.
+
+Systems Administrator at Chicago Data Corp
+January 2020 - December 2021
+- Automated server provisioning with Ansible and Linux shell scripts.
+
+EDUCATION
+Bachelor of Engineering in Computer Engineering
+University of Illinois

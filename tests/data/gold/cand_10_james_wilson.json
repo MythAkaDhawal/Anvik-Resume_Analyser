@@ -1,0 +1,15 @@
+{
+  "id": "cand_10_james_wilson",
+  "resume_filename": "cand_10_james_wilson.txt",
+  "name": "James Wilson",
+  "email": "jwilson@dbadmin.com",
+  "skills": [
+    "PostgreSQL",
+    "MySQL",
+    "Oracle Database",
+    "Redis",
+    "SQL"
+  ],
+  "total_experience_years": 5.0,
+  "highest_education_level": "BACHELOR"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "cand_02_marcus_chen",
+  "resume_filename": "cand_02_marcus_chen.txt",
+  "name": "Marcus Chen",
+  "email": "marcus.chen@example.org",
+  "skills": [
+    "Go",
+    "Docker",
+    "Kubernetes",
+    "PostgreSQL",
+    "Redis",
+    "gRPC"
+  ],
+  "total_experience_years": 4.5,
+  "highest_education_level": "MASTER"
+}

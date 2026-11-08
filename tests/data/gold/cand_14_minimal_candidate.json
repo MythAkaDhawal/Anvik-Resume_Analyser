@@ -1,0 +1,13 @@
+{
+  "id": "cand_14_minimal_candidate",
+  "resume_filename": "cand_14_minimal_candidate.txt",
+  "name": "Jean-Luc O'Neil",
+  "email": "jl.oneil@freelance.org",
+  "skills": [
+    "Python",
+    "FastAPI",
+    "PostgreSQL"
+  ],
+  "total_experience_years": null,
+  "highest_education_level": "UNSPECIFIED"
+}

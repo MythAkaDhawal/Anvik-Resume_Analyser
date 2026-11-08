@@ -1,0 +1,16 @@
+{
+  "id": "cand_09_clara_schmidt",
+  "resume_filename": "cand_09_clara_schmidt.txt",
+  "name": "Clara Schmidt",
+  "email": "clara.schmidt@frontend.de",
+  "skills": [
+    "Vue.js",
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Tailwind CSS",
+    "Figma"
+  ],
+  "total_experience_years": 2.5,
+  "highest_education_level": "BACHELOR"
+}

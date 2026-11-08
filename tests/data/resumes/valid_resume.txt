@@ -1,0 +1,29 @@
+Asha Verma
+Email: asha.verma@example.com
+Phone: (555) 234-5678
+Location: San Francisco, CA
+
+SUMMARY
+Enthusiastic Junior Data Analyst with 2 years of experience in Python, SQL, and data visualization. Proven track record in building analytics pipelines and automated reporting dashboards.
+
+SKILLS
+Programming: Python, SQL, R, Bash
+Data & Tools: Pandas, NumPy, Tableau, Streamlit, Docker, Git, AWS (S3, EC2)
+
+EXPERIENCE
+Data Analyst Intern | DataCorp Inc.
+June 2023 - Present
+- Developed automated daily ETL pipelines using Python and SQL, reducing manual reporting time by 40%.
+- Designed interactive executive dashboards in Streamlit and Tableau for weekly performance tracking.
+- Containerized reporting jobs with Docker and deployed them to AWS EC2 instances.
+
+Junior Analyst | Alpha Tech Solutions
+January 2022 - May 2023
+- Conducted exploratory data analysis on marketing attribution datasets using Pandas and SQL.
+- Collaborated with engineering teams to optimize database queries, improving dashboard load times.
+
+EDUCATION
+Bachelor of Science in Computer Science
+State University | Graduated: May 2022
+Relevant Coursework: Database Management Systems, Data Structures, Statistics, Machine Learning
+

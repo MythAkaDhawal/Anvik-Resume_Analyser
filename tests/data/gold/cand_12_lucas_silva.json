@@ -1,0 +1,14 @@
+{
+  "id": "cand_12_lucas_silva",
+  "resume_filename": "cand_12_lucas_silva.txt",
+  "name": "Lucas Silva",
+  "email": "lucas.silva@security.io",
+  "skills": [
+    "Cybersecurity",
+    "Linux",
+    "Python",
+    "Network Security"
+  ],
+  "total_experience_years": 3.0,
+  "highest_education_level": "DIPLOMA"
+}

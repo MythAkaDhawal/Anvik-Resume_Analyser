@@ -1,0 +1,23 @@
+Rajesh Sharma
+rajesh.sharma@mobileapps.in
+Bangalore, India
+
+SUMMARY
+Mobile Application Developer experienced in building native Android and iOS applications.
+
+TECHNICAL PROFICIENCIES
+Kotlin, Java, Swift, RESTful APIs, Git
+
+EXPERIENCE
+Lead Android Developer at AppVantage Technologies
+July 2021 - Present
+- Designed native mobile apps using Kotlin and Java.
+- Integrated backend services through RESTful APIs.
+
+Mobile Developer at InnoApps India
+January 2020 - June 2021
+- Maintained Swift and Java mobile codebases.
+
+EDUCATION
+Bachelor of Technology in Computer Science
+Visvesvaraya Technological University

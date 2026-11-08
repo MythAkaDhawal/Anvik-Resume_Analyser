@@ -1,0 +1,23 @@
+Ananya Iyer
+ananya.iyer@analytics.com
+Boston, MA
+
+PROFESSIONAL SUMMARY
+Business Intelligence Analyst specializing in executive dashboards, SQL modeling, and KPI tracking.
+
+SKILLS
+Power BI, SQL, Excel, Tableau, Business Intelligence
+
+WORK EXPERIENCE
+BI Analyst at Global Insights Consulting
+March 2022 - Present
+- Designed executive dashboards in Power BI and Tableau.
+- Crafted complex SQL queries to model financial metrics.
+
+Junior Analyst at Boston Analytics
+October 2019 - February 2022
+- Conducted variance analysis in Excel and SQL.
+
+EDUCATION
+Master of Science in Business Analytics
+Boston University

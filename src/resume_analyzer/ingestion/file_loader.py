@@ -106,3 +106,4 @@ def load_resume(
         raw_text=raw_text,
         warnings=warnings,
     )
+

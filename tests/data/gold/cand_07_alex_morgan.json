@@ -1,0 +1,16 @@
+{
+  "id": "cand_07_alex_morgan",
+  "resume_filename": "cand_07_alex_morgan.txt",
+  "name": "Alex Morgan",
+  "email": "alex.morgan@dataflow.io",
+  "skills": [
+    "Python",
+    "SQL",
+    "Apache Spark",
+    "Apache Kafka",
+    "Snowflake",
+    "Apache Airflow"
+  ],
+  "total_experience_years": 3.7,
+  "highest_education_level": "MASTER"
+}

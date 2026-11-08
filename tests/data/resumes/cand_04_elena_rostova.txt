@@ -1,0 +1,22 @@
+Elena Rostova
+elena.rostova@ai-lab.io
+New York, NY
+
+OBJECTIVE
+Machine Learning Researcher specializing in deep learning, neural networks, and computer vision.
+
+SKILLS
+Python, PyTorch, TensorFlow, Scikit-Learn, Machine Learning, Deep Learning
+
+EXPERIENCE
+Machine Learning Scientist at VisionAI Labs
+June 2021 - Present
+- Developed deep learning models with PyTorch and TensorFlow for computer vision.
+
+Research Assistant at NYU AI Center
+June 2020 - May 2021
+- Applied machine learning algorithms using Scikit-Learn and Python.
+
+EDUCATION
+PhD in Computer Science
+New York University

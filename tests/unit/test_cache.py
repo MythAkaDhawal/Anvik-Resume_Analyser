@@ -27,3 +27,31 @@ def test_get_settings_cache_hits_and_clearing() -> None:
     assert info_cleared.hits == 0
     assert info_cleared.misses == 0
 
+
+def test_normalizer_and_fuzzy_cache_hits_and_clearing() -> None:
+    """UT-CACHE-03 / UT-CACHE-04: Verify normalizer and fuzzy similarity LRU caching and cache clearing."""
+    from resume_analyzer.skills.normalizer import (
+        clear_normalizer_caches,
+        fuzzy_similarity,
+        normalize_skill,
+    )
+
+    clear_normalizer_caches()
+
+    # Normalizer cache test
+    norm1 = normalize_skill("Python (advanced)")
+    norm2 = normalize_skill("Python (advanced)")
+    assert norm1 == norm2 == "python"
+    assert normalize_skill.cache_info().hits >= 1
+
+    # Fuzzy similarity cache test
+    sim1 = fuzzy_similarity("python", "python")
+    sim2 = fuzzy_similarity("python", "python")
+    assert sim1 == sim2 == 100.0
+    assert fuzzy_similarity.cache_info().hits >= 1
+
+    # Clear caches
+    clear_normalizer_caches()
+    assert normalize_skill.cache_info().hits == 0
+    assert fuzzy_similarity.cache_info().hits == 0
+

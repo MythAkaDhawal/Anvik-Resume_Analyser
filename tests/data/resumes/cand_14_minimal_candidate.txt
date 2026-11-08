@@ -1,0 +1,5 @@
+Jean-Luc O'Neil
+jl.oneil@freelance.org
+
+SKILLS
+Python, FastAPI, PostgreSQL

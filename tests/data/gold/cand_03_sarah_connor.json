@@ -1,0 +1,16 @@
+{
+  "id": "cand_03_sarah_connor",
+  "resume_filename": "cand_03_sarah_connor.txt",
+  "name": "Sarah Connor",
+  "email": "sconnor@cyberdyne.net",
+  "skills": [
+    "AWS",
+    "Terraform",
+    "Ansible",
+    "Linux",
+    "Python",
+    "CI/CD"
+  ],
+  "total_experience_years": 5.0,
+  "highest_education_level": "BACHELOR"
+}

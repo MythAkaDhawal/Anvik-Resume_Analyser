@@ -1,0 +1,15 @@
+{
+  "id": "cand_11_priya_patel",
+  "resume_filename": "cand_11_priya_patel.txt",
+  "name": "Priya Patel",
+  "email": "priya.patel@qatech.com",
+  "skills": [
+    "Selenium",
+    "Pytest",
+    "Python",
+    "Git",
+    "Jira"
+  ],
+  "total_experience_years": 2.8,
+  "highest_education_level": "BACHELOR"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "cand_04_elena_rostova",
+  "resume_filename": "cand_04_elena_rostova.txt",
+  "name": "Elena Rostova",
+  "email": "elena.rostova@ai-lab.io",
+  "skills": [
+    "Python",
+    "PyTorch",
+    "TensorFlow",
+    "Scikit-Learn",
+    "Machine Learning",
+    "Deep Learning"
+  ],
+  "total_experience_years": 3.0,
+  "highest_education_level": "DOCTORATE"
+}

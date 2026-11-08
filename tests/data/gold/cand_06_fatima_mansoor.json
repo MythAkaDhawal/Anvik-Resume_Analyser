@@ -1,0 +1,16 @@
+{
+  "id": "cand_06_fatima_mansoor",
+  "resume_filename": "cand_06_fatima_mansoor.txt",
+  "name": "Fatima Mansoor",
+  "email": "fatima.mansoor@devops.org",
+  "skills": [
+    "Kubernetes",
+    "Docker",
+    "Jenkins",
+    "Ansible",
+    "Linux",
+    "Git"
+  ],
+  "total_experience_years": 4.0,
+  "highest_education_level": "BACHELOR"
+}

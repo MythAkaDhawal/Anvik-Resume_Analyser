@@ -265,3 +265,4 @@ def _validate_txt(data: bytes) -> None:
 
     if not decoded:
         raise FileTypeMismatchError("TXT file could not be decoded with standard text encodings.")
+

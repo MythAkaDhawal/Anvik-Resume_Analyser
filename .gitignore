@@ -28,8 +28,8 @@ wheels/
 *.env.local
 
 # Runtime data and logs
-data/
-logs/
+/data/
+/logs/
 *.log
 *.tmp
 

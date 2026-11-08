@@ -1,0 +1,23 @@
+Priya Patel
+priya.patel@qatech.com
+Atlanta, GA
+
+SUMMARY
+Quality Assurance Engineer skilled in building automated test suites with Python and Selenium.
+
+SKILLS
+Selenium, Pytest, Python, Git, Jira
+
+WORK EXPERIENCE
+Software QA Engineer | QualiTech Solutions
+August 2022 - Present
+- Developed end-to-end regression test suites with Selenium and Pytest.
+- Managed bug tracking workflows in Jira.
+
+QA Analyst at Alpha Software
+January 2021 - July 2022
+- Executed automated and exploratory test scripts using Python.
+
+EDUCATION
+Bachelor of Science in Computer Science
+Georgia Institute of Technology

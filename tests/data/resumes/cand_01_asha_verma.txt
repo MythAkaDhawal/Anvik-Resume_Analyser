@@ -1,0 +1,24 @@
+Asha Verma
+Email: asha.verma@example.com
+Phone: (555) 234-5678
+San Francisco, CA
+
+SUMMARY
+Enthusiastic Junior Data Analyst with 2 years of experience in Python, SQL, and data reporting.
+
+SKILLS
+Programming: Python, SQL, Pandas, Tableau, Docker, AWS
+
+EXPERIENCE
+Data Analyst Intern at DataCorp Inc
+June 2023 - Present
+- Created analytics dashboards using Tableau and SQL.
+- Containerized workflows using Docker and AWS.
+
+Junior Analyst | Alpha Solutions
+January 2022 - May 2023
+- Analyzed business performance using Python and Pandas.
+
+EDUCATION
+Bachelor of Science in Computer Science
+State University, 2022

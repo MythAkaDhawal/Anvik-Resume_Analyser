@@ -1,0 +1,23 @@
+Alex Morgan
+alex.morgan@dataflow.io
+Denver, CO
+
+PROFESSIONAL SUMMARY
+Data Engineer skilled in large-scale batch and streaming pipeline architectures.
+
+KEY SKILLS
+Python, SQL, Apache Spark, Apache Kafka, Snowflake, Apache Airflow
+
+EXPERIENCE
+Senior Data Engineer | DataFlow Systems
+August 2022 - Present
+- Engineered high-throughput streaming pipelines using Apache Kafka and Apache Spark.
+- Automated daily orchestrations using Apache Airflow into Snowflake data warehouse.
+
+Data Engineer at Apex Analytics
+May 2020 - July 2022
+- Maintained dimensional data models in Snowflake using Python and SQL.
+
+EDUCATION
+Master of Science in Data Science
+University of Colorado

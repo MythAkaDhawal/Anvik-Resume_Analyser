@@ -1,0 +1,23 @@
+Clara Schmidt
+clara.schmidt@frontend.de
+Berlin, Germany
+
+CAREER SUMMARY
+Frontend Engineer passionate about design systems, accessible UI, and Vue.js architecture.
+
+SKILLS
+Vue.js, JavaScript, HTML, CSS, Tailwind CSS, Figma
+
+WORK EXPERIENCE
+Frontend Engineer @ DesignCraft Digital
+January 2023 - Present
+- Implemented responsive web components using Vue.js and Tailwind CSS.
+- Translated UI mockups from Figma into pixel-perfect web interfaces.
+
+Junior Web Developer at Studio Berlin
+June 2021 - December 2022
+- Built interactive websites using HTML, CSS, and JavaScript.
+
+EDUCATION
+Bachelor of Science in Digital Media
+Technical University of Berlin

@@ -1,0 +1,23 @@
+James Wilson
+jwilson@dbadmin.com
+Dallas, TX
+
+SUMMARY
+Database Administrator with extensive background in high availability, query optimization, and disaster recovery.
+
+SKILLS
+PostgreSQL, MySQL, Oracle Database, Redis, SQL, Linux
+
+EXPERIENCE
+Database Administrator at Enterprise Data Corp
+January 2021 - Present
+- Administered high-concurrency PostgreSQL and MySQL database clusters.
+- Configured in-memory caching with Redis.
+
+Database Analyst at First Financial
+January 2019 - December 2020
+- Tuned complex SQL queries on Oracle Database systems.
+
+EDUCATION
+Bachelor of Science in Information Systems
+University of Texas at Dallas

@@ -1,0 +1,22 @@
+Sarah Connor
+sconnor@cyberdyne.net | Austin, TX
+
+SUMMARY
+Cloud Architect and Infrastructure Lead specializing in AWS and Terraform automation.
+
+CORE COMPETENCIES
+AWS, Terraform, Ansible, Linux, Python, CI/CD, Git
+
+PROFESSIONAL EXPERIENCE
+Lead Cloud Architect | Cyberdyne Systems
+January 2021 - Present
+- Built multi-region AWS cloud infrastructure using Terraform.
+- Automated system configurations via Ansible and Linux shell scripts.
+
+DevOps Engineer at SkyNet Global
+January 2019 - December 2020
+- Built automated CI/CD deployment pipelines using Python and Git.
+
+ACADEMIC BACKGROUND
+Bachelor of Technology in Information Technology
+Austin Institute of Technology

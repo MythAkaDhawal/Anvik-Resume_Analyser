@@ -1,0 +1,16 @@
+{
+  "id": "cand_05_david_kim",
+  "resume_filename": "cand_05_david_kim.txt",
+  "name": "David Kim",
+  "email": "david.kim@webdev.com",
+  "skills": [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Node.js",
+    "MongoDB",
+    "Express.js"
+  ],
+  "total_experience_years": 3.5,
+  "highest_education_level": "BACHELOR"
+}

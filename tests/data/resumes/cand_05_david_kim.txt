@@ -1,0 +1,23 @@
+David Kim
+david.kim@webdev.com
+San Jose, CA
+
+PROFILE
+Full Stack Developer proficient in React, Node.js, and TypeScript.
+
+TECHNICAL SKILLS
+Languages: JavaScript, TypeScript
+Web: React, Node.js, Express.js, MongoDB, HTML, CSS
+
+EXPERIENCE
+Full Stack Developer | Nexa Web Studio
+October 2021 - Present
+- Developed scalable React and Node.js applications with MongoDB.
+
+Frontend Developer at PixelWorks
+May 2020 - September 2021
+- Created dynamic user interfaces using TypeScript and React.
+
+EDUCATION
+Bachelor of Science in Computer Science
+San Jose State University

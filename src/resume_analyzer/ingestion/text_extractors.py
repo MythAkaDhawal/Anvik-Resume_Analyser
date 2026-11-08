@@ -240,3 +240,4 @@ def extract_text(
         return extract_txt_text(data)
 
     raise UnreadableFileError(f"Unsupported format '{file.format}' for text extraction.")
+
