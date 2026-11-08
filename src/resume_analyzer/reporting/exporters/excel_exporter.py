@@ -380,3 +380,4 @@ class ExcelExporter(Exporter):
                 f"Failed to export batch workbook to '{target}': {e}",
                 details={"path": str(target), "error": str(e)},
             ) from e
+

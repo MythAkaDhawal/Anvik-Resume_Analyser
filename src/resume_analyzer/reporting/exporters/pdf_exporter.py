@@ -490,3 +490,4 @@ class PDFExporter(Exporter):
 
         doc.build(story, canvasmaker=canvas_maker)
         return buffer.getvalue()
+

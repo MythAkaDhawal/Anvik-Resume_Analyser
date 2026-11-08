@@ -48,3 +48,4 @@ class HTMLExporter(Exporter):
             matched_skills=matched,
         )
         return html_text.encode("utf-8")
+
