@@ -13,21 +13,15 @@ Saves results to tests/evaluation/results/et02_matching.json.
 from __future__ import annotations
 
 import csv
-from datetime import date
 import json
 import math
-from pathlib import Path
 import random
-import pytest
+from datetime import date
+from pathlib import Path
 
 from resume_analyzer.config.settings import get_settings
-from resume_analyzer.ingestion.file_loader import load_resume
 from resume_analyzer.models.job import JobRequirements
-from resume_analyzer.parsing.resume_parser import ResumeParser
 from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
-from resume_analyzer.skills.skill_index import SkillIndex
-from resume_analyzer.skills.taxonomy import SkillTaxonomy
-
 
 PAIRS_CSV = Path("tests/data/labels/pairs.csv")
 JOBS_DIR = Path("tests/data/jobs")
@@ -69,7 +63,11 @@ def compute_metrics(actual: list[bool], pred: list[bool]) -> dict[str, float]:
 
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
 
     return {
         "tp": tp,
@@ -110,7 +108,10 @@ def bootstrap_ci(
     upper_idx = int(0.975 * n_resamples)
 
     return {
-        "precision_ci95": (round(p_samples[lower_idx], 4), round(p_samples[upper_idx], 4)),
+        "precision_ci95": (
+            round(p_samples[lower_idx], 4),
+            round(p_samples[upper_idx], 4),
+        ),
         "recall_ci95": (round(r_samples[lower_idx], 4), round(r_samples[upper_idx], 4)),
         "f1_ci95": (round(f1_samples[lower_idx], 4), round(f1_samples[upper_idx], 4)),
     }
@@ -180,13 +181,15 @@ def test_et_02_matching_precision_recall_and_ablation() -> None:
             reference_date=REF_DATE,
         )
 
-        scored_pairs.append({
-            "candidate_id": cid,
-            "job_id": jid,
-            "actual_suitable": adjudicated,
-            "score_weighted": rep_weighted.score.total_score,
-            "score_basic": rep_basic.score.total_score,
-        })
+        scored_pairs.append(
+            {
+                "candidate_id": cid,
+                "job_id": jid,
+                "actual_suitable": adjudicated,
+                "score_weighted": rep_weighted.score.total_score,
+                "score_basic": rep_basic.score.total_score,
+            }
+        )
 
     # 3. Stratified 60% Dev / 40% Test split by job_id
     rng = random.Random(42)
@@ -246,7 +249,8 @@ def test_et_02_matching_precision_recall_and_ablation() -> None:
         "comparison_weighted_vs_basic": {
             "weighted_f1": test_metrics_weighted["f1"],
             "basic_f1": test_metrics_basic["f1"],
-            "weighted_beats_basic": test_metrics_weighted["f1"] >= test_metrics_basic["f1"],
+            "weighted_beats_basic": test_metrics_weighted["f1"]
+            >= test_metrics_basic["f1"],
         },
     }
 
@@ -255,7 +259,12 @@ def test_et_02_matching_precision_recall_and_ablation() -> None:
 
     # Assertions
     assert kappa >= 0.70, f"Annotator agreement Kappa ({kappa:.2f}) below 0.70"
-    assert test_metrics_weighted["precision"] >= 0.65, f"Precision ({test_metrics_weighted['precision']}) below 0.65"
-    assert test_metrics_weighted["recall"] >= 0.60, f"Recall ({test_metrics_weighted['recall']}) below 0.60"
-    assert test_metrics_weighted["f1"] >= 0.65, f"F1 score ({test_metrics_weighted['f1']}) below 0.65"
-
+    assert test_metrics_weighted["precision"] >= 0.65, (
+        f"Precision ({test_metrics_weighted['precision']}) below 0.65"
+    )
+    assert test_metrics_weighted["recall"] >= 0.60, (
+        f"Recall ({test_metrics_weighted['recall']}) below 0.60"
+    )
+    assert test_metrics_weighted["f1"] >= 0.65, (
+        f"F1 score ({test_metrics_weighted['f1']}) below 0.65"
+    )

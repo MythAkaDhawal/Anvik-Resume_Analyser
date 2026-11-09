@@ -11,7 +11,6 @@ from pathlib import Path
 
 import openpyxl
 from pypdf import PdfReader
-import pytest
 
 from resume_analyzer.config.settings import get_settings
 from resume_analyzer.models.job import JobRequirements

@@ -9,7 +9,7 @@ from __future__ import annotations
 import io
 import logging
 import os
-import xml.sax.saxutils as saxutils
+import xml.sax.saxutils as saxutils  # nosec: B406
 from typing import Any
 
 from reportlab.lib import colors
@@ -28,7 +28,6 @@ from reportlab.platypus import (
 
 from resume_analyzer.models.results import AnalysisReport
 from resume_analyzer.reporting.exporters.base import Exporter, register_exporter
-from resume_analyzer.reporting.report_builder import ReportBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ class NumberedCanvas(canvas.Canvas):
         self._saved_page_states: list[dict[str, Any]] = []
         self.report_id_str = ""
 
-    def showPage(self) -> None:
+    def showPage(self) -> None:  # noqa: N802
         self._saved_page_states.append(dict(self.__dict__))
         self._startPage()
 
@@ -104,71 +103,134 @@ class PDFExporter(Exporter):
         """Initialize PDF exporter and ensure Unicode font is registered."""
         self.font_name = _register_unicode_font()
 
-    def _build_meta_and_notice(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_meta_and_notice(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         cand_display = report.candidate.name or report.candidate.candidate_id
-        items.append(Paragraph(f"Resume Analysis Report: {_escape(cand_display)}", styles["title"]))
+        items.append(
+            Paragraph(
+                f"Resume Analysis Report: {_escape(cand_display)}", styles["title"]
+            )
+        )
         created_str = report.created_at.strftime("%Y-%m-%d %H:%M UTC")
         meta_line = f"Report ID: {report.report_id}  &bull;  Date: {created_str}  &bull;  App Version: {report.app_version}"
         items.append(Paragraph(meta_line, styles["subtitle"]))
         items.append(Spacer(1, 8))
 
         notice_table = Table(
-            [[Paragraph(f"<b>Notice:</b> {_escape(report.human_review_notice)}", styles["notice"])]],
+            [
+                [
+                    Paragraph(
+                        f"<b>Notice:</b> {_escape(report.human_review_notice)}",
+                        styles["notice"],
+                    )
+                ]
+            ],
             colWidths=[A4[0] - 72],
         )
         notice_table.setStyle(
-            TableStyle([
-                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eff6ff")),
-                ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#bfdbfe")),
-                ("PADDING", (0, 0), (-1, -1), 6),
-            ])
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eff6ff")),
+                    ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#bfdbfe")),
+                    ("PADDING", (0, 0), (-1, -1), 6),
+                ]
+            )
         )
         items.append(notice_table)
         items.append(Spacer(1, 8))
         return items
 
-    def _build_candidate_and_job_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_candidate_and_job_section(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
         h2_style = styles["h2"]
 
         items.append(Paragraph("1. Candidate Information", h2_style))
         cand_data = [
-            [Paragraph("<b>Candidate ID:</b>", body_style), Paragraph(report.candidate.candidate_id, body_style)],
-            [Paragraph("<b>Candidate Name:</b>", body_style), Paragraph(_escape(report.candidate.name or "Not detected"), body_style)],
-            [Paragraph("<b>Email:</b>", body_style), Paragraph(_escape(report.candidate.email or "Not detected"), body_style)],
-            [Paragraph("<b>Source Format:</b>", body_style), Paragraph(report.candidate.source_format.upper(), body_style)],
+            [
+                Paragraph("<b>Candidate ID:</b>", body_style),
+                Paragraph(report.candidate.candidate_id, body_style),
+            ],
+            [
+                Paragraph("<b>Candidate Name:</b>", body_style),
+                Paragraph(_escape(report.candidate.name or "Not detected"), body_style),
+            ],
+            [
+                Paragraph("<b>Email:</b>", body_style),
+                Paragraph(
+                    _escape(report.candidate.email or "Not detected"), body_style
+                ),
+            ],
+            [
+                Paragraph("<b>Source Format:</b>", body_style),
+                Paragraph(report.candidate.source_format.upper(), body_style),
+            ],
         ]
         cand_table = Table(cand_data, colWidths=[120, A4[0] - 72 - 120])
-        cand_table.setStyle(TableStyle([
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
-            ("PADDING", (0, 0), (-1, -1), 4),
-        ]))
+        cand_table.setStyle(
+            TableStyle(
+                [
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
+                    ("PADDING", (0, 0), (-1, -1), 4),
+                ]
+            )
+        )
         items.append(cand_table)
 
         items.append(Paragraph("2. Job Requirements", h2_style))
         req_skills_str = ", ".join(report.job.required_skills)
-        opt_skills_str = ", ".join(report.job.optional_skills) if report.job.optional_skills else "None"
+        opt_skills_str = (
+            ", ".join(report.job.optional_skills)
+            if report.job.optional_skills
+            else "None"
+        )
         job_data = [
-            [Paragraph("<b>Position Title:</b>", body_style), Paragraph(_escape(report.job.job_title), body_style)],
-            [Paragraph("<b>Required Skills:</b>", body_style), Paragraph(_escape(req_skills_str), body_style)],
-            [Paragraph("<b>Optional Skills:</b>", body_style), Paragraph(_escape(opt_skills_str), body_style)],
-            [Paragraph("<b>Min Experience:</b>", body_style), Paragraph(f"{report.job.min_experience_years} year(s)", body_style)],
-            [Paragraph("<b>Min Education:</b>", body_style), Paragraph(report.job.min_education_level.name, body_style)],
-            [Paragraph("<b>Strategy:</b>", body_style), Paragraph(report.score.strategy_name, body_style)],
+            [
+                Paragraph("<b>Position Title:</b>", body_style),
+                Paragraph(_escape(report.job.job_title), body_style),
+            ],
+            [
+                Paragraph("<b>Required Skills:</b>", body_style),
+                Paragraph(_escape(req_skills_str), body_style),
+            ],
+            [
+                Paragraph("<b>Optional Skills:</b>", body_style),
+                Paragraph(_escape(opt_skills_str), body_style),
+            ],
+            [
+                Paragraph("<b>Min Experience:</b>", body_style),
+                Paragraph(f"{report.job.min_experience_years} year(s)", body_style),
+            ],
+            [
+                Paragraph("<b>Min Education:</b>", body_style),
+                Paragraph(report.job.min_education_level.name, body_style),
+            ],
+            [
+                Paragraph("<b>Strategy:</b>", body_style),
+                Paragraph(report.score.strategy_name, body_style),
+            ],
         ]
         job_table = Table(job_data, colWidths=[120, A4[0] - 72 - 120])
-        job_table.setStyle(TableStyle([
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
-            ("PADDING", (0, 0), (-1, -1), 4),
-        ]))
+        job_table.setStyle(
+            TableStyle(
+                [
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
+                    ("PADDING", (0, 0), (-1, -1), 4),
+                ]
+            )
+        )
         items.append(job_table)
         return items
 
-    def _build_score_and_flags_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_score_and_flags_section(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
         h2_style = styles["h2"]
@@ -186,31 +248,52 @@ class PDFExporter(Exporter):
         ]
         col_w = (A4[0] - 72) / 6
         score_table = Table(score_data, colWidths=[col_w] * 6)
-        score_table.setStyle(TableStyle([
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("PADDING", (0, 0), (-1, -1), 5),
-        ]))
+        score_table.setStyle(
+            TableStyle(
+                [
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("PADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
         items.append(score_table)
 
         if report.flags:
-            flag_items = "<br/>".join([f"&bull; <b>{_escape(f.code)}:</b> {_escape(f.message)}" for f in report.flags])
+            flag_items = "<br/>".join(
+                [
+                    f"&bull; <b>{_escape(f.code)}:</b> {_escape(f.message)}"
+                    for f in report.flags
+                ]
+            )
             flags_table = Table(
-                [[Paragraph(f"<b>Review Flags:</b><br/>{flag_items}", styles["alert"])]],
+                [
+                    [
+                        Paragraph(
+                            f"<b>Review Flags:</b><br/>{flag_items}", styles["alert"]
+                        )
+                    ]
+                ],
                 colWidths=[A4[0] - 72],
             )
-            flags_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fef3c7")),
-                ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#fde68a")),
-                ("PADDING", (0, 0), (-1, -1), 5),
-            ]))
+            flags_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fef3c7")),
+                        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#fde68a")),
+                        ("PADDING", (0, 0), (-1, -1), 5),
+                    ]
+                )
+            )
             items.append(Spacer(1, 4))
             items.append(flags_table)
 
         return items
 
-    def _build_score_breakdown_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_score_breakdown_section(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
         items.append(Paragraph("4. Score Component Breakdown", styles["h2"]))
@@ -227,14 +310,16 @@ class PDFExporter(Exporter):
         for comp in report.score.components:
             sub = f"{comp.subscore:.2f}" if comp.subscore is not None else "—"
             pts = f"{comp.points:.1f}" if comp.points is not None else "—"
-            comp_rows.append([
-                Paragraph(comp.name.replace("_", " ").title(), body_style),
-                Paragraph(comp.status.value, body_style),
-                Paragraph(f"{comp.weight * 100:.0f}%", body_style),
-                Paragraph(sub, body_style),
-                Paragraph(pts, body_style),
-                Paragraph(_escape(comp.explanation or "—"), body_style),
-            ])
+            comp_rows.append(
+                [
+                    Paragraph(comp.name.replace("_", " ").title(), body_style),
+                    Paragraph(comp.status.value, body_style),
+                    Paragraph(f"{comp.weight * 100:.0f}%", body_style),
+                    Paragraph(sub, body_style),
+                    Paragraph(pts, body_style),
+                    Paragraph(_escape(comp.explanation or "—"), body_style),
+                ]
+            )
         comp_table = Table(
             comp_rows,
             colWidths=[
@@ -246,18 +331,26 @@ class PDFExporter(Exporter):
                 (A4[0] - 72) * 0.33,
             ],
         )
-        comp_table.setStyle(TableStyle([
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-            ("PADDING", (0, 0), (-1, -1), 3.5),
-        ]))
+        comp_table.setStyle(
+            TableStyle(
+                [
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+                    ("PADDING", (0, 0), (-1, -1), 3.5),
+                ]
+            )
+        )
         items.append(comp_table)
         return items
 
-    def _build_skills_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_skills_section(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
-        items.append(Paragraph("5. Skill Match Analysis (Job Requirements)", styles["h2"]))
+        items.append(
+            Paragraph("5. Skill Match Analysis (Job Requirements)", styles["h2"])
+        )
         match_rows: list[list[Any]] = [
             [
                 Paragraph("<b>Target Skill</b>", body_style),
@@ -271,13 +364,15 @@ class PDFExporter(Exporter):
             target_str = _escape(sm.target)
             matched_str = _escape(sm.matched_candidate_skill or "—")
             req_label = "Required" if sm.is_required else "Optional"
-            match_rows.append([
-                Paragraph(target_str, body_style),
-                Paragraph(req_label, body_style),
-                Paragraph(matched_str, body_style),
-                Paragraph(sm.match_type.value, body_style),
-                Paragraph(f"{sm.credit * 100:.0f}%", body_style),
-            ])
+            match_rows.append(
+                [
+                    Paragraph(target_str, body_style),
+                    Paragraph(req_label, body_style),
+                    Paragraph(matched_str, body_style),
+                    Paragraph(sm.match_type.value, body_style),
+                    Paragraph(f"{sm.credit * 100:.0f}%", body_style),
+                ]
+            )
         match_table = Table(
             match_rows,
             colWidths=[
@@ -288,16 +383,25 @@ class PDFExporter(Exporter):
                 (A4[0] - 72) * 0.15,
             ],
         )
-        match_table.setStyle(TableStyle([
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-            ("PADDING", (0, 0), (-1, -1), 3),
-        ]))
+        match_table.setStyle(
+            TableStyle(
+                [
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+                    ("PADDING", (0, 0), (-1, -1), 3),
+                ]
+            )
+        )
         items.append(match_table)
 
         items.append(Paragraph("6. Candidate Skills Inventory", styles["h2"]))
         if not report.candidate.skills:
-            items.append(Paragraph("<i>No skills extracted from candidate profile.</i>", styles["subtitle"]))
+            items.append(
+                Paragraph(
+                    "<i>No skills extracted from candidate profile.</i>",
+                    styles["subtitle"],
+                )
+            )
         else:
             cand_skills_rows: list[list[Any]] = [
                 [
@@ -309,13 +413,15 @@ class PDFExporter(Exporter):
                 ]
             ]
             for sk in report.candidate.skills:
-                cand_skills_rows.append([
-                    Paragraph(_escape(sk.name), body_style),
-                    Paragraph(_escape(sk.canonical_name or "—"), body_style),
-                    Paragraph(_escape(sk.category or "Uncategorized"), body_style),
-                    Paragraph(sk.provenance.value, body_style),
-                    Paragraph(str(sk.mentions), body_style),
-                ])
+                cand_skills_rows.append(
+                    [
+                        Paragraph(_escape(sk.name), body_style),
+                        Paragraph(_escape(sk.canonical_name or "—"), body_style),
+                        Paragraph(_escape(sk.category or "Uncategorized"), body_style),
+                        Paragraph(sk.provenance.value, body_style),
+                        Paragraph(str(sk.mentions), body_style),
+                    ]
+                )
             cand_skills_table = Table(
                 cand_skills_rows,
                 colWidths=[
@@ -326,16 +432,22 @@ class PDFExporter(Exporter):
                     (A4[0] - 72) * 0.10,
                 ],
             )
-            cand_skills_table.setStyle(TableStyle([
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-                ("PADDING", (0, 0), (-1, -1), 3),
-            ]))
+            cand_skills_table.setStyle(
+                TableStyle(
+                    [
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+                        ("PADDING", (0, 0), (-1, -1), 3),
+                    ]
+                )
+            )
             items.append(cand_skills_table)
 
         return items
 
-    def _build_experience_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_experience_section(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
         h2_style = styles["h2"]
@@ -357,24 +469,42 @@ class PDFExporter(Exporter):
                 ]
             ]
             for e in report.candidate.experience:
-                dur = f"{e.duration_months} mo" if e.duration_months is not None else "?"
-                exp_rows.append([
-                    Paragraph(_escape(e.job_title or "Unspecified"), body_style),
-                    Paragraph(_escape(e.company or "Unspecified"), body_style),
-                    Paragraph(dur, body_style),
-                    Paragraph(e.provenance.value, body_style),
-                ])
-            exp_table = Table(exp_rows, colWidths=[(A4[0] - 72) * 0.35, (A4[0] - 72) * 0.35, (A4[0] - 72) * 0.15, (A4[0] - 72) * 0.15])
-            exp_table.setStyle(TableStyle([
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-                ("PADDING", (0, 0), (-1, -1), 3),
-            ]))
+                dur = (
+                    f"{e.duration_months} mo" if e.duration_months is not None else "?"
+                )
+                exp_rows.append(
+                    [
+                        Paragraph(_escape(e.job_title or "Unspecified"), body_style),
+                        Paragraph(_escape(e.company or "Unspecified"), body_style),
+                        Paragraph(dur, body_style),
+                        Paragraph(e.provenance.value, body_style),
+                    ]
+                )
+            exp_table = Table(
+                exp_rows,
+                colWidths=[
+                    (A4[0] - 72) * 0.35,
+                    (A4[0] - 72) * 0.35,
+                    (A4[0] - 72) * 0.15,
+                    (A4[0] - 72) * 0.15,
+                ],
+            )
+            exp_table.setStyle(
+                TableStyle(
+                    [
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+                        ("PADDING", (0, 0), (-1, -1), 3),
+                    ]
+                )
+            )
             items.append(Spacer(1, 4))
             items.append(exp_table)
         return items
 
-    def _build_education_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_education_section(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
         h2_style = styles["h2"]
@@ -396,47 +526,106 @@ class PDFExporter(Exporter):
                 ]
             ]
             for ed in report.candidate.education:
-                edu_rows.append([
-                    Paragraph(_escape(ed.degree or "Unspecified"), body_style),
-                    Paragraph(ed.level.name, body_style),
-                    Paragraph(_escape(ed.institution or "—"), body_style),
-                    Paragraph(ed.provenance.value, body_style),
-                ])
-            edu_table = Table(edu_rows, colWidths=[(A4[0] - 72) * 0.4, (A4[0] - 72) * 0.2, (A4[0] - 72) * 0.25, (A4[0] - 72) * 0.15])
-            edu_table.setStyle(TableStyle([
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-                ("PADDING", (0, 0), (-1, -1), 3),
-            ]))
+                edu_rows.append(
+                    [
+                        Paragraph(_escape(ed.degree or "Unspecified"), body_style),
+                        Paragraph(ed.level.name, body_style),
+                        Paragraph(_escape(ed.institution or "—"), body_style),
+                        Paragraph(ed.provenance.value, body_style),
+                    ]
+                )
+            edu_table = Table(
+                edu_rows,
+                colWidths=[
+                    (A4[0] - 72) * 0.4,
+                    (A4[0] - 72) * 0.2,
+                    (A4[0] - 72) * 0.25,
+                    (A4[0] - 72) * 0.15,
+                ],
+            )
+            edu_table.setStyle(
+                TableStyle(
+                    [
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+                        ("PADDING", (0, 0), (-1, -1), 3),
+                    ]
+                )
+            )
             items.append(Spacer(1, 4))
             items.append(edu_table)
         return items
 
-    def _build_ai_explanation_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_ai_explanation_section(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
         subtitle_style = styles["subtitle"]
         h2_style = styles["h2"]
 
-        items.append(Paragraph("9. Recommendations (AI-Generated &mdash; Not Verified)", h2_style))
-        if report.ai and report.ai.explanation and report.ai.explanation.status.value in ("ok", "partial") and report.ai.explanation.data:
-            items.append(Paragraph(f"<b>Summary:</b> {_escape(report.ai.explanation.data.summary)}", body_style))
+        items.append(
+            Paragraph(
+                "9. Recommendations (AI-Generated &mdash; Not Verified)", h2_style
+            )
+        )
+        if (
+            report.ai
+            and report.ai.explanation
+            and report.ai.explanation.status.value in ("ok", "partial")
+            and report.ai.explanation.data
+        ):
+            items.append(
+                Paragraph(
+                    f"<b>Summary:</b> {_escape(report.ai.explanation.data.summary)}",
+                    body_style,
+                )
+            )
             for s in report.ai.explanation.data.strengths or []:
-                items.append(Paragraph(f"&bull; <b>Strength:</b> {_escape(s.point)}", body_style))
+                items.append(
+                    Paragraph(f"&bull; <b>Strength:</b> {_escape(s.point)}", body_style)
+                )
             for c in report.ai.explanation.data.concerns or []:
-                items.append(Paragraph(f"&bull; <b>Focus Area:</b> {_escape(c.point)}", body_style))
+                items.append(
+                    Paragraph(
+                        f"&bull; <b>Focus Area:</b> {_escape(c.point)}", body_style
+                    )
+                )
         else:
-            status_val = report.ai.explanation.status.value if report.ai and report.ai.explanation else "disabled"
-            items.append(Paragraph(f"<i>AI-generated content unavailable ({status_val}).</i>", subtitle_style))
+            status_val = (
+                report.ai.explanation.status.value
+                if report.ai and report.ai.explanation
+                else "disabled"
+            )
+            items.append(
+                Paragraph(
+                    f"<i>AI-generated content unavailable ({status_val}).</i>",
+                    subtitle_style,
+                )
+            )
 
-        if report.ai and report.ai.recommendations and report.ai.recommendations.status.value in ("ok", "partial") and report.ai.recommendations.data:
+        if (
+            report.ai
+            and report.ai.recommendations
+            and report.ai.recommendations.status.value in ("ok", "partial")
+            and report.ai.recommendations.data
+        ):
             items.append(Spacer(1, 4))
-            items.append(Paragraph("<b>Candidate Development Suggestions:</b>", body_style))
+            items.append(
+                Paragraph("<b>Candidate Development Suggestions:</b>", body_style)
+            )
             for r in report.ai.recommendations.data:
-                items.append(Paragraph(f"&bull; [<b>{r.priority.upper()}</b>] {_escape(r.action)} &mdash; <font color='#64748b'>{_escape(r.rationale)}</font>", body_style))
+                items.append(
+                    Paragraph(
+                        f"&bull; [<b>{r.priority.upper()}</b>] {_escape(r.action)} &mdash; <font color='#64748b'>{_escape(r.rationale)}</font>",
+                        body_style,
+                    )
+                )
         return items
 
-    def _build_questions_and_appendix(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+    def _build_questions_and_appendix(
+        self, report: AnalysisReport, styles: dict[str, ParagraphStyle]
+    ) -> list[Any]:
         items: list[Any] = []
         body_style = styles["body"]
         subtitle_style = styles["subtitle"]
@@ -449,14 +638,40 @@ class PDFExporter(Exporter):
         )
         items.append(Paragraph(suitability_text, body_style))
 
-        items.append(Paragraph("11. Suggested Interview Questions (AI-Generated &mdash; Not Verified)", h2_style))
-        if report.ai and report.ai.interview_questions and report.ai.interview_questions.status.value in ("ok", "partial") and report.ai.interview_questions.data:
+        items.append(
+            Paragraph(
+                "11. Suggested Interview Questions (AI-Generated &mdash; Not Verified)",
+                h2_style,
+            )
+        )
+        if (
+            report.ai
+            and report.ai.interview_questions
+            and report.ai.interview_questions.status.value in ("ok", "partial")
+            and report.ai.interview_questions.data
+        ):
             for idx, q in enumerate(report.ai.interview_questions.data, start=1):
-                items.append(Paragraph(f"{idx}. <b>{_escape(q.question)}</b> <font color='#64748b'>({_escape(q.category)})</font>", body_style))
-                items.append(Paragraph(f"   Rationale: {_escape(q.rationale)}", subtitle_style))
+                items.append(
+                    Paragraph(
+                        f"{idx}. <b>{_escape(q.question)}</b> <font color='#64748b'>({_escape(q.category)})</font>",
+                        body_style,
+                    )
+                )
+                items.append(
+                    Paragraph(f"   Rationale: {_escape(q.rationale)}", subtitle_style)
+                )
         else:
-            status_val = report.ai.interview_questions.status.value if report.ai and report.ai.interview_questions else "disabled"
-            items.append(Paragraph(f"<i>AI-generated content unavailable ({status_val}).</i>", subtitle_style))
+            status_val = (
+                report.ai.interview_questions.status.value
+                if report.ai and report.ai.interview_questions
+                else "disabled"
+            )
+            items.append(
+                Paragraph(
+                    f"<i>AI-generated content unavailable ({status_val}).</i>",
+                    subtitle_style,
+                )
+            )
 
         items.append(Paragraph("12. Appendix &amp; System Limitations", h2_style))
         appendix_text = (

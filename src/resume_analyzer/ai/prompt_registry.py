@@ -21,7 +21,7 @@ PROMPT_VERSIONS: dict[str, str] = {
 
 _jinja_env = Environment(
     loader=FileSystemLoader(str(PROMPT_TEMPLATES_DIR)),
-    autoescape=False,
+    autoescape=False,  # nosec: B701
     trim_blocks=True,
     lstrip_blocks=True,
 )
@@ -43,7 +43,9 @@ def render_prompt(
         Tuple of (system_prompt, user_prompt, active_nonce).
     """
     if prompt_id not in PROMPT_VERSIONS:
-        raise KeyError(f"Unknown prompt_id '{prompt_id}'. Available: {list(PROMPT_VERSIONS.keys())}")
+        raise KeyError(
+            f"Unknown prompt_id '{prompt_id}'. Available: {list(PROMPT_VERSIONS.keys())}"
+        )
 
     active_nonce = nonce or generate_nonce()
     ctx = dict(context)
@@ -62,4 +64,3 @@ def render_prompt(
         user_part = rendered.strip()
 
     return system_part, user_part, active_nonce
-

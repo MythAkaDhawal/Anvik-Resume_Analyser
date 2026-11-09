@@ -7,12 +7,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
 from resume_analyzer.exceptions import InvalidIdentifierError
 from resume_analyzer.storage.feedback_store import FeedbackRecord, FeedbackStore
-
 
 VALID_REPORT_ID = "20261108T120000Z_01234567_89ab"
 
@@ -143,7 +143,9 @@ def test_ut_fb_03_summary_aggregation(tmp_path: Path) -> None:
     # skills: 2 True, 1 False -> 2/3 = ~0.667
     assert pytest.approx(summary.section_positive_ratios["skills"], rel=1e-2) == 0.67
     # experience: 2 True, 1 False -> 2/3 = ~0.667
-    assert pytest.approx(summary.section_positive_ratios["experience"], rel=1e-2) == 0.67
+    assert (
+        pytest.approx(summary.section_positive_ratios["experience"], rel=1e-2) == 0.67
+    )
     # education: 3 True, 0 False -> 3/3 = 1.0
     assert summary.section_positive_ratios["education"] == 1.0
 
@@ -154,4 +156,3 @@ def test_ut_fb_03_summary_aggregation(tmp_path: Path) -> None:
     assert skills_map["Docker"] == 3
     assert skills_map["FastAPI"] == 1
     assert skills_map["Kubernetes"] == 1
-

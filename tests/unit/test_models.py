@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 
-from pydantic import ValidationError
 import pytest
+from pydantic import ValidationError
 
 from resume_analyzer.models.candidate import (
     Candidate,
@@ -18,7 +18,6 @@ from resume_analyzer.models.candidate import (
 from resume_analyzer.models.enums import (
     ComponentStatus,
     EducationLevel,
-    FeatureStatus,
     FitBand,
     MatchType,
     Provenance,
@@ -30,7 +29,6 @@ from resume_analyzer.models.results import (
     AnalysisReport,
     EducationAnalysis,
     ExperienceAnalysis,
-    FeatureResult,
     MatchResult,
     ReportFlag,
     ScoreComponent,
@@ -66,7 +64,9 @@ def test_candidate_forbidden_fields_absence() -> None:
     ]
     candidate_fields = Candidate.model_fields.keys()
     for attr in forbidden_attributes:
-        assert attr not in candidate_fields, f"Forbidden attribute '{attr}' found on Candidate model"
+        assert attr not in candidate_fields, (
+            f"Forbidden attribute '{attr}' found on Candidate model"
+        )
 
 
 def test_extra_forbid_on_models() -> None:
@@ -128,7 +128,9 @@ def test_candidate_json_round_trip() -> None:
         total_experience_years=1.4,
         highest_education_level=EducationLevel.BACHELOR,
         source_format="txt",
-        parse_warnings=[ParseWarning(code="TEST_WARN", message="Informational warning")],
+        parse_warnings=[
+            ParseWarning(code="TEST_WARN", message="Informational warning")
+        ],
         injection_indicators=[],
         parser_version="0.1.0",
     )
@@ -230,7 +232,7 @@ def test_analysis_report_json_round_trip() -> None:
     report = AnalysisReport(
         schema_version="1.0",
         report_id="20261107T120000Z_3fa91c0b_a1b2",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         app_version="0.1.0",
         config_snapshot={"strategy": "weighted", "weights": {"required_skills": 0.5}},
         candidate=cand,
@@ -238,7 +240,11 @@ def test_analysis_report_json_round_trip() -> None:
         match=match_result,
         score=score_result,
         ai=AIInsights(),
-        flags=[ReportFlag(code="MISSING_REQUIRED_SKILLS", message="Missing 1 required skill")],
+        flags=[
+            ReportFlag(
+                code="MISSING_REQUIRED_SKILLS", message="Missing 1 required skill"
+            )
+        ],
     )
 
     json_str = report.model_dump_json()
@@ -248,4 +254,3 @@ def test_analysis_report_json_round_trip() -> None:
     assert reloaded.score.total_score == 65.0
     assert reloaded.score.fit_band == FitBand.MODERATE
     assert reloaded.human_review_notice == DEFAULT_HUMAN_REVIEW_NOTICE
-

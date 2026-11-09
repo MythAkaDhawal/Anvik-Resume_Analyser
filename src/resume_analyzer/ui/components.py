@@ -29,7 +29,9 @@ def render_human_review_notice() -> None:
 
 def render_scoring_limitations() -> None:
     """Render scoring limitations expander as required by §7.7."""
-    with st.expander("ℹ️ Important Scoring Limitations & Advisory (§7.7)", expanded=False):
+    with st.expander(
+        "ℹ️ Important Scoring Limitations & Advisory (§7.7)", expanded=False
+    ):
         for idx, item in enumerate(SCORING_LIMITATIONS, start=1):
             st.markdown(f"**{idx}.** {item}")
 
@@ -79,11 +81,19 @@ def render_skills_view(report: AnalysisReport) -> None:
     match = report.match
     st.subheader("Skill Match Analysis")
 
-    tab1, tab2, tab3 = st.tabs(["Matched Skills", "Missing Required", "Missing Optional"])
+    tab1, tab2, tab3 = st.tabs(
+        ["Matched Skills", "Missing Required", "Missing Optional"]
+    )
 
     matched = [s for s in match.skill_matches if s.match_type.value != "none"]
-    missing_req = [s for s in match.skill_matches if s.is_required and s.match_type.value == "none"]
-    missing_opt = [s for s in match.skill_matches if not s.is_required and s.match_type.value == "none"]
+    missing_req = [
+        s for s in match.skill_matches if s.is_required and s.match_type.value == "none"
+    ]
+    missing_opt = [
+        s
+        for s in match.skill_matches
+        if not s.is_required and s.match_type.value == "none"
+    ]
 
     with tab1:
         if matched:
@@ -131,7 +141,11 @@ def render_experience_education_view(report: AnalysisReport) -> None:
 
     with col1:
         st.markdown("#### Experience")
-        years = cand.total_experience_years if cand.total_experience_years is not None else 0.0
+        years = (
+            cand.total_experience_years
+            if cand.total_experience_years is not None
+            else 0.0
+        )
         st.write(f"**Total Experience:** {years:.1f} years ({int(years * 12)} months)")
         st.write(f"**Status:** {exp_eval.status}")
         credit = exp_eval.subscore if exp_eval.subscore is not None else 0.0
@@ -148,7 +162,9 @@ def render_experience_education_view(report: AnalysisReport) -> None:
         if cand.education:
             for entry in cand.education:
                 deg_title = entry.degree or entry.level.value
-                st.caption(f"• {deg_title} ({entry.institution or 'Institution unspecified'})")
+                st.caption(
+                    f"• {deg_title} ({entry.institution or 'Institution unspecified'})"
+                )
 
 
 def render_ai_insights_view(report: AnalysisReport) -> None:
@@ -156,14 +172,18 @@ def render_ai_insights_view(report: AnalysisReport) -> None:
     ai = report.ai
     st.subheader("AI Analysis & Insights")
 
-    has_ai = any([
-        ai.explanation and ai.explanation.data,
-        ai.recommendations and ai.recommendations.data,
-        ai.interview_questions and ai.interview_questions.data,
-    ])
+    has_ai = any(
+        [
+            ai.explanation and ai.explanation.data,
+            ai.recommendations and ai.recommendations.data,
+            ai.interview_questions and ai.interview_questions.data,
+        ]
+    )
 
     if not has_ai:
-        st.info("AI insights were disabled or unavailable for this analysis run. (Deterministic core operation)")
+        st.info(
+            "AI insights were disabled or unavailable for this analysis run. (Deterministic core operation)"
+        )
         return
 
     st.caption("Provenance: 🟠 AI_GENERATED (Non-authoritative analysis advisory)")
@@ -186,7 +206,11 @@ def render_ai_insights_view(report: AnalysisReport) -> None:
 
     if ai.recommendations and ai.recommendations.data:
         rec_data = ai.recommendations.data
-        recs = getattr(rec_data, "recommendations", rec_data) if not isinstance(rec_data, list) else rec_data
+        recs = (
+            getattr(rec_data, "recommendations", rec_data)
+            if not isinstance(rec_data, list)
+            else rec_data
+        )
         with st.expander("Upskilling Recommendations (P4)", expanded=False):
             for r in recs:
                 skill = getattr(r, "skill", str(r))
@@ -196,7 +220,11 @@ def render_ai_insights_view(report: AnalysisReport) -> None:
 
     if ai.interview_questions and ai.interview_questions.data:
         q_data = ai.interview_questions.data
-        questions = getattr(q_data, "questions", q_data) if not isinstance(q_data, list) else q_data
+        questions = (
+            getattr(q_data, "questions", q_data)
+            if not isinstance(q_data, list)
+            else q_data
+        )
         with st.expander("Role-Specific Interview Questions (P5)", expanded=False):
             for idx, q in enumerate(questions, start=1):
                 topic = getattr(q, "target_topic", "General")
@@ -248,15 +276,27 @@ def render_feedback_widget(report: AnalysisReport) -> None:
     st.subheader("Evaluation Feedback")
     with st.expander("📝 Rate Analysis Quality & Suggest Corrections", expanded=False):
         with st.form(f"feedback_form_{report.report_id}"):
-            rating = st.slider("Quality Rating (1 = Poor, 5 = Excellent)", min_value=1, max_value=5, value=5)
+            rating = st.slider(
+                "Quality Rating (1 = Poor, 5 = Excellent)",
+                min_value=1,
+                max_value=5,
+                value=5,
+            )
             col_t1, col_t2 = st.columns(2)
             with col_t1:
                 skills_thumb = st.checkbox("Skills match was accurate", value=True)
             with col_t2:
                 exp_thumb = st.checkbox("Experience analysis was accurate", value=True)
-            corrected_raw = st.text_input("Corrected Skills (comma-separated, if any)", placeholder="e.g. Python, SQL")
-            comment = st.text_area("Reviewer Comments (Max 1000 characters)", max_chars=1000)
-            submitted = st.form_submit_button("Submit Feedback", use_container_width=True)
+            corrected_raw = st.text_input(
+                "Corrected Skills (comma-separated, if any)",
+                placeholder="e.g. Python, SQL",
+            )
+            comment = st.text_area(
+                "Reviewer Comments (Max 1000 characters)", max_chars=1000
+            )
+            submitted = st.form_submit_button(
+                "Submit Feedback", use_container_width=True
+            )
 
         if submitted:
             from resume_analyzer.storage.feedback_store import (
@@ -275,4 +315,3 @@ def render_feedback_widget(report: AnalysisReport) -> None:
             store = FeedbackStore()
             store.append(record)
             st.success("Thank you! Your feedback has been safely recorded.")
-

@@ -72,4 +72,3 @@ class FakeProvider:
 
         # Default fallback valid empty JSON
         return '{"schema_version": "1.0"}'
-

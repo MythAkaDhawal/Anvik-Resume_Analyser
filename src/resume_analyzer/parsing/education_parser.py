@@ -95,7 +95,9 @@ DEGREE_KEYWORDS: list[tuple[EducationLevel, list[str], list[str]]] = [
 ]
 
 # Precompile degree regex patterns once at import time
-COMPILED_DEGREE_PATTERNS: list[tuple[EducationLevel, list[re.Pattern[str]], list[re.Pattern[str]]]] = [
+COMPILED_DEGREE_PATTERNS: list[
+    tuple[EducationLevel, list[re.Pattern[str]], list[re.Pattern[str]]]
+] = [
     (
         level,
         [re.compile(p, re.IGNORECASE) for p in ci],
@@ -109,7 +111,9 @@ INSTITUTION_KEYWORDS = re.compile(
 )
 
 
-def _extract_institution_from_lines(entry_lines: list[str], primary_line: str) -> str | None:
+def _extract_institution_from_lines(
+    entry_lines: list[str], primary_line: str
+) -> str | None:
     """Extract education institution by scanning lines for institution keywords."""
     for el in entry_lines:
         if not INSTITUTION_KEYWORDS.search(el):
@@ -177,7 +181,9 @@ def parse_education(
         return entries, EducationLevel.UNSPECIFIED, warnings
 
     for i, (line_idx, level, matched_str) in enumerate(degree_matches):
-        next_line_idx = degree_matches[i + 1][0] if i + 1 < len(degree_matches) else len(lines)
+        next_line_idx = (
+            degree_matches[i + 1][0] if i + 1 < len(degree_matches) else len(lines)
+        )
         entry_lines = lines[line_idx:next_line_idx]
         primary_line = entry_lines[0]
 
@@ -198,7 +204,9 @@ def parse_education(
             )
         )
 
-    highest_level = max((entry.level for entry in entries), default=EducationLevel.UNSPECIFIED)
+    highest_level = max(
+        (entry.level for entry in entries), default=EducationLevel.UNSPECIFIED
+    )
     return entries, highest_level, warnings
 
 
@@ -241,7 +249,13 @@ def _extract_field_of_study(line: str, matched_keyword: str) -> str | None:
 
         if 2 <= len(field_candidate) <= 60:
             # Reject if candidate is just "Science" from "Bachelor of Science" without major
-            if field_candidate.lower() in ("science", "arts", "engineering", "technology", "commerce"):
+            if field_candidate.lower() in (
+                "science",
+                "arts",
+                "engineering",
+                "technology",
+                "commerce",
+            ):
                 # Try finding 'in <major>' specifically
                 m_in = re.search(r"\bin\s+([A-Za-z\s&/]+)", line, re.IGNORECASE)
                 if m_in:

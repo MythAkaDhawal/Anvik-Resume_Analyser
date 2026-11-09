@@ -175,4 +175,3 @@ def _extract_from_skills_section(
 
             for tok in sub_tokens:
                 _record_skill_token(tok, index, skills_map)
-

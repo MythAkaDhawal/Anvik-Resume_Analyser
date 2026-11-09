@@ -25,7 +25,9 @@ EMAIL_REGEX = re.compile(r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$")
 def _validate_job_title_desc(job: JobRequirements, errors: list[str]) -> str:
     title = (job.job_title or "").strip()
     if not title:
-        errors.append("Job title is required and cannot be empty (must be 1-100 characters)")
+        errors.append(
+            "Job title is required and cannot be empty (must be 1-100 characters)"
+        )
     elif len(title) > 100:
         errors.append(f"Job title exceeds 100 characters (length: {len(title)})")
     if job.description is not None:
@@ -55,7 +57,9 @@ def _validate_job_skills_list(
     if not cleaned_required:
         errors.append("At least one required skill must be specified")
     elif len(cleaned_required) > 50:
-        errors.append(f"Required skills list exceeds 50 items (count: {len(cleaned_required)})")
+        errors.append(
+            f"Required skills list exceeds 50 items (count: {len(cleaned_required)})"
+        )
 
     cleaned_optional: list[str] = []
     seen_optional_lower: set[str] = set()
@@ -74,7 +78,9 @@ def _validate_job_skills_list(
             seen_optional_lower.add(lower)
             cleaned_optional.append(s)
     if len(cleaned_optional) > 50:
-        errors.append(f"Optional skills list exceeds 50 items (count: {len(cleaned_optional)})")
+        errors.append(
+            f"Optional skills list exceeds 50 items (count: {len(cleaned_optional)})"
+        )
     return cleaned_required, cleaned_optional
 
 
@@ -112,7 +118,9 @@ def validate_job(job: JobRequirements | dict[str, Any]) -> JobRequirements:
         )
 
     if len(job.preferred_fields) > 10:
-        errors.append(f"preferred_fields exceeds 10 items (got {len(job.preferred_fields)})")
+        errors.append(
+            f"preferred_fields exceeds 10 items (got {len(job.preferred_fields)})"
+        )
 
     if errors:
         raise JobValidationError(
@@ -146,7 +154,10 @@ def _check_candidate_impossibilities(candidate: Candidate) -> None:
             user_message="Candidate identifier is invalid or corrupt.",
         )
 
-    if candidate.total_experience_years is not None and candidate.total_experience_years < 0.0:
+    if (
+        candidate.total_experience_years is not None
+        and candidate.total_experience_years < 0.0
+    ):
         raise DataValidationError(
             "Candidate total experience years cannot be negative.",
             error_code="E-DATA-002",
@@ -162,7 +173,9 @@ def _check_candidate_impossibilities(candidate: Candidate) -> None:
             )
 
 
-def _check_candidate_warnings(candidate: Candidate, ref_date: date) -> list[ParseWarning]:
+def _check_candidate_warnings(
+    candidate: Candidate, ref_date: date
+) -> list[ParseWarning]:
     """Check non-fatal data sanity warnings for candidate profile."""
     warnings: list[ParseWarning] = []
 
@@ -215,7 +228,9 @@ def _check_candidate_warnings(candidate: Candidate, ref_date: date) -> list[Pars
     return warnings
 
 
-def validate_candidate(candidate: Candidate, reference_date: date | None = None) -> list[ParseWarning]:
+def validate_candidate(
+    candidate: Candidate, reference_date: date | None = None
+) -> list[ParseWarning]:
     """Perform sanity checks on a parsed Candidate profile.
 
     Validates structurally plausible bounds and emits non-fatal ParseWarnings.

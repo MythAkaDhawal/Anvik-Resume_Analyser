@@ -54,7 +54,9 @@ def extract_email(
     full_matches = EMAIL_REGEX.findall(full_text)
 
     # Combine matches preserving order
-    all_raw_emails = header_matches + [e for e in full_matches if e not in header_matches]
+    all_raw_emails = header_matches + [
+        e for e in full_matches if e not in header_matches
+    ]
 
     valid_emails: list[str] = []
     seen_lower: set[str] = set()
@@ -115,7 +117,9 @@ def _is_valid_name_candidate(line: str) -> str | None:
         return None
     if lower_line in DISALLOWED_NAME_PHRASES:
         return None
-    if any(phrase in lower_line for phrase in ("curriculum vitae", "resume of", "resume")):
+    if any(
+        phrase in lower_line for phrase in ("curriculum vitae", "resume of", "resume")
+    ):
         return None
 
     tokens = clean_line.split()
@@ -174,4 +178,3 @@ def extract_name(
         )
     )
     return None, warnings
-

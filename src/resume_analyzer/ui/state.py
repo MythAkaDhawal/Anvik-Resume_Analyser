@@ -43,7 +43,6 @@ def set_page(page: str) -> None:
         st.session_state["nav_radio"] = page
 
 
-
 def clear_results() -> None:
     """Reset active analysis reports and failure records."""
     st.session_state["reports"] = []

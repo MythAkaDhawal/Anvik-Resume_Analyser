@@ -136,9 +136,7 @@ def _validate_pdf(data: bytes, settings: FileSettings) -> None:
     # Magic bytes check: %PDF- within the first 1024 bytes
     header_window = data[:1024]
     if b"%PDF-" not in header_window:
-        raise FileTypeMismatchError(
-            "PDF header magic bytes '%PDF-' not found in file."
-        )
+        raise FileTypeMismatchError("PDF header magic bytes '%PDF-' not found in file.")
 
     # Try validating via pypdf if installed
     try:
@@ -161,7 +159,9 @@ def _validate_pdf(data: bytes, settings: FileSettings) -> None:
         except FileTooLargeError:
             raise
         except Exception as err:
-            raise UnreadableFileError(f"Corrupted or invalid PDF document: {err}") from err
+            raise UnreadableFileError(
+                f"Corrupted or invalid PDF document: {err}"
+            ) from err
     except ImportError:
         # Fallback inspection without external library
         _fallback_validate_pdf(data, settings)
@@ -221,7 +221,9 @@ def _validate_docx(data: bytes, settings: FileSettings) -> None:
     """Validate DOCX zip archive safety, structure, and compression ratios."""
     # Check ZIP local file header signature PK\x03\x04
     if not data.startswith(b"PK\x03\x04"):
-        raise FileTypeMismatchError("DOCX file does not begin with ZIP signature PK\\x03\\x04.")
+        raise FileTypeMismatchError(
+            "DOCX file does not begin with ZIP signature PK\\x03\\x04."
+        )
 
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
@@ -259,7 +261,9 @@ def _validate_txt(data: bytes) -> None:
     """Validate TXT file for absence of binary NUL bytes and decode capability."""
     # Fast binary check: NUL byte in the first 8 KB
     if b"\x00" in data[:8192]:
-        raise FileTypeMismatchError("Binary NUL bytes detected in TXT file; binary files are not supported.")
+        raise FileTypeMismatchError(
+            "Binary NUL bytes detected in TXT file; binary files are not supported."
+        )
 
     # Verification of decodability across supported standard encodings
     decoded = False
@@ -272,5 +276,6 @@ def _validate_txt(data: bytes) -> None:
             continue
 
     if not decoded:
-        raise FileTypeMismatchError("TXT file could not be decoded with standard text encodings.")
-
+        raise FileTypeMismatchError(
+            "TXT file could not be decoded with standard text encodings."
+        )

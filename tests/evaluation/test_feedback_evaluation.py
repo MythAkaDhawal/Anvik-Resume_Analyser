@@ -11,10 +11,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-import pytest
 
 from resume_analyzer.storage.feedback_store import FeedbackRecord, FeedbackStore
-
 
 RESULTS_DIR = Path("tests/evaluation/results")
 
@@ -121,7 +119,10 @@ def test_et_06_feedback_loop_evaluation(tmp_path: Path) -> None:
     out_file.write_text(json.dumps(evaluation_report, indent=2), encoding="utf-8")
 
     # Assertions
-    assert summary.average_rating >= 4.0, f"Average rating ({summary.average_rating}) below 4.0 target"
-    assert share_ge_4 >= 0.80, f"Share of ratings >= 4 ({share_ge_4:.2f}) below 80% target"
+    assert summary.average_rating >= 4.0, (
+        f"Average rating ({summary.average_rating}) below 4.0 target"
+    )
+    assert share_ge_4 >= 0.80, (
+        f"Share of ratings >= 4 ({share_ge_4:.2f}) below 80% target"
+    )
     assert summary.section_positive_ratios["skills"] >= 0.80
-

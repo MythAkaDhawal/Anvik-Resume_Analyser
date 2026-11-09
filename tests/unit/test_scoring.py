@@ -10,7 +10,11 @@ from resume_analyzer.config.settings import (
     ScoringSettings,
 )
 from resume_analyzer.exceptions import ConfigurationError, UnknownStrategyError
-from resume_analyzer.models.enums import ComponentStatus, EducationLevel, FitBand, MatchType
+from resume_analyzer.models.enums import (
+    EducationLevel,
+    FitBand,
+    MatchType,
+)
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
     EducationAnalysis,
@@ -20,21 +24,69 @@ from resume_analyzer.models.results import (
 )
 from resume_analyzer.scoring.bands import fit_band_for
 from resume_analyzer.scoring.basic import BasicScoringStrategy
-from resume_analyzer.scoring.registry import STRATEGY_REGISTRY, get_strategy
+from resume_analyzer.scoring.registry import get_strategy
 from resume_analyzer.scoring.weighted import WeightedScoringStrategy
 
 
 def _build_worked_example_match() -> tuple[MatchResult, JobRequirements]:
     """Helper constructing MatchResult matching worked example in TECHNICAL_SPECIFICATION §7.5."""
     skill_matches = [
-        SkillMatch(target="Python", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-        SkillMatch(target="SQL", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-        SkillMatch(target="Docker", is_required=True, match_type=MatchType.NONE, similarity=0.0, credit=0.0),
-        SkillMatch(target="AWS", is_required=True, match_type=MatchType.ALIAS, similarity=100.0, credit=1.0),
-        SkillMatch(target="Pandas", is_required=True, match_type=MatchType.FUZZY, similarity=90.91, credit=0.9091),
-        SkillMatch(target="Git", is_required=False, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-        SkillMatch(target="Streamlit", is_required=False, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-        SkillMatch(target="Tableau", is_required=False, match_type=MatchType.NONE, similarity=0.0, credit=0.0),
+        SkillMatch(
+            target="Python",
+            is_required=True,
+            match_type=MatchType.EXACT,
+            similarity=100.0,
+            credit=1.0,
+        ),
+        SkillMatch(
+            target="SQL",
+            is_required=True,
+            match_type=MatchType.EXACT,
+            similarity=100.0,
+            credit=1.0,
+        ),
+        SkillMatch(
+            target="Docker",
+            is_required=True,
+            match_type=MatchType.NONE,
+            similarity=0.0,
+            credit=0.0,
+        ),
+        SkillMatch(
+            target="AWS",
+            is_required=True,
+            match_type=MatchType.ALIAS,
+            similarity=100.0,
+            credit=1.0,
+        ),
+        SkillMatch(
+            target="Pandas",
+            is_required=True,
+            match_type=MatchType.FUZZY,
+            similarity=90.91,
+            credit=0.9091,
+        ),
+        SkillMatch(
+            target="Git",
+            is_required=False,
+            match_type=MatchType.EXACT,
+            similarity=100.0,
+            credit=1.0,
+        ),
+        SkillMatch(
+            target="Streamlit",
+            is_required=False,
+            match_type=MatchType.EXACT,
+            similarity=100.0,
+            credit=1.0,
+        ),
+        SkillMatch(
+            target="Tableau",
+            is_required=False,
+            match_type=MatchType.NONE,
+            similarity=0.0,
+            credit=0.0,
+        ),
     ]
     job = JobRequirements(
         job_title="Senior Data Analyst",
@@ -97,7 +149,9 @@ def test_ut_score_03_weights_sum_validation():
     """UT-SCORE-03: Weights not summing to 1.0 raise ConfigurationError."""
     # Test through ScoreWeights model
     with pytest.raises(Exception):
-        ScoreWeights(required_skills=0.6, experience=0.6, education=0.1, optional_skills=0.1)
+        ScoreWeights(
+            required_skills=0.6, experience=0.6, education=0.1, optional_skills=0.1
+        )
 
     # Test through WeightedScoringStrategy
     invalid_weights = ScoreWeights.model_construct(
@@ -122,12 +176,29 @@ def test_ut_score_04_renormalization_when_dimension_not_applicable():
     )
     match = MatchResult(
         skill_matches=[
-            SkillMatch(target="Python", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-            SkillMatch(target="SQL", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
+            SkillMatch(
+                target="Python",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
+            SkillMatch(
+                target="SQL",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
         ],
         required_credit=1.0,
         optional_credit=None,
-        experience=ExperienceAnalysis(required_years=0.0, candidate_years=0.0, status="not_required", subscore=None),
+        experience=ExperienceAnalysis(
+            required_years=0.0,
+            candidate_years=0.0,
+            status="not_required",
+            subscore=None,
+        ),
         education=EducationAnalysis(
             required_level=EducationLevel.BACHELOR,
             candidate_level=EducationLevel.BACHELOR,
@@ -150,12 +221,28 @@ def test_ut_score_05_bounds_all_miss_and_all_exact():
     strat = WeightedScoringStrategy()
 
     # All-miss
-    job = JobRequirements(job_title="Dev", required_skills=["Rust"], min_experience_years=3.0)
+    job = JobRequirements(
+        job_title="Dev", required_skills=["Rust"], min_experience_years=3.0
+    )
     match_miss = MatchResult(
-        skill_matches=[SkillMatch(target="Rust", is_required=True, match_type=MatchType.NONE, similarity=0.0, credit=0.0)],
+        skill_matches=[
+            SkillMatch(
+                target="Rust",
+                is_required=True,
+                match_type=MatchType.NONE,
+                similarity=0.0,
+                credit=0.0,
+            )
+        ],
         required_credit=0.0,
         optional_credit=None,
-        experience=ExperienceAnalysis(required_years=3.0, candidate_years=0.0, status="unmet", subscore=0.0, gap_years=3.0),
+        experience=ExperienceAnalysis(
+            required_years=3.0,
+            candidate_years=0.0,
+            status="unmet",
+            subscore=0.0,
+            gap_years=3.0,
+        ),
         education=EducationAnalysis(
             required_level=EducationLevel.UNSPECIFIED,
             candidate_level=EducationLevel.UNSPECIFIED,
@@ -169,10 +256,24 @@ def test_ut_score_05_bounds_all_miss_and_all_exact():
 
     # All-exact
     match_exact = MatchResult(
-        skill_matches=[SkillMatch(target="Rust", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0)],
+        skill_matches=[
+            SkillMatch(
+                target="Rust",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            )
+        ],
         required_credit=1.0,
         optional_credit=None,
-        experience=ExperienceAnalysis(required_years=3.0, candidate_years=5.0, status="met", subscore=1.0, gap_years=0.0),
+        experience=ExperienceAnalysis(
+            required_years=3.0,
+            candidate_years=5.0,
+            status="met",
+            subscore=1.0,
+            gap_years=0.0,
+        ),
         education=EducationAnalysis(
             required_level=EducationLevel.UNSPECIFIED,
             candidate_level=EducationLevel.UNSPECIFIED,
@@ -240,26 +341,62 @@ def test_ut_score_10_monotonicity():
     # 1 of 2 required skills matched (50% coverage)
     match_partial = MatchResult(
         skill_matches=[
-            SkillMatch(target="Python", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-            SkillMatch(target="SQL", is_required=True, match_type=MatchType.NONE, similarity=0.0, credit=0.0),
+            SkillMatch(
+                target="Python",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
+            SkillMatch(
+                target="SQL",
+                is_required=True,
+                match_type=MatchType.NONE,
+                similarity=0.0,
+                credit=0.0,
+            ),
         ],
         required_credit=0.5,
         optional_credit=None,
-        experience=ExperienceAnalysis(required_years=0.0, status="not_required", subscore=None),
-        education=EducationAnalysis(required_level=EducationLevel.UNSPECIFIED, candidate_level=EducationLevel.UNSPECIFIED, status="not_required"),
+        experience=ExperienceAnalysis(
+            required_years=0.0, status="not_required", subscore=None
+        ),
+        education=EducationAnalysis(
+            required_level=EducationLevel.UNSPECIFIED,
+            candidate_level=EducationLevel.UNSPECIFIED,
+            status="not_required",
+        ),
     )
     score_partial = strat.score(match_partial, job).total_score
 
     # 2 of 2 required skills matched (100% coverage)
     match_full = MatchResult(
         skill_matches=[
-            SkillMatch(target="Python", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-            SkillMatch(target="SQL", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
+            SkillMatch(
+                target="Python",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
+            SkillMatch(
+                target="SQL",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
         ],
         required_credit=1.0,
         optional_credit=None,
-        experience=ExperienceAnalysis(required_years=0.0, status="not_required", subscore=None),
-        education=EducationAnalysis(required_level=EducationLevel.UNSPECIFIED, candidate_level=EducationLevel.UNSPECIFIED, status="not_required"),
+        experience=ExperienceAnalysis(
+            required_years=0.0, status="not_required", subscore=None
+        ),
+        education=EducationAnalysis(
+            required_level=EducationLevel.UNSPECIFIED,
+            candidate_level=EducationLevel.UNSPECIFIED,
+            status="not_required",
+        ),
     )
     score_full = strat.score(match_full, job).total_score
 
@@ -296,11 +433,19 @@ def test_ut_score_12_unknown_policy_exclude_vs_zero():
     # Candidate with unknown experience and unknown education
     match = MatchResult(
         skill_matches=[
-            SkillMatch(target="Python", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0)
+            SkillMatch(
+                target="Python",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            )
         ],
         required_credit=1.0,
         optional_credit=None,
-        experience=ExperienceAnalysis(required_years=3.0, candidate_years=None, status="unknown", subscore=None),
+        experience=ExperienceAnalysis(
+            required_years=3.0, candidate_years=None, status="unknown", subscore=None
+        ),
         education=EducationAnalysis(
             required_level=EducationLevel.BACHELOR,
             candidate_level=EducationLevel.UNSPECIFIED,
@@ -332,4 +477,3 @@ def test_ut_score_12_unknown_policy_exclude_vs_zero():
     assert res_zero.coverage == 1.0
     assert "UNKNOWN_TREATED_AS_ZERO" in res_zero.flags
     assert "INCOMPLETE_DATA" not in res_zero.flags
-

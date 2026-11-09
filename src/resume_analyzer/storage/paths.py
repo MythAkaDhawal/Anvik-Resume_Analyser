@@ -70,6 +70,6 @@ def safe_join(base: Path | str, name: str) -> Path:
     try:
         target.relative_to(base_path)
     except ValueError:
-        raise InvalidIdentifierError(name)
+        raise InvalidIdentifierError(name) from None
 
     return target

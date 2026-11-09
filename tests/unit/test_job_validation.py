@@ -109,4 +109,3 @@ def test_validation_messages_never_contain_resume_text() -> None:
         assert "resume" not in msg.lower()
         assert "candidate" not in msg.lower()
         assert exc.error_code == "E-DATA-001"
-

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.parsing.education_parser import parse_education
 
@@ -34,7 +32,9 @@ def test_ut_edu_02_case_sensitive_short_abbreviations():
     assert highest_ms == EducationLevel.MASTER
 
     # Lowercase 'to be' should not map to Bachelor
-    entry_word, highest_word, warnings = parse_education("Aspiring to be an exceptional software leader")
+    entry_word, highest_word, warnings = parse_education(
+        "Aspiring to be an exceptional software leader"
+    )
     assert highest_word == EducationLevel.UNSPECIFIED
     assert any(w.code == "UNKNOWN_DEGREE" for w in warnings)
 
@@ -67,4 +67,3 @@ def test_ut_edu_04_highest_education_level():
     empty_entries, highest_empty, warnings_empty = parse_education("")
     assert highest_empty == EducationLevel.UNSPECIFIED
     assert any(w.code == "NO_EDUCATION" for w in warnings_empty)
-

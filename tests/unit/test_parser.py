@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from datetime import date
 from pathlib import Path
+
 import pytest
 
 from resume_analyzer.config.settings import get_settings
 from resume_analyzer.exceptions import EmptyResumeError
 from resume_analyzer.ingestion.file_loader import LoadedResume, load_resume
-from resume_analyzer.ingestion.file_validator import ValidatedFile, validate_upload
 from resume_analyzer.models.candidate import Candidate
-from resume_analyzer.models.enums import EducationLevel, Provenance
+from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.parsing.resume_parser import ResumeParser
 from resume_analyzer.skills.skill_index import SkillIndex
 from resume_analyzer.skills.taxonomy import SkillTaxonomy
@@ -117,9 +117,8 @@ def test_ut_parse_05_no_fabrication(parser: ResumeParser):
 
     # All extracted skills must be grounded in the raw text
     for skill in candidate.skills:
-        assert (
-            skill.name.lower() in text.lower()
-            or (skill.canonical_name and skill.canonical_name.lower() in text.lower())
+        assert skill.name.lower() in text.lower() or (
+            skill.canonical_name and skill.canonical_name.lower() in text.lower()
         )
 
 
@@ -145,4 +144,6 @@ def test_ut_parse_06_fairness_protected_attributes_absence():
     }
     candidate_fields = set(Candidate.model_fields.keys())
     intersection = forbidden_fields.intersection(candidate_fields)
-    assert not intersection, f"Candidate model improperly contains protected attributes: {intersection}"
+    assert not intersection, (
+        f"Candidate model improperly contains protected attributes: {intersection}"
+    )

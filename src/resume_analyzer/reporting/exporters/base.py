@@ -37,7 +37,6 @@ class Exporter(ABC):
         """Export report to file path atomically (alias for export)."""
         return self.export(report, out_path)
 
-
     def export(self, report: AnalysisReport, out_path: Path | str) -> Path:
         """Export report to file path atomically with error handling.
 
@@ -73,7 +72,12 @@ class Exporter(ABC):
                 f.write(content_bytes)
 
             os.replace(temp_file, target)
-            logger.info("Export written fmt=%s cid=%s path=%s", self.format, report.candidate.candidate_id, target)
+            logger.info(
+                "Export written fmt=%s cid=%s path=%s",
+                self.format,
+                report.candidate.candidate_id,
+                target,
+            )
             return target
         except Exception as e:
             # Guarantee no partial file left behind
@@ -117,12 +121,15 @@ def get_exporter(fmt: Literal["html", "pdf", "xlsx"] | str) -> Exporter:
         # Lazy load implementations to avoid circular imports
         if clean_fmt == "html":
             from resume_analyzer.reporting.exporters.html_exporter import HTMLExporter
+
             return HTMLExporter()
         elif clean_fmt == "pdf":
             from resume_analyzer.reporting.exporters.pdf_exporter import PDFExporter
+
             return PDFExporter()
         elif clean_fmt in ("xlsx", "excel"):
             from resume_analyzer.reporting.exporters.excel_exporter import ExcelExporter
+
             return ExcelExporter()
         else:
             raise UnsupportedExportFormatError(
@@ -133,7 +140,9 @@ def get_exporter(fmt: Literal["html", "pdf", "xlsx"] | str) -> Exporter:
     return _EXPORTER_REGISTRY[clean_fmt]()
 
 
-def export_batch_workbook(reports: list[AnalysisReport], out_path: Path | str | None = None) -> Path | bytes:
+def export_batch_workbook(
+    reports: list[AnalysisReport], out_path: Path | str | None = None
+) -> Path | bytes:
     """Export aggregated multi-candidate ranking workbook.
 
     Args:
@@ -149,4 +158,3 @@ def export_batch_workbook(reports: list[AnalysisReport], out_path: Path | str | 
     if out_path is None:
         return exporter.export_batch_bytes(reports)
     return exporter.export_batch(reports, out_path)
-

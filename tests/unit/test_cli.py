@@ -43,19 +43,27 @@ def test_cli_load_job_file_not_found(tmp_path: Path) -> None:
         cli.load_job_file(tmp_path / "nonexistent_job.json")
 
 
-def test_cli_analyze_success(cli_job_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_analyze_success(
+    cli_job_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     """Verify analyze command executes and returns exit code 0."""
     valid_resume = Path("tests/data/resumes/cand_01_asha_verma.txt")
     out_dir = tmp_path / "reports"
 
     argv = [
         "analyze",
-        "--resume", str(valid_resume),
-        "--job", str(cli_job_file),
-        "--strategy", "weighted",
-        "--ai", "off",
-        "--format", "html",
-        "--output-dir", str(out_dir),
+        "--resume",
+        str(valid_resume),
+        "--job",
+        str(cli_job_file),
+        "--strategy",
+        "weighted",
+        "--ai",
+        "off",
+        "--format",
+        "html",
+        "--output-dir",
+        str(out_dir),
     ]
 
     exit_code = cli.main(argv)
@@ -71,14 +79,18 @@ def test_cli_analyze_missing_resume(cli_job_file: Path, tmp_path: Path) -> None:
     """Verify analyze with missing resume file returns exit code 2."""
     argv = [
         "analyze",
-        "--resume", str(tmp_path / "missing_resume.pdf"),
-        "--job", str(cli_job_file),
+        "--resume",
+        str(tmp_path / "missing_resume.pdf"),
+        "--job",
+        str(cli_job_file),
     ]
     exit_code = cli.main(argv)
     assert exit_code == 2
 
 
-def test_cli_batch_command(cli_job_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_batch_command(
+    cli_job_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     """Verify batch command processes directory and outputs rankings."""
     # Create directory with 1 valid and 1 empty resume
     batch_dir = tmp_path / "resumes"
@@ -91,10 +103,14 @@ def test_cli_batch_command(cli_job_file: Path, tmp_path: Path, capsys: pytest.Ca
 
     argv = [
         "batch",
-        "--resumes-dir", str(batch_dir),
-        "--job", str(cli_job_file),
-        "--output-dir", str(out_dir),
-        "--format", "xlsx",
+        "--resumes-dir",
+        str(batch_dir),
+        "--job",
+        str(cli_job_file),
+        "--output-dir",
+        str(out_dir),
+        "--format",
+        "xlsx",
     ]
 
     exit_code = cli.main(argv)
@@ -107,7 +123,9 @@ def test_cli_batch_command(cli_job_file: Path, tmp_path: Path, capsys: pytest.Ca
     assert (out_dir / "batch_ranking_summary.xlsx").is_file()
 
 
-def test_cli_benchmark_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_benchmark_command(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     """Verify benchmark command measures deterministic pipeline throughput."""
     bench_dir = tmp_path / "bench_resumes"
     bench_dir.mkdir()
@@ -117,8 +135,10 @@ def test_cli_benchmark_command(tmp_path: Path, capsys: pytest.CaptureFixture[str
 
     argv = [
         "benchmark",
-        "--resumes-dir", str(bench_dir),
-        "--runs", "1",
+        "--resumes-dir",
+        str(bench_dir),
+        "--runs",
+        "1",
     ]
 
     exit_code = cli.main(argv)
@@ -139,7 +159,10 @@ def test_cli_list_command(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code = cli.main(["list"])
     assert exit_code == 0
     captured = capsys.readouterr()
-    assert "saved analyses" in captured.out.lower() or "no saved analyses" in captured.out.lower()
+    assert (
+        "saved analyses" in captured.out.lower()
+        or "no saved analyses" in captured.out.lower()
+    )
 
 
 def test_cli_feedback_summary_command(capsys: pytest.CaptureFixture[str]) -> None:
@@ -164,4 +187,3 @@ def test_cli_export_missing_record(capsys: pytest.CaptureFixture[str]) -> None:
     assert exit_code == 2
     captured = capsys.readouterr()
     assert "not found" in captured.err.lower()
-

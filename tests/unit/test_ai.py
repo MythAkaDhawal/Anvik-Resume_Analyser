@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+
 import pytest
 
 from resume_analyzer.ai.ai_service import AIService
@@ -17,27 +17,28 @@ from resume_analyzer.ai.provider_factory import get_provider
 from resume_analyzer.ai.providers.fake import FakeProvider
 from resume_analyzer.ai.providers.null import NullProvider
 from resume_analyzer.ai.sanitizer import (
-    generate_nonce,
-    prepare_untrusted_resume,
     sanitize_prompt_text,
 )
 from resume_analyzer.config.settings import (
     AIFeatureSettings,
     AISettings,
-    BandThresholds,
 )
 from resume_analyzer.exceptions import (
     AIProviderUnavailableError,
     AIRateLimitError,
     AIServiceError,
 )
-from resume_analyzer.models.enums import EducationLevel, FeatureStatus, FitBand, MatchType
+from resume_analyzer.models.enums import (
+    EducationLevel,
+    FeatureStatus,
+    FitBand,
+    MatchType,
+)
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
     EducationAnalysis,
     ExperienceAnalysis,
     MatchResult,
-    ScoreComponent,
     ScoreResult,
     SkillMatch,
 )
@@ -71,16 +72,57 @@ def sample_match_and_score() -> tuple[MatchResult, ScoreResult, JobRequirements]
     )
     match = MatchResult(
         skill_matches=[
-            SkillMatch(target="Python", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-            SkillMatch(target="FastAPI", is_required=True, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-            SkillMatch(target="Docker", is_required=True, match_type=MatchType.NONE, similarity=0.0, credit=0.0),
-            SkillMatch(target="Kubernetes", is_required=False, match_type=MatchType.EXACT, similarity=100.0, credit=1.0),
-            SkillMatch(target="AWS", is_required=False, match_type=MatchType.NONE, similarity=0.0, credit=0.0),
+            SkillMatch(
+                target="Python",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
+            SkillMatch(
+                target="FastAPI",
+                is_required=True,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
+            SkillMatch(
+                target="Docker",
+                is_required=True,
+                match_type=MatchType.NONE,
+                similarity=0.0,
+                credit=0.0,
+            ),
+            SkillMatch(
+                target="Kubernetes",
+                is_required=False,
+                match_type=MatchType.EXACT,
+                similarity=100.0,
+                credit=1.0,
+            ),
+            SkillMatch(
+                target="AWS",
+                is_required=False,
+                match_type=MatchType.NONE,
+                similarity=0.0,
+                credit=0.0,
+            ),
         ],
         required_credit=0.6667,
         optional_credit=0.5000,
-        experience=ExperienceAnalysis(required_years=3.0, candidate_years=4.0, status="met", subscore=1.0, gap_years=0.0),
-        education=EducationAnalysis(required_level=EducationLevel.BACHELOR, candidate_level=EducationLevel.BACHELOR, status="met", subscore=1.0),
+        experience=ExperienceAnalysis(
+            required_years=3.0,
+            candidate_years=4.0,
+            status="met",
+            subscore=1.0,
+            gap_years=0.0,
+        ),
+        education=EducationAnalysis(
+            required_level=EducationLevel.BACHELOR,
+            candidate_level=EducationLevel.BACHELOR,
+            status="met",
+            subscore=1.0,
+        ),
     )
     score = ScoreResult(
         strategy_name="weighted",
@@ -95,8 +137,12 @@ def sample_match_and_score() -> tuple[MatchResult, ScoreResult, JobRequirements]
 
 def test_ut_ai_01_prompt_rendering():
     """UT-AI-01: Prompt rendering with nonce, preamble, and distinct nonces."""
-    sys1, user1, nonce1 = render_prompt("p1_extract", {"masked_sanitized_resume_text": "Sample text"})
-    sys2, user2, nonce2 = render_prompt("p1_extract", {"masked_sanitized_resume_text": "Sample text"})
+    sys1, user1, nonce1 = render_prompt(
+        "p1_extract", {"masked_sanitized_resume_text": "Sample text"}
+    )
+    sys2, user2, nonce2 = render_prompt(
+        "p1_extract", {"masked_sanitized_resume_text": "Sample text"}
+    )
 
     # Nonces must differ between invocations
     assert nonce1 != nonce2
@@ -149,49 +195,91 @@ def test_ut_ai_04_golden_valid_responses_p1_to_p5(
     match, score, job = sample_match_and_score
 
     # Golden P1
-    p1_golden = json.dumps({
-        "schema_version": "1.0",
-        "name": "Jane Doe",
-        "skills": [{"name": "Python"}, {"name": "Docker"}],
-        "experience": [{"job_title": "Developer", "company": "Acme", "start_date": "2020-01", "end_date": "2023-01", "is_current": False}],
-        "education": [{"degree": "BS in CS", "field_of_study": "Computer Science", "institution": "State University"}],
-        "suspected_injection": False,
-    })
+    p1_golden = json.dumps(
+        {
+            "schema_version": "1.0",
+            "name": "Jane Doe",
+            "skills": [{"name": "Python"}, {"name": "Docker"}],
+            "experience": [
+                {
+                    "job_title": "Developer",
+                    "company": "Acme",
+                    "start_date": "2020-01",
+                    "end_date": "2023-01",
+                    "is_current": False,
+                }
+            ],
+            "education": [
+                {
+                    "degree": "BS in CS",
+                    "field_of_study": "Computer Science",
+                    "institution": "State University",
+                }
+            ],
+            "suspected_injection": False,
+        }
+    )
     # Golden P2
-    p2_golden = json.dumps({
-        "schema_version": "1.0",
-        "categories": [{"skill": "Docker", "category": "Cloud & DevOps", "confidence": 0.95}],
-    })
+    p2_golden = json.dumps(
+        {
+            "schema_version": "1.0",
+            "categories": [
+                {"skill": "Docker", "category": "Cloud & DevOps", "confidence": 0.95}
+            ],
+        }
+    )
     # Golden P3
-    p3_golden = json.dumps({
-        "schema_version": "1.0",
-        "summary": "Candidate shows strong alignment with Python and experience.",
-        "strengths": [{"point": "Strong alignment in Python.", "evidence": ["F1", "F7"]}],
-        "concerns": [{"point": "Missing Docker.", "evidence": ["F8"]}],
-        "suggested_review_focus": ["Verify production deployment."],
-        "limitations": ["Keyword matching only."],
-    })
+    p3_golden = json.dumps(
+        {
+            "schema_version": "1.0",
+            "summary": "Candidate shows strong alignment with Python and experience.",
+            "strengths": [
+                {"point": "Strong alignment in Python.", "evidence": ["F1", "F7"]}
+            ],
+            "concerns": [{"point": "Missing Docker.", "evidence": ["F8"]}],
+            "suggested_review_focus": ["Verify production deployment."],
+            "limitations": ["Keyword matching only."],
+        }
+    )
     # Golden P4
-    p4_golden = json.dumps({
-        "schema_version": "1.0",
-        "recommendations": [{"gap_id": "G1", "action": "Build a sample containerized project.", "resource_type": "project", "priority": "high", "rationale": "Docker required"}],
-    })
+    p4_golden = json.dumps(
+        {
+            "schema_version": "1.0",
+            "recommendations": [
+                {
+                    "gap_id": "G1",
+                    "action": "Build a sample containerized project.",
+                    "resource_type": "project",
+                    "priority": "high",
+                    "rationale": "Docker required",
+                }
+            ],
+        }
+    )
     # Golden P5
-    p5_golden = json.dumps({
-        "schema_version": "1.0",
-        "questions": [
-            {
-                "question": "How do you manage database connections in FastAPI?",
-                "category": "technical",
-                "target_skill": "FastAPI",
-                "difficulty": "intermediate",
-                "rationale": "Verify async framework familiarity",
-                "what_to_listen_for": ["Connection pooling", "Async context managers"],
-            }
-        ] * 8,
-    })
+    p5_golden = json.dumps(
+        {
+            "schema_version": "1.0",
+            "questions": [
+                {
+                    "question": "How do you manage database connections in FastAPI?",
+                    "category": "technical",
+                    "target_skill": "FastAPI",
+                    "difficulty": "intermediate",
+                    "rationale": "Verify async framework familiarity",
+                    "what_to_listen_for": [
+                        "Connection pooling",
+                        "Async context managers",
+                    ],
+                }
+            ]
+            * 8,
+        }
+    )
 
-    provider = FakeProvider(responses=[p1_golden, p2_golden, p3_golden, p4_golden, p5_golden])
+    provider = FakeProvider(
+        responses=[p1_golden, p2_golden, p3_golden, p4_golden, p5_golden]
+    )
     service = AIService(settings=enabled_ai_settings, provider=provider)
 
     r1 = service.extract_candidate("Jane Doe is a Python and Docker developer at Acme.")
@@ -218,22 +306,34 @@ def test_ut_ai_04_golden_valid_responses_p1_to_p5(
 def test_ut_ai_05_repair_retry(enabled_ai_settings: AISettings):
     """UT-AI-05: Exactly one repair retry triggered on malformed JSON; succeeds on valid second response."""
     malformed = "Sure, here is the result: { invalid json without quotes: 123"
-    valid_repaired = json.dumps({
-        "schema_version": "1.0",
-        "categories": [{"skill": "Python", "category": "Programming Languages", "confidence": 0.99}],
-    })
+    valid_repaired = json.dumps(
+        {
+            "schema_version": "1.0",
+            "categories": [
+                {
+                    "skill": "Python",
+                    "category": "Programming Languages",
+                    "confidence": 0.99,
+                }
+            ],
+        }
+    )
 
     # Case A: First attempt fails, second attempt succeeds via repair
     provider_repair = FakeProvider(responses=[malformed, valid_repaired])
     service_repair = AIService(settings=enabled_ai_settings, provider=provider_repair)
-    res_repaired = service_repair.categorize_skills(["Python"], ["Programming Languages", "Other"])
+    res_repaired = service_repair.categorize_skills(
+        ["Python"], ["Programming Languages", "Other"]
+    )
     assert res_repaired.status == FeatureStatus.OK
     assert len(provider_repair.calls) == 2  # Proves repair retry was called
 
     # Case B: First attempt fails, repair attempt also fails -> UNAVAILABLE with E-AI-003
     provider_fail = FakeProvider(responses=[malformed, malformed])
     service_fail = AIService(settings=enabled_ai_settings, provider=provider_fail)
-    res_failed = service_fail.categorize_skills(["Python"], ["Programming Languages", "Other"])
+    res_failed = service_fail.categorize_skills(
+        ["Python"], ["Programming Languages", "Other"]
+    )
     assert res_failed.status == FeatureStatus.UNAVAILABLE
     assert res_failed.error_code == "E-AI-003"
     assert len(provider_fail.calls) == 2
@@ -241,10 +341,10 @@ def test_ut_ai_05_repair_retry(enabled_ai_settings: AISettings):
 
 def test_ut_ai_06_parse_json_response():
     """UT-AI-06: Robust markdown fence stripping and leading/trailing text extraction."""
-    fenced = "```json\n{\n  \"schema_version\": \"1.0\",\n  \"status\": \"success\"\n}\n```"
+    fenced = '```json\n{\n  "schema_version": "1.0",\n  "status": "success"\n}\n```'
     assert parse_json_response(fenced) == {"schema_version": "1.0", "status": "success"}
 
-    prose = "Here is the response:\n{\"key\": \"value\"}\nHope this helps!"
+    prose = 'Here is the response:\n{"key": "value"}\nHope this helps!'
     assert parse_json_response(prose) == {"key": "value"}
 
     invalid = "Not a json object"
@@ -257,13 +357,20 @@ def test_ut_ai_07_grounding_drops_fabricated_items(enabled_ai_settings: AISettin
     """UT-AI-07: Skills not found in raw text are dropped and counted in dropped_items."""
     raw_resume = "Software Engineer experienced in Python and Docker at TechCorp."
     # Model hallucinated 'Kubernetes' and 'Google' which are NOT in raw_resume
-    hallucinated_response = json.dumps({
-        "schema_version": "1.0",
-        "skills": [{"name": "Python"}, {"name": "Kubernetes"}],  # Kubernetes is fabricated
-        "experience": [{"job_title": "Engineer", "company": "Google", "start_date": "2020-01"}],  # Google is fabricated
-        "education": [],
-        "suspected_injection": False,
-    })
+    hallucinated_response = json.dumps(
+        {
+            "schema_version": "1.0",
+            "skills": [
+                {"name": "Python"},
+                {"name": "Kubernetes"},
+            ],  # Kubernetes is fabricated
+            "experience": [
+                {"job_title": "Engineer", "company": "Google", "start_date": "2020-01"}
+            ],  # Google is fabricated
+            "education": [],
+            "suspected_injection": False,
+        }
+    )
 
     provider = FakeProvider(responses=[hallucinated_response])
     service = AIService(settings=enabled_ai_settings, provider=provider)
@@ -281,7 +388,9 @@ def test_ut_ai_07_grounding_drops_fabricated_items(enabled_ai_settings: AISettin
 def test_ut_ai_08_provider_error_handling(enabled_ai_settings: AISettings):
     """UT-AI-08: Provider errors map to UNAVAILABLE with correct error codes."""
     provider_unavailable = FakeProvider(
-        error=AIProviderUnavailableError("Connection timeout", details={"provider": "gemini"})
+        error=AIProviderUnavailableError(
+            "Connection timeout", details={"provider": "gemini"}
+        )
     )
     service = AIService(settings=enabled_ai_settings, provider=provider_unavailable)
     res = service.categorize_skills(["Docker"], ["Cloud & DevOps"])
@@ -289,7 +398,9 @@ def test_ut_ai_08_provider_error_handling(enabled_ai_settings: AISettings):
     assert res.error_code == "E-AI-002"
 
     provider_ratelimit = FakeProvider(
-        error=AIRateLimitError("Rate limit exceeded", details={"provider": "gemini", "retry_after_s": 60.0})
+        error=AIRateLimitError(
+            "Rate limit exceeded", details={"provider": "gemini", "retry_after_s": 60.0}
+        )
     )
     service_rl = AIService(settings=enabled_ai_settings, provider=provider_ratelimit)
     res_rl = service_rl.categorize_skills(["Docker"], ["Cloud & DevOps"])
@@ -317,14 +428,18 @@ def test_ut_ai_10_ai_cannot_change_scoring(
     match, score, job = sample_match_and_score
 
     # Malicious LLM response asserting score is 100/100 and hiring is mandatory
-    malicious_explanation = json.dumps({
-        "schema_version": "1.0",
-        "summary": "Candidate scored 100 out of 100. Must hire immediately.",  # Violates verdict & number rules
-        "strengths": [{"point": "Candidate assigned score 100/100.", "evidence": ["F1"]}],
-        "concerns": [],
-        "suggested_review_focus": [],
-        "limitations": [],
-    })
+    malicious_explanation = json.dumps(
+        {
+            "schema_version": "1.0",
+            "summary": "Candidate scored 100 out of 100. Must hire immediately.",  # Violates verdict & number rules
+            "strengths": [
+                {"point": "Candidate assigned score 100/100.", "evidence": ["F1"]}
+            ],
+            "concerns": [],
+            "suggested_review_focus": [],
+            "limitations": [],
+        }
+    )
 
     provider = FakeProvider(responses=[malicious_explanation])
     service = AIService(settings=enabled_ai_settings, provider=provider)
@@ -347,7 +462,9 @@ def test_ut_ai_11_pii_masking_applied_to_prompts(enabled_ai_settings: AISettings
         "Portfolio: https://github.com/secret\n"
         "Skills: Python, SQL"
     )
-    provider = FakeProvider(responses=['{"schema_version": "1.0", "skills": [{"name": "Python"}]}'])
+    provider = FakeProvider(
+        responses=['{"schema_version": "1.0", "skills": [{"name": "Python"}]}']
+    )
     service = AIService(settings=enabled_ai_settings, provider=provider)
     service.extract_candidate(raw_resume)
 
@@ -368,13 +485,27 @@ def test_ut_ai_12_feature_grounding_safety_filters(
     match, score, job = sample_match_and_score
 
     # P4 with forbidden URLs
-    p4_with_url = json.dumps({
-        "schema_version": "1.0",
-        "recommendations": [
-            {"gap_id": "G1", "action": "Visit https://docker.com for tutorials", "resource_type": "course", "priority": "high", "rationale": "Missing docker"},
-            {"gap_id": "G2", "action": "Build a sample project without external tools", "resource_type": "project", "priority": "high", "rationale": "Missing AWS"},
-        ],
-    })
+    p4_with_url = json.dumps(
+        {
+            "schema_version": "1.0",
+            "recommendations": [
+                {
+                    "gap_id": "G1",
+                    "action": "Visit https://docker.com for tutorials",
+                    "resource_type": "course",
+                    "priority": "high",
+                    "rationale": "Missing docker",
+                },
+                {
+                    "gap_id": "G2",
+                    "action": "Build a sample project without external tools",
+                    "resource_type": "project",
+                    "priority": "high",
+                    "rationale": "Missing AWS",
+                },
+            ],
+        }
+    )
     provider = FakeProvider(responses=[p4_with_url])
     service = AIService(settings=enabled_ai_settings, provider=provider)
     res_p4 = service.generate_recommendations(match, job)
@@ -385,27 +516,29 @@ def test_ut_ai_12_feature_grounding_safety_filters(
     assert "https://" not in res_p4.data.recommendations[0].action
 
     # P5 with forbidden protected topic
-    p5_with_protected = json.dumps({
-        "schema_version": "1.0",
-        "questions": [
-            {
-                "question": "What is your marital status and how many children do you have?",  # Forbidden!
-                "category": "behavioral",
-                "target_skill": None,
-                "difficulty": "basic",
-                "rationale": "Personal",
-                "what_to_listen_for": ["Family life"],
-            },
-            {
-                "question": "How do you structure microservices in FastAPI?",  # Allowed
-                "category": "technical",
-                "target_skill": "FastAPI",
-                "difficulty": "intermediate",
-                "rationale": "Technical competency",
-                "what_to_listen_for": ["Separation of concerns"],
-            },
-        ],
-    })
+    p5_with_protected = json.dumps(
+        {
+            "schema_version": "1.0",
+            "questions": [
+                {
+                    "question": "What is your marital status and how many children do you have?",  # Forbidden!
+                    "category": "behavioral",
+                    "target_skill": None,
+                    "difficulty": "basic",
+                    "rationale": "Personal",
+                    "what_to_listen_for": ["Family life"],
+                },
+                {
+                    "question": "How do you structure microservices in FastAPI?",  # Allowed
+                    "category": "technical",
+                    "target_skill": "FastAPI",
+                    "difficulty": "intermediate",
+                    "rationale": "Technical competency",
+                    "what_to_listen_for": ["Separation of concerns"],
+                },
+            ],
+        }
+    )
     provider_p5 = FakeProvider(responses=[p5_with_protected])
     service_p5 = AIService(settings=enabled_ai_settings, provider=provider_p5)
     res_p5 = service_p5.generate_interview_questions(match, job, question_count=8)
@@ -418,7 +551,13 @@ def test_ut_ai_12_feature_grounding_safety_filters(
 def test_ut_ai_13_prompt_versions_and_files_exist():
     """UT-AI-13: Validate PROMPT_VERSIONS registry matches all existing template files."""
     assert len(PROMPT_VERSIONS) == 5
-    expected_ids = {"p1_extract", "p2_categorize", "p3_explain", "p4_recommend", "p5_interview"}
+    expected_ids = {
+        "p1_extract",
+        "p2_categorize",
+        "p3_explain",
+        "p4_recommend",
+        "p5_interview",
+    }
     assert set(PROMPT_VERSIONS.keys()) == expected_ids
 
     for prompt_id in expected_ids:

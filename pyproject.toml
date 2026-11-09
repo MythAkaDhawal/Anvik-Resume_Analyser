@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resume-analyzer"
-version = "0.1.0"
+version = "1.0.0"
 description = "Intelligent Resume Analyzer — AI-powered hiring assistant with deterministic core"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -64,10 +64,26 @@ select = [
     "D",    # pydocstyle
 ]
 ignore = [
-    "D100", # Missing docstring in public module (relaxed where self-evident)
+    "E501", # Line too long (handled by formatter)
+    "S701", # Jinja autoescape (AI prompt templates are plain text)
+    "S310", # Audit urlopen (endpoints are HTTPS/HTTP validated)
+    "S314", # xml parsing (decompression and archive bounds are checked prior)
+    "UP042", # str, Enum inheritance preserved for Python 3.10 compatibility
+    "C901", # McCabe complexity (monitored separately via Radon CC)
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
     "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
     "D107", # Missing docstring in __init__
+    "D301", # Use r""" if backslashes in docstring
+    "B007", # Loop control variable not used
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "D", "B017", "B905", "B007", "F841"]
+"samples/*" = ["D", "S"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

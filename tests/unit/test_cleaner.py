@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from resume_analyzer.parsing.text_cleaner import clean_text
 
 

@@ -239,7 +239,7 @@ class ResultStore:
 
         # Sort newest first by created_at descending
         summaries.sort(
-            key=lambda s: (s.created_at or datetime.min.replace(tzinfo=UTC)),
+            key=lambda s: s.created_at or datetime.min.replace(tzinfo=UTC),
             reverse=True,
         )
         return summaries
@@ -297,14 +297,18 @@ class ResultStore:
                 if created_str:
                     file_ts = datetime.fromisoformat(created_str).timestamp()
             except Exception:
-                pass
+                logger.debug(
+                    "Failed to parse created_at timestamp from %s; using stat mtime", f
+                )
 
             if file_ts < cutoff_sec:
                 try:
                     f.unlink()
                     deleted += 1
                 except OSError as e:
-                    logger.warning("Failed to purge old report file '%s': %s", f.name, e)
+                    logger.warning(
+                        "Failed to purge old report file '%s': %s", f.name, e
+                    )
 
         logger.info("Purged %d old analysis records (>%d days)", deleted, days)
         return deleted
@@ -323,4 +327,3 @@ class ResultStore:
             except OSError:
                 pass
         return deleted
-

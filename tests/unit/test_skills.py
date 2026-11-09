@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 import pytest
 
 from resume_analyzer.models.enums import Provenance
 from resume_analyzer.parsing.skills_extractor import extract_skills
-from resume_analyzer.skills.normalizer import fuzzy_similarity, normalize_skill
+from resume_analyzer.skills.normalizer import normalize_skill
 from resume_analyzer.skills.skill_index import SkillIndex
 from resume_analyzer.skills.taxonomy import SkillTaxonomy
 
@@ -53,9 +54,7 @@ def test_ut_skill_02_normalization_preserved_symbols():
 
 def test_ut_skill_03_exact_skill_match_from_section(skill_index: SkillIndex):
     """UT-SKILL-03: Exact skill matches extracted from skills section with canonical names."""
-    sections = {
-        "skills": "Python, Docker, Kubernetes, PostgreSQL"
-    }
+    sections = {"skills": "Python, Docker, Kubernetes, PostgreSQL"}
     skills, warnings = extract_skills(sections, skill_index)
     canonical_names = {s.canonical_name for s in skills}
     assert "Python" in canonical_names
@@ -67,9 +66,7 @@ def test_ut_skill_03_exact_skill_match_from_section(skill_index: SkillIndex):
 
 def test_ut_skill_04_alias_resolution(skill_index: SkillIndex):
     """UT-SKILL-04: Skill aliases resolve to canonical names."""
-    sections = {
-        "skills": "k8s, postgres, reactjs, aws, tf"
-    }
+    sections = {"skills": "k8s, postgres, reactjs, aws, tf"}
     skills, warnings = extract_skills(sections, skill_index)
     canonical_names = {s.canonical_name for s in skills}
     assert "Kubernetes" in canonical_names
@@ -95,9 +92,7 @@ def test_ut_skill_05_ngram_body_scanning(skill_index: SkillIndex):
 
 def test_ut_skill_06_confusable_disambiguation(skill_index: SkillIndex):
     """UT-SKILL-06: Distinct skills with overlapping names (Java vs JavaScript) are distinguished."""
-    sections = {
-        "skills": "JavaScript, TypeScript"
-    }
+    sections = {"skills": "JavaScript, TypeScript"}
     skills, warnings = extract_skills(sections, skill_index)
     canonical_names = {s.canonical_name for s in skills}
     assert "JavaScript" in canonical_names
@@ -106,9 +101,7 @@ def test_ut_skill_06_confusable_disambiguation(skill_index: SkillIndex):
 
 def test_ut_skill_07_no_fabrication(skill_index: SkillIndex):
     """UT-SKILL-07: Unmentioned skills are never fabricated."""
-    sections = {
-        "skills": "Python, FastApi, Redis"
-    }
+    sections = {"skills": "Python, FastApi, Redis"}
     skills, warnings = extract_skills(sections, skill_index)
     canonical_names = {s.canonical_name for s in skills}
     assert "Rust" not in canonical_names
@@ -120,9 +113,7 @@ def test_ut_skill_08_skill_stuffing_cap(skill_index: SkillIndex):
     """UT-SKILL-08: Extremely long skill lists are capped at 300 with SKILL_LIST_TRUNCATED warning."""
     # Fabricate 350 distinct skills
     synthetic_skills = [f"SkillNumber{i}" for i in range(350)]
-    sections = {
-        "skills": ", ".join(synthetic_skills)
-    }
+    sections = {"skills": ", ".join(synthetic_skills)}
     skills, warnings = extract_skills(sections, skill_index)
     assert len(skills) <= 300
     assert any(w.code == "SKILL_LIST_TRUNCATED" for w in warnings)

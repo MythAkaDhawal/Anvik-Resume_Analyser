@@ -19,4 +19,3 @@ __all__ = [
     "safe_join",
     "validate_report_id",
 ]
-

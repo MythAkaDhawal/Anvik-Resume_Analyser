@@ -12,7 +12,6 @@ from resume_analyzer.reporting.exporters.pdf_exporter import PDFExporter
 from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
 from resume_analyzer.storage.result_store import ResultStore
 
-
 SAMPLE_RESUME_TEXT = """
 Alex Morgan
 alex.morgan@techmail.com | San Francisco, CA
@@ -102,4 +101,3 @@ def test_it_07_storage_pipeline_roundtrip(tmp_path: Path) -> None:
     html_content = html_out.read_text(encoding="utf-8")
     assert "Alex Morgan" in html_content
     assert loaded_report.report_id in html_content
-

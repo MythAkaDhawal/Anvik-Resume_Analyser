@@ -7,16 +7,25 @@ and presents export action buttons.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from resume_analyzer.models.candidate import Candidate, EducationEntry, ExperienceEntry, Skill
-from resume_analyzer.models.enums import ComponentStatus, EducationLevel, FitBand, MatchType, Provenance
-from resume_analyzer.models.job import JobRequirements
+from resume_analyzer.models.candidate import (
+    Candidate,
+    EducationEntry,
+    ExperienceEntry,
+    Skill,
+)
+from resume_analyzer.models.enums import (
+    ComponentStatus,
+    EducationLevel,
+    FitBand,
+    MatchType,
+)
 from resume_analyzer.models.results import (
     AIInsights,
     AnalysisReport,
@@ -32,14 +41,19 @@ from resume_analyzer.models.results import (
 @pytest.fixture(autouse=True)
 def mock_component_manifests() -> None:
     """Mock component manifest scanning to avoid Windows disk scan bottlenecks."""
-    with patch("streamlit.components.v2.manifest_scanner.scan_component_manifests", return_value=[]):
+    with patch(
+        "streamlit.components.v2.manifest_scanner.scan_component_manifests",
+        return_value=[],
+    ):
         yield
 
 
 def test_it_06_streamlit_app_smoke() -> None:
     """Smoke test Streamlit UI navigation, validation, score display, and exports (IT-06)."""
     # 1. App starts without unhandled exception
-    app_path = (Path(__file__).parent.parent.parent / "src/resume_analyzer/ui/streamlit_app.py").resolve()
+    app_path = (
+        Path(__file__).parent.parent.parent / "src/resume_analyzer/ui/streamlit_app.py"
+    ).resolve()
     at = AppTest.from_file(str(app_path), default_timeout=15)
     at.run()
     assert len(at.exception) == 0, f"App crashed on startup with: {at.exception}"
@@ -52,7 +66,9 @@ def test_it_06_streamlit_app_smoke() -> None:
     assert len(at.exception) == 0
     # Must report error message
     assert len(at.error) > 0
-    assert any("empty" in e.value.lower() or "skill" in e.value.lower() for e in at.error)
+    assert any(
+        "empty" in e.value.lower() or "skill" in e.value.lower() for e in at.error
+    )
 
     # 3. Valid job submission
     title_input = at.get("text_input")[0]
@@ -70,9 +86,13 @@ def test_it_06_streamlit_app_smoke() -> None:
     # 4. Navigation to Results with mock report
     dummy_report = AnalysisReport(
         report_id="20261108T100000Z_01234567_abcd",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         app_version="0.1.0",
-        config_snapshot={"strategy": "weighted", "fuzzy_threshold": 85.0, "ai": {"provider": "null"}},
+        config_snapshot={
+            "strategy": "weighted",
+            "fuzzy_threshold": 85.0,
+            "ai": {"provider": "null"},
+        },
         candidate=Candidate(
             candidate_id="0123456789ab",
             name="Smoke Test Candidate",
@@ -193,4 +213,3 @@ def test_it_06_streamlit_app_smoke() -> None:
 
     assert len(at.exception) == 0
     assert "Step 5: History & Persistence" in at.title[0].value
-

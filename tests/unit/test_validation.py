@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 from pathlib import Path
+
 import pytest
 
 from resume_analyzer.config.settings import get_settings
@@ -11,13 +12,10 @@ from resume_analyzer.exceptions import DataValidationError, JobValidationError
 from resume_analyzer.ingestion.file_loader import load_resume
 from resume_analyzer.models.candidate import (
     Candidate,
-    EducationEntry,
     ExperienceEntry,
-    ParseWarning,
     Skill,
 )
 from resume_analyzer.models.enums import EducationLevel, Provenance
-from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.parsing.resume_parser import ResumeParser
 from resume_analyzer.skills.skill_index import SkillIndex
 from resume_analyzer.skills.taxonomy import SkillTaxonomy
@@ -57,7 +55,9 @@ def test_ut_val_02_job_with_several_problems_single_aggregated_error():
         "job_title": "",  # Problem 1: empty title
         "required_skills": [],  # Problem 2: no required skills
         "min_experience_years": -5.0,  # Problem 3: negative years
-        "optional_skills": [f"Skill_{i}" for i in range(60)],  # Problem 4: >50 optional skills
+        "optional_skills": [
+            f"Skill_{i}" for i in range(60)
+        ],  # Problem 4: >50 optional skills
     }
     with pytest.raises(JobValidationError) as exc_info:
         validate_job(raw_job)
@@ -94,7 +94,10 @@ def test_ut_val_03_deduplication_and_cross_collision():
     with pytest.raises(JobValidationError) as exc_info:
         validate_job(colliding_job)
 
-    assert any("appears in both required and optional" in msg for msg in exc_info.value.details.get("errors", []))
+    assert any(
+        "appears in both required and optional" in msg
+        for msg in exc_info.value.details.get("errors", [])
+    )
 
 
 def test_ut_val_04_candidate_sanity_checks():
@@ -177,7 +180,9 @@ def test_ut_val_05_assess_parse_quality_sparse_resume():
     parser = ResumeParser(index)
 
     sparse_path = Path("tests/data/resumes/cand_15_sparse_candidate.txt")
-    loaded = load_resume(sparse_path.name, sparse_path.read_bytes(), settings=settings.files)
+    loaded = load_resume(
+        sparse_path.name, sparse_path.read_bytes(), settings=settings.files
+    )
     candidate = parser.parse(loaded, reference_date=REF_DATE)
 
     quality_warnings = assess_parse_quality(candidate)
@@ -194,7 +199,9 @@ def test_ut_val_05_assess_parse_quality_sparse_resume():
 
 def test_ut_val_06_validation_messages_never_echo_resume_content():
     """UT-VAL-06: Verification that validation warnings and messages never contain PII or resume text."""
-    secret_candidate_text = "Private Confidential Content John Secret 555-1234 secret@confidential.com"
+    secret_candidate_text = (
+        "Private Confidential Content John Secret 555-1234 secret@confidential.com"
+    )
     candidate = Candidate(
         candidate_id="0123456789ab",
         name=secret_candidate_text,  # Excessively long name

@@ -51,9 +51,7 @@ def clean_text(text: str) -> str:
     # 2. Remove control characters (except newline and tab) and zero-width chars
     t = ZERO_WIDTH_CHARS.sub("", t)
     t = "".join(
-        c
-        for c in t
-        if c in ("\n", "\t") or (unicodedata.category(c)[0] != "C")
+        c for c in t if c in ("\n", "\t") or (unicodedata.category(c)[0] != "C")
     )
 
     # 3. Normalize line endings
@@ -76,4 +74,3 @@ def clean_text(text: str) -> str:
 
     # 8. Strip leading/trailing blank lines
     return t.strip()
-

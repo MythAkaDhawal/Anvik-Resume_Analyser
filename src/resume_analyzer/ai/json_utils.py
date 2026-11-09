@@ -28,9 +28,7 @@ def parse_json_response(raw_text: str) -> dict[str, Any] | list[Any]:
         AIServiceError: If valid JSON cannot be extracted and parsed.
     """
     if not raw_text or not raw_text.strip():
-        raise AIServiceError(
-            "Model returned empty or whitespace-only response."
-        )
+        raise AIServiceError("Model returned empty or whitespace-only response.")
 
     text = raw_text.strip()
 
@@ -63,6 +61,4 @@ def parse_json_response(raw_text: str) -> dict[str, Any] | list[Any]:
         except json.JSONDecodeError:
             continue
 
-    raise AIServiceError(
-        "Failed to extract valid JSON payload from model response."
-    )
+    raise AIServiceError("Failed to extract valid JSON payload from model response.")

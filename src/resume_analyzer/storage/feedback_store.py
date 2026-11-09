@@ -94,7 +94,11 @@ class FeedbackStore:
         line = record.model_dump_json() + "\n"
         with self.path.open("a", encoding="utf-8") as f:
             f.write(line)
-        logger.info("Appended user feedback for report_id=%s rating=%d", record.report_id, record.rating)
+        logger.info(
+            "Appended user feedback for report_id=%s rating=%d",
+            record.report_id,
+            record.rating,
+        )
 
     def list_records(self) -> list[FeedbackRecord]:
         """Read all feedback records from the JSONL file."""
@@ -160,4 +164,3 @@ class FeedbackStore:
         """Clear all stored feedback entries."""
         if self.path.is_file():
             self.path.unlink()
-

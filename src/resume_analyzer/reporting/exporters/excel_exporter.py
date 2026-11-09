@@ -106,7 +106,12 @@ class ExcelExporter(Exporter):
 
         rows: list[list[Any]] = [
             ["Metadata", "Report ID", report.report_id, ""],
-            ["Metadata", "Created At", report.created_at.strftime("%Y-%m-%d %H:%M UTC"), ""],
+            [
+                "Metadata",
+                "Created At",
+                report.created_at.strftime("%Y-%m-%d %H:%M UTC"),
+                "",
+            ],
             ["Metadata", "App Version", report.app_version, ""],
             ["Metadata", "Legal Notice", report.human_review_notice, ""],
             ["Candidate", "Candidate ID", report.candidate.candidate_id, ""],
@@ -115,13 +120,25 @@ class ExcelExporter(Exporter):
             ["Candidate", "Source Format", report.candidate.source_format.upper(), ""],
             ["Job", "Target Title", report.job.job_title, ""],
             ["Job", "Required Skills", ", ".join(report.job.required_skills), ""],
-            ["Job", "Optional Skills", ", ".join(report.job.optional_skills) if report.job.optional_skills else "None", ""],
+            [
+                "Job",
+                "Optional Skills",
+                ", ".join(report.job.optional_skills)
+                if report.job.optional_skills
+                else "None",
+                "",
+            ],
             ["Job", "Min Experience Years", report.job.min_experience_years, ""],
             ["Job", "Min Education Level", report.job.min_education_level.name, ""],
             ["Job", "Scoring Strategy", report.score.strategy_name, ""],
             ["Score", "Total Score", report.score.total_score, "Scale: 0-100"],
             ["Score", "Fit Band", report.score.fit_band.value.upper(), ""],
-            ["Score", "Data Coverage", f"{report.score.coverage * 100:.0f}%", "Evaluated weights share"],
+            [
+                "Score",
+                "Data Coverage",
+                f"{report.score.coverage * 100:.0f}%",
+                "Evaluated weights share",
+            ],
         ]
 
         if report.flags:
@@ -131,12 +148,14 @@ class ExcelExporter(Exporter):
         for comp in report.score.components:
             sub = f"{comp.subscore:.2f}" if comp.subscore is not None else "N/A"
             pts = f"{comp.points:.1f}" if comp.points is not None else "0.0"
-            rows.append([
-                "Breakdown",
-                comp.name,
-                f"{comp.weight * 100:.0f}% wt | {sub} sub | {pts} pts",
-                comp.explanation,
-            ])
+            rows.append(
+                [
+                    "Breakdown",
+                    comp.name,
+                    f"{comp.weight * 100:.0f}% wt | {sub} sub | {pts} pts",
+                    comp.explanation,
+                ]
+            )
 
         for r_idx, row in enumerate(rows, start=2):
             for c_idx, val in enumerate(row, start=1):
@@ -163,7 +182,9 @@ class ExcelExporter(Exporter):
 
         row_idx = 2
         for m in report.match.skill_matches:
-            req_type = "Required (Must-have)" if m.is_required else "Optional (Nice-to-have)"
+            req_type = (
+                "Required (Must-have)" if m.is_required else "Optional (Nice-to-have)"
+            )
             matched_skill = m.matched_candidate_skill or "—"
             row = [
                 m.target,
@@ -175,7 +196,9 @@ class ExcelExporter(Exporter):
                 m.provenance.value,
             ]
             for c_idx, val in enumerate(row, start=1):
-                cell = ws.cell(row=row_idx, column=c_idx, value=sanitize_excel_value(val))
+                cell = ws.cell(
+                    row=row_idx, column=c_idx, value=sanitize_excel_value(val)
+                )
                 cell.font = BODY_FONT
                 cell.border = BORDER
             row_idx += 1
@@ -206,33 +229,39 @@ class ExcelExporter(Exporter):
                 f"{'Present' if e.is_current else (e.end.strftime('%b %Y') if e.end else '?')}"
             )
             dur = f"{e.duration_months} mo" if e.duration_months is not None else "?"
-            rows.append([
-                "Experience Entry",
-                e.job_title or "Unspecified",
-                e.company or "Unspecified",
-                dates,
-                dur,
-                e.provenance.value,
-            ])
+            rows.append(
+                [
+                    "Experience Entry",
+                    e.job_title or "Unspecified",
+                    e.company or "Unspecified",
+                    dates,
+                    dur,
+                    e.provenance.value,
+                ]
+            )
 
-        rows.append([
-            "Education Summary",
-            f"Required: {report.match.education.required_level.name}",
-            f"Candidate: {report.match.education.candidate_level.name}",
-            f"Status: {report.match.education.status.upper()}",
-            f"Field Match: {'Yes' if report.match.education.field_match else ('No' if report.match.education.field_match is False else 'N/A')}",
-            report.match.education.provenance.value,
-        ])
+        rows.append(
+            [
+                "Education Summary",
+                f"Required: {report.match.education.required_level.name}",
+                f"Candidate: {report.match.education.candidate_level.name}",
+                f"Status: {report.match.education.status.upper()}",
+                f"Field Match: {'Yes' if report.match.education.field_match else ('No' if report.match.education.field_match is False else 'N/A')}",
+                report.match.education.provenance.value,
+            ]
+        )
 
         for ed in report.candidate.education:
-            rows.append([
-                "Education Entry",
-                ed.degree or "Unspecified",
-                ed.level.name,
-                ed.field_of_study or "—",
-                ed.institution or "—",
-                ed.provenance.value,
-            ])
+            rows.append(
+                [
+                    "Education Entry",
+                    ed.degree or "Unspecified",
+                    ed.level.name,
+                    ed.field_of_study or "—",
+                    ed.institution or "—",
+                    ed.provenance.value,
+                ]
+            )
 
         for r_idx, row in enumerate(rows, start=2):
             for c_idx, val in enumerate(row, start=1):
@@ -245,38 +274,123 @@ class ExcelExporter(Exporter):
     def _populate_ai_sheet(self, ws: Any, report: AnalysisReport) -> None:
         """Build AI insights sheet covering explanation, recommendations, and interview questions."""
         ws.freeze_panes = "A2"
-        headers = ["AI Feature", "Category / Topic", "Content / Question", "Rationale / Details", "Status"]
+        headers = [
+            "AI Feature",
+            "Category / Topic",
+            "Content / Question",
+            "Rationale / Details",
+            "Status",
+        ]
         ws.append(headers)
         _style_header_row(ws, 1, len(headers))
 
         rows: list[list[Any]] = []
 
         # P3: Explanation
-        if report.ai and report.ai.explanation and report.ai.explanation.status.value in ("ok", "partial") and report.ai.explanation.data:
-            rows.append(["Match Explanation", "Summary", report.ai.explanation.data.summary, "", "OK"])
+        if (
+            report.ai
+            and report.ai.explanation
+            and report.ai.explanation.status.value in ("ok", "partial")
+            and report.ai.explanation.data
+        ):
+            rows.append(
+                [
+                    "Match Explanation",
+                    "Summary",
+                    report.ai.explanation.data.summary,
+                    "",
+                    "OK",
+                ]
+            )
             for s in report.ai.explanation.data.strengths:
-                rows.append(["Match Explanation", "Strength", s.point, ", ".join(s.evidence), "OK"])
+                rows.append(
+                    [
+                        "Match Explanation",
+                        "Strength",
+                        s.point,
+                        ", ".join(s.evidence),
+                        "OK",
+                    ]
+                )
             for c in report.ai.explanation.data.concerns:
-                rows.append(["Match Explanation", "Focus Area", c.point, ", ".join(c.evidence), "OK"])
+                rows.append(
+                    [
+                        "Match Explanation",
+                        "Focus Area",
+                        c.point,
+                        ", ".join(c.evidence),
+                        "OK",
+                    ]
+                )
         else:
-            status_val = report.ai.explanation.status.value if report.ai and report.ai.explanation else "disabled"
-            rows.append(["Match Explanation", "N/A", f"AI-generated content unavailable ({status_val})", "", status_val])
+            status_val = (
+                report.ai.explanation.status.value
+                if report.ai and report.ai.explanation
+                else "disabled"
+            )
+            rows.append(
+                [
+                    "Match Explanation",
+                    "N/A",
+                    f"AI-generated content unavailable ({status_val})",
+                    "",
+                    status_val,
+                ]
+            )
 
         # P4: Recommendations
-        if report.ai and report.ai.recommendations and report.ai.recommendations.status.value in ("ok", "partial") and report.ai.recommendations.data:
+        if (
+            report.ai
+            and report.ai.recommendations
+            and report.ai.recommendations.status.value in ("ok", "partial")
+            and report.ai.recommendations.data
+        ):
             for r in report.ai.recommendations.data:
-                rows.append(["Recommendation", r.priority.upper(), r.action, r.rationale, "OK"])
+                rows.append(
+                    ["Recommendation", r.priority.upper(), r.action, r.rationale, "OK"]
+                )
         else:
-            status_val = report.ai.recommendations.status.value if report.ai and report.ai.recommendations else "disabled"
-            rows.append(["Recommendation", "N/A", f"AI-generated content unavailable ({status_val})", "", status_val])
+            status_val = (
+                report.ai.recommendations.status.value
+                if report.ai and report.ai.recommendations
+                else "disabled"
+            )
+            rows.append(
+                [
+                    "Recommendation",
+                    "N/A",
+                    f"AI-generated content unavailable ({status_val})",
+                    "",
+                    status_val,
+                ]
+            )
 
         # P5: Interview Questions
-        if report.ai and report.ai.interview_questions and report.ai.interview_questions.status.value in ("ok", "partial") and report.ai.interview_questions.data:
+        if (
+            report.ai
+            and report.ai.interview_questions
+            and report.ai.interview_questions.status.value in ("ok", "partial")
+            and report.ai.interview_questions.data
+        ):
             for q in report.ai.interview_questions.data:
-                rows.append(["Interview Question", q.category, q.question, q.rationale, "OK"])
+                rows.append(
+                    ["Interview Question", q.category, q.question, q.rationale, "OK"]
+                )
         else:
-            status_val = report.ai.interview_questions.status.value if report.ai and report.ai.interview_questions else "disabled"
-            rows.append(["Interview Question", "N/A", f"AI-generated content unavailable ({status_val})", "", status_val])
+            status_val = (
+                report.ai.interview_questions.status.value
+                if report.ai and report.ai.interview_questions
+                else "disabled"
+            )
+            rows.append(
+                [
+                    "Interview Question",
+                    "N/A",
+                    f"AI-generated content unavailable ({status_val})",
+                    "",
+                    status_val,
+                ]
+            )
 
         for r_idx, row in enumerate(rows, start=2):
             for c_idx, val in enumerate(row, start=1):
@@ -318,7 +432,8 @@ class ExcelExporter(Exporter):
 
         for rank, r in enumerate(sorted_reports, start=1):
             missing_req = [
-                m.target for m in r.match.skill_matches
+                m.target
+                for m in r.match.skill_matches
                 if m.is_required and (m.credit < 0.5 or m.match_type.value == "none")
             ]
             missing_str = ", ".join(missing_req) if missing_req else "None"
@@ -338,7 +453,9 @@ class ExcelExporter(Exporter):
 
             r_idx = rank + 1
             for c_idx, val in enumerate(row, start=1):
-                cell = ws_rank.cell(row=r_idx, column=c_idx, value=sanitize_excel_value(val))
+                cell = ws_rank.cell(
+                    row=r_idx, column=c_idx, value=sanitize_excel_value(val)
+                )
                 cell.font = BODY_FONT
                 cell.border = BORDER
                 if c_idx in (1, 4):  # Rank and Score
@@ -373,7 +490,9 @@ class ExcelExporter(Exporter):
             wb = self.build_batch_workbook(reports)
             wb.save(temp_file)
             os.replace(temp_file, target)
-            logger.info("Batch ranking workbook written path=%s count=%d", target, len(reports))
+            logger.info(
+                "Batch ranking workbook written path=%s count=%d", target, len(reports)
+            )
             return target
         except Exception as e:
             if temp_file.exists():
@@ -385,5 +504,3 @@ class ExcelExporter(Exporter):
                 f"Failed to export batch workbook to '{target}': {e}",
                 details={"path": str(target), "error": str(e)},
             ) from e
-
-

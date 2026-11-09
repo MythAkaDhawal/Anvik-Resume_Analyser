@@ -10,15 +10,13 @@ Saves results to tests/evaluation/results/et04_benchmark.json.
 
 from __future__ import annotations
 
-from datetime import date
 import json
-import os
-from pathlib import Path
 import platform
 import statistics
 import sys
 import time
-import pytest
+from datetime import date
+from pathlib import Path
 
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.reporting.exporters.excel_exporter import ExcelExporter
@@ -27,7 +25,6 @@ from resume_analyzer.reporting.exporters.pdf_exporter import PDFExporter
 from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
 from resume_analyzer.skills.skill_index import SkillIndex
 from resume_analyzer.skills.taxonomy import SkillTaxonomy
-
 
 RESUMES_DIR = Path("tests/data/resumes")
 GOLD_DIR = Path("tests/data/gold")
@@ -108,7 +105,9 @@ def test_et_04_performance_benchmark(tmp_path: Path) -> None:
         t_start = time.perf_counter()
         for name, data in corpus:
             t_single_start = time.perf_counter()
-            rep = service.analyze(name, data, job, options=opts, reference_date=ref_date)
+            rep = service.analyze(
+                name, data, job, options=opts, reference_date=ref_date
+            )
             single_latencies.append(time.perf_counter() - t_single_start)
             if pass_num == 0:
                 sample_reports.append(rep)
@@ -173,6 +172,9 @@ def test_et_04_performance_benchmark(tmp_path: Path) -> None:
     out_file.write_text(json.dumps(benchmark_summary, indent=2), encoding="utf-8")
 
     # Assertions for performance targets
-    assert avg_throughput >= 10.0, f"Average throughput ({avg_throughput:.1f} res/s) below minimum 10 res/s"
-    assert median_latency_ms <= 100.0, f"Median latency ({median_latency_ms:.1f}ms) above 100ms ceiling"
-
+    assert avg_throughput >= 10.0, (
+        f"Average throughput ({avg_throughput:.1f} res/s) below minimum 10 res/s"
+    )
+    assert median_latency_ms <= 100.0, (
+        f"Median latency ({median_latency_ms:.1f}ms) above 100ms ceiling"
+    )

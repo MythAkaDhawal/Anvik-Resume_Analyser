@@ -95,7 +95,9 @@ def _match_single_target(
 
     # 3. FUZZY match
     if settings.enabled and t_norm:
-        cand_skill, sim = _find_best_fuzzy_match(t_norm, t_canonical, candidate_entries, index, settings)
+        cand_skill, sim = _find_best_fuzzy_match(
+            t_norm, t_canonical, candidate_entries, index, settings
+        )
         if cand_skill is not None:
             return SkillMatch(
                 target=target_skill,
@@ -158,9 +160,9 @@ def match_skills(
             cand_by_canonical[skill.canonical_name] = skill
         candidate_entries.append((skill, c_norm))
 
-    target_skills: list[tuple[str, bool]] = [
-        (s, True) for s in job.required_skills
-    ] + [(s, False) for s in job.optional_skills]
+    target_skills: list[tuple[str, bool]] = [(s, True) for s in job.required_skills] + [
+        (s, False) for s in job.optional_skills
+    ]
 
     return [
         _match_single_target(

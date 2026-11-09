@@ -35,4 +35,3 @@ __all__ = [
     "get_provenance_display",
     "validate_no_verdict_language",
 ]
-

@@ -1,0 +1,382 @@
+{
+  "schema_version": "1.0",
+  "report_id": "20261109T101547Z_1dbedc6d_827b",
+  "created_at": "2026-11-09T10:15:47.260367Z",
+  "app_version": "0.1.0",
+  "config_snapshot": {
+    "strategy": "weighted",
+    "weights": {
+      "required_skills": 0.5,
+      "experience": 0.2,
+      "education": 0.15,
+      "optional_skills": 0.15
+    },
+    "fuzzy_threshold": 85.0,
+    "ai": {
+      "enabled": false,
+      "provider": "none",
+      "model": null
+    }
+  },
+  "candidate": {
+    "candidate_id": "1dbedc6d5780",
+    "name": "David Kim",
+    "email": "david.kim@webdev.com",
+    "skills": [
+      {
+        "name": "JavaScript",
+        "canonical_name": "JavaScript",
+        "category": "Programming Languages",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 1
+      },
+      {
+        "name": "TypeScript",
+        "canonical_name": "TypeScript",
+        "category": "Programming Languages",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 3
+      },
+      {
+        "name": "React",
+        "canonical_name": "React",
+        "category": "Frameworks & Libraries",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 4
+      },
+      {
+        "name": "Node.js",
+        "canonical_name": "Node.js",
+        "category": "Frameworks & Libraries",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 3
+      },
+      {
+        "name": "Express.js",
+        "canonical_name": "Express.js",
+        "category": "Frameworks & Libraries",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 1
+      },
+      {
+        "name": "MongoDB",
+        "canonical_name": "MongoDB",
+        "category": "Databases",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 2
+      },
+      {
+        "name": "HTML",
+        "canonical_name": "HTML",
+        "category": "Programming Languages",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 1
+      },
+      {
+        "name": "CSS",
+        "canonical_name": "CSS",
+        "category": "Programming Languages",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 1
+      }
+    ],
+    "experience": [
+      {
+        "job_title": "Full Stack Developer",
+        "company": "Nexa Web Studio",
+        "start": "2021-10-01",
+        "end": null,
+        "is_current": true,
+        "duration_months": 61,
+        "provenance": "extracted_rule"
+      },
+      {
+        "job_title": "Frontend Developer",
+        "company": "PixelWorks",
+        "start": "2020-05-01",
+        "end": "2021-09-01",
+        "is_current": false,
+        "duration_months": 16,
+        "provenance": "extracted_rule"
+      }
+    ],
+    "education": [
+      {
+        "degree": "Bachelor of Science in Computer Science",
+        "level": 3,
+        "field_of_study": "Science in Computer Science",
+        "institution": "San Jose State University",
+        "provenance": "extracted_rule"
+      }
+    ],
+    "total_experience_years": 6.4,
+    "highest_education_level": 3,
+    "source_format": "txt",
+    "parse_warnings": [],
+    "injection_indicators": [],
+    "parser_version": "0.1.0"
+  },
+  "job": {
+    "job_id": "senior-python-developer",
+    "job_title": "Senior Python Developer",
+    "description": "Senior backend developer to design, build, and maintain mission-critical Python microservices.",
+    "required_skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes",
+      "Redis"
+    ],
+    "optional_skills": [
+      "GraphQL",
+      "CI/CD",
+      "AWS",
+      "Terraform"
+    ],
+    "min_experience_years": 5.0,
+    "min_education_level": 3,
+    "preferred_fields": [
+      "Computer Science",
+      "Software Engineering"
+    ]
+  },
+  "match": {
+    "skill_matches": [
+      {
+        "target": "Python",
+        "target_canonical": "Python",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "FastAPI",
+        "target_canonical": "FastAPI",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "PostgreSQL",
+        "target_canonical": "PostgreSQL",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Docker",
+        "target_canonical": "Docker",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Kubernetes",
+        "target_canonical": "Kubernetes",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Redis",
+        "target_canonical": "Redis",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "GraphQL",
+        "target_canonical": "GraphQL",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "CI/CD",
+        "target_canonical": "CI/CD",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "AWS",
+        "target_canonical": "AWS",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Terraform",
+        "target_canonical": "Terraform",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      }
+    ],
+    "required_credit": 0.0,
+    "optional_credit": 0.0,
+    "experience": {
+      "required_years": 5.0,
+      "candidate_years": 6.4,
+      "status": "met",
+      "subscore": 1.0,
+      "gap_years": 0.0,
+      "provenance": "computed"
+    },
+    "education": {
+      "required_level": 3,
+      "candidate_level": 3,
+      "status": "met",
+      "field_match": true,
+      "subscore": 1.0,
+      "provenance": "computed"
+    }
+  },
+  "score": {
+    "strategy_name": "weighted",
+    "total_score": 35.0,
+    "components": [
+      {
+        "name": "required_skills",
+        "status": "evaluated",
+        "weight": 0.5,
+        "subscore": 0.0,
+        "points": 0.0,
+        "explanation": "Weight 0.50 (effective 0.50) x 0.0000"
+      },
+      {
+        "name": "experience",
+        "status": "evaluated",
+        "weight": 0.2,
+        "subscore": 1.0,
+        "points": 20.0,
+        "explanation": "Weight 0.20 (effective 0.20) x 1.0000"
+      },
+      {
+        "name": "education",
+        "status": "evaluated",
+        "weight": 0.15,
+        "subscore": 1.0,
+        "points": 15.0,
+        "explanation": "Weight 0.15 (effective 0.15) x 1.0000"
+      },
+      {
+        "name": "optional_skills",
+        "status": "evaluated",
+        "weight": 0.15,
+        "subscore": 0.0,
+        "points": 0.0,
+        "explanation": "Weight 0.15 (effective 0.15) x 0.0000"
+      }
+    ],
+    "coverage": 1.0,
+    "fit_band": "low",
+    "flags": [
+      "MISSING_REQUIRED_SKILLS"
+    ],
+    "provenance": "computed"
+  },
+  "ai": {
+    "categorization": {
+      "feature": "categorization",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "explanation": {
+      "feature": "explanation",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "recommendations": {
+      "feature": "recommendations",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "interview_questions": {
+      "feature": "interview_questions",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "extraction_status": {
+      "feature": "extraction",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    }
+  },
+  "flags": [
+    {
+      "code": "MISSING_REQUIRED_SKILLS",
+      "message": "6 required skill(s) not found in resume."
+    }
+  ],
+  "human_review_notice": "This report supports, and does not replace, human judgement. Scores reflect alignment between stated requirements and information extracted from the resume. AI-generated sections are interpretations that have not been verified. Do not use this report as the sole basis for any employment decision."
+}

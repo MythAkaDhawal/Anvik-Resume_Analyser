@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from resume_analyzer.parsing.contact_extractor import extract_email, extract_name
 from resume_analyzer.parsing.pii import mask_pii, scan_injection_indicators
 
@@ -34,7 +32,9 @@ def test_ut_cont_03_invalid_obfuscated_emails():
 
 def test_ut_cont_04_candidate_name_extraction():
     """UT-CONT-04: Candidate name is extracted from the first valid alphabetic line of 2-4 tokens."""
-    header = "Jane Marie Doe\njane@example.com\n(555) 123-4567\nSummary of Qualifications"
+    header = (
+        "Jane Marie Doe\njane@example.com\n(555) 123-4567\nSummary of Qualifications"
+    )
     name, warnings = extract_name(header, "jane@example.com")
     assert name == "Jane Marie Doe"
     assert not any(w.code == "NO_NAME" for w in warnings)
@@ -86,4 +86,3 @@ def test_injection_indicators_scanning():
     assert "ROLE_OVERRIDE" in indicators
     assert "SCORE_MANIPULATION" in indicators
     assert "OUTPUT_FORMAT_HIJACK" in indicators
-

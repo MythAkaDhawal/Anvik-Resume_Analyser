@@ -21,4 +21,3 @@ __all__ = [
     "load_resume",
     "validate_upload",
 ]
-

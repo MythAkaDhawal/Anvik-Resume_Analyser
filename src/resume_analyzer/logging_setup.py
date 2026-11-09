@@ -127,7 +127,9 @@ def setup_logging(
         file_handler.addFilter(pii_filter)
         logger.addHandler(file_handler)
     except OSError as err:
-        logger.warning("Could not set up file logging to %s: %s", log_settings.log_dir, err)
+        logger.warning(
+            "Could not set up file logging to %s: %s", log_settings.log_dir, err
+        )
 
     # Do not propagate to root to avoid duplicate messages in application logs
     logger.propagate = False

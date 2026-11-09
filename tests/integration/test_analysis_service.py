@@ -14,7 +14,7 @@ import pytest
 from resume_analyzer.ai.ai_service import AIService
 from resume_analyzer.ai.providers.fake import FakeProvider
 from resume_analyzer.config.settings import get_settings
-from resume_analyzer.exceptions import AIProviderUnavailableError, AIRateLimitError
+from resume_analyzer.exceptions import AIProviderUnavailableError
 from resume_analyzer.models.enums import EducationLevel, FeatureStatus, Provenance
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import AnalysisReport
@@ -135,7 +135,9 @@ def test_it_02_e2e_with_fake_provider(
         '"what_to_listen_for": ["Readability", "Performance"]}]}'
     )
 
-    provider = FakeProvider(responses=[p1_response, p2_response, p3_response, p4_response, p5_response])
+    provider = FakeProvider(
+        responses=[p1_response, p2_response, p3_response, p4_response, p5_response]
+    )
     settings = get_settings()
     settings.ai.enabled = True
     settings.ai.features.recommendations = True
@@ -147,7 +149,13 @@ def test_it_02_e2e_with_fake_provider(
 
     opts = AnalysisOptions(
         strategy="weighted",
-        ai_features={"extraction", "categorization", "explanation", "recommendations", "interview_questions"},
+        ai_features={
+            "extraction",
+            "categorization",
+            "explanation",
+            "recommendations",
+            "interview_questions",
+        },
     )
     report = service.analyze(
         filename=resume_path.name,
@@ -181,7 +189,9 @@ def test_it_03_ai_failure_matrix(
 ) -> None:
     """Assert AI provider errors never crash analysis; report is produced with UNAVAILABLE status."""
     failing_provider = FakeProvider(
-        error=AIProviderUnavailableError("Upstream timeout connecting to AI model", details={"provider": "fake"})
+        error=AIProviderUnavailableError(
+            "Upstream timeout connecting to AI model", details={"provider": "fake"}
+        )
     )
     settings = get_settings()
     settings.ai.enabled = True
@@ -197,7 +207,13 @@ def test_it_03_ai_failure_matrix(
 
     opts = AnalysisOptions(
         strategy="weighted",
-        ai_features={"extraction", "categorization", "explanation", "recommendations", "interview_questions"},
+        ai_features={
+            "extraction",
+            "categorization",
+            "explanation",
+            "recommendations",
+            "interview_questions",
+        },
     )
     report = service.analyze(
         filename=resume_path.name,
@@ -259,4 +275,7 @@ def test_batch_runner_isolation_and_ranking(
 
     # Successful reports were sorted by score descending
     assert len(batch_result.reports) == 2
-    assert batch_result.reports[0].score.total_score >= batch_result.reports[1].score.total_score
+    assert (
+        batch_result.reports[0].score.total_score
+        >= batch_result.reports[1].score.total_score
+    )

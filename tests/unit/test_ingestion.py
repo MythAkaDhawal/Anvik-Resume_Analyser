@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import io
 from pathlib import Path
-import zipfile
 
 import pytest
 
@@ -22,15 +20,11 @@ from resume_analyzer.exceptions import (
 from resume_analyzer.ingestion.file_loader import load_resume
 from resume_analyzer.ingestion.file_validator import validate_upload
 from resume_analyzer.ingestion.text_extractors import (
-    extract_docx_text,
-    extract_pdf_text,
     extract_txt_text,
 )
 from tests.data.generate_fixtures import (
     create_encrypted_pdf,
     create_macro_docx,
-    create_minimal_docx,
-    create_minimal_pdf,
     create_scanned_image_pdf,
     create_zip_bomb_docx,
 )
@@ -176,7 +170,10 @@ def test_unsafe_docx_archive_rejected() -> None:
     with pytest.raises(UnsafeArchiveError) as exc_info:
         validate_upload("macro.docx", macro_bytes, settings)
     assert exc_info.value.error_code == "E-FILE-007"
-    assert "macro" in exc_info.value.user_message.lower() or "macro" in str(exc_info.value).lower()
+    assert (
+        "macro" in exc_info.value.user_message.lower()
+        or "macro" in str(exc_info.value).lower()
+    )
 
     # 2. Synthetic zip bomb with ratio > 100:1
     bomb_bytes = create_zip_bomb_docx()
@@ -185,7 +182,9 @@ def test_unsafe_docx_archive_rejected() -> None:
     assert exc_info.value.error_code == "E-FILE-007"
 
 
-def test_path_like_filenames_and_safe_display_name(caplog: pytest.LogCaptureFixture) -> None:
+def test_path_like_filenames_and_safe_display_name(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     """UT-FILE-09: Path traversal in filenames neutralized; safe_display_name used; no leak in logs."""
     settings = FileSettings()
     txt_bytes = Path("tests/data/resumes/valid_resume.txt").read_bytes()

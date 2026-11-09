@@ -63,4 +63,3 @@ def validate_no_verdict_language(text: str, context: str = "rendered text") -> N
             f"Prohibited employment verdict language detected in {context}: {matches}. "
             "Automated verdicts violate NFR-15."
         )
-

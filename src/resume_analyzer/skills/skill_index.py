@@ -154,5 +154,3 @@ def get_skill_index(taxonomy_path: Path | str) -> SkillIndex:
     """Load and index a SkillTaxonomy from a JSON file with LRU caching."""
     tax = SkillTaxonomy.from_file(taxonomy_path)
     return SkillIndex(taxonomy=tax)
-
-

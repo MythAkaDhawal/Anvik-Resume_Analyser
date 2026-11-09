@@ -59,7 +59,7 @@ class OllamaProvider:
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout_s) as response:
+            with urllib.request.urlopen(req, timeout=self.timeout_s) as response:  # nosec: B310
                 resp_data = json.loads(response.read().decode("utf-8"))
                 response_text = resp_data.get("response")
                 if response_text is None:

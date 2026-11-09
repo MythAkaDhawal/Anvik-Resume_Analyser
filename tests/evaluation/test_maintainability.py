@@ -13,11 +13,9 @@ from __future__ import annotations
 
 import ast
 import json
-from pathlib import Path
 import subprocess
 import sys
-import pytest
-
+from pathlib import Path
 
 SRC_DIR = Path("src/resume_analyzer")
 RESULTS_DIR = Path("tests/evaluation/results")
@@ -77,12 +75,14 @@ def test_et_05_maintainability_and_architecture() -> None:
                     if target_layer in layer_ranks:
                         # Low layers cannot import higher layers
                         if layer_ranks[target_layer] > layer_ranks[current_layer]:
-                            arch_violations.append({
-                                "file": str(rel),
-                                "source_layer": current_layer,
-                                "target_layer": target_layer,
-                                "imported": imported_module,
-                            })
+                            arch_violations.append(
+                                {
+                                    "file": str(rel),
+                                    "source_layer": current_layer,
+                                    "target_layer": target_layer,
+                                    "imported": imported_module,
+                                }
+                            )
 
     # 2. Module line count inspection
     module_sizes = {}
@@ -126,7 +126,9 @@ def test_et_05_maintainability_and_architecture() -> None:
         "architectural_violations": arch_violations,
         "oversized_modules_count": len(oversized_modules),
         "oversized_modules": oversized_modules,
-        "cyclomatic_complexity_summary": cc_output.splitlines()[-5:] if cc_output else ["Average complexity: A (2.3)"],
+        "cyclomatic_complexity_summary": cc_output.splitlines()[-5:]
+        if cc_output
+        else ["Average complexity: A (2.3)"],
         "maintainability_index_summary": "All modules Rank A/B",
     }
 
@@ -134,5 +136,6 @@ def test_et_05_maintainability_and_architecture() -> None:
     out_file.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     # Assertions
-    assert len(arch_violations) == 0, f"Found {len(arch_violations)} architectural layering violations: {arch_violations}"
-
+    assert len(arch_violations) == 0, (
+        f"Found {len(arch_violations)} architectural layering violations: {arch_violations}"
+    )

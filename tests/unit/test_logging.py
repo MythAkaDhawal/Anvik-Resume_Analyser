@@ -14,7 +14,9 @@ def test_pii_masking_filter_masks_emails_and_phones() -> None:
     pii_filter = PIIMaskingFilter()
 
     # Test raw text masking
-    masked = pii_filter.mask_text("Contact candidate at john.doe@example.com or +1 (555) 123-4567.")
+    masked = pii_filter.mask_text(
+        "Contact candidate at john.doe@example.com or +1 (555) 123-4567."
+    )
     assert "[EMAIL_REDACTED]" in masked
     assert "john.doe@example.com" not in masked
     assert "[PHONE_REDACTED]" in masked
@@ -97,4 +99,3 @@ def test_logs_contain_no_resume_text(tmp_path: Path) -> None:
     assert candidate_phone not in content
     assert "[EMAIL_REDACTED]" in content
     assert "[PHONE_REDACTED]" in content
-

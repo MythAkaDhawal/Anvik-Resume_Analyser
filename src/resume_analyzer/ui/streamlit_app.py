@@ -6,10 +6,13 @@ deterministic Python core and optional GenAI enhancements.
 
 from __future__ import annotations
 
+import logging
+
 import streamlit as st
 
 from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.models.job import JobRequirements
+from resume_analyzer.models.results import AnalysisReport
 from resume_analyzer.reporting.exporters.base import export_batch_workbook
 from resume_analyzer.services.analysis_service import AnalysisOptions
 from resume_analyzer.storage.feedback_store import FeedbackStore
@@ -33,6 +36,8 @@ from resume_analyzer.ui.state import (
     set_page,
 )
 
+logger = logging.getLogger(__name__)
+
 st.set_page_config(
     page_title="Intelligent Resume Analyzer",
     page_icon="📄",
@@ -50,7 +55,10 @@ def main() -> None:
     st.sidebar.caption("AI-Powered Hiring Assistant")
 
     # Ensure sidebar radio matches current_page
-    if "nav_radio" not in st.session_state or st.session_state["nav_radio"] != st.session_state["current_page"]:
+    if (
+        "nav_radio" not in st.session_state
+        or st.session_state["nav_radio"] != st.session_state["current_page"]
+    ):
         st.session_state["nav_radio"] = st.session_state["current_page"]
 
     selected_nav = st.sidebar.radio(
@@ -60,7 +68,6 @@ def main() -> None:
         key="nav_radio",
     )
     st.session_state["current_page"] = selected_nav
-
 
     st.sidebar.divider()
     render_human_review_notice()
@@ -135,7 +142,6 @@ def render_job_page() -> None:
                 index=default_edu_idx,
             )
 
-
         fields_raw = st.text_input(
             "Preferred Fields of Study (comma-separated)",
             value=", ".join(existing_job.preferred_fields) if existing_job else "",
@@ -144,7 +150,9 @@ def render_job_page() -> None:
 
         context_desc = st.text_area(
             "Job Description Context (Optional)",
-            value=existing_job.description if existing_job and existing_job.description else "",
+            value=existing_job.description
+            if existing_job and existing_job.description
+            else "",
             placeholder="Full job description context...",
             max_chars=5000,
         )
@@ -178,7 +186,9 @@ def render_job_page() -> None:
                 ai_p4 = st.checkbox("P4: Upskilling Recommendations", value=True)
                 ai_p5 = st.checkbox("P5: Interview Questions", value=True)
 
-        submitted = st.form_submit_button("Save & Validate Job Requirements", use_container_width=True)
+        submitted = st.form_submit_button(
+            "Save & Validate Job Requirements", use_container_width=True
+        )
 
     if submitted:
         # Validate inputs
@@ -216,7 +226,9 @@ def render_job_page() -> None:
                     ai_recommendations=ai_p4 if ai_master else False,
                     ai_interview_questions=ai_p5 if ai_master else False,
                 )
-                st.success(f"Job requirements for '{job_obj.title}' saved successfully!")
+                st.success(
+                    f"Job requirements for '{job_obj.title}' saved successfully!"
+                )
                 if st.button("Proceed to Upload Resumes ➡️"):
                     set_page("2 Resumes")
                     st.rerun()
@@ -235,13 +247,17 @@ def render_resumes_page() -> None:
 
     job: JobRequirements | None = st.session_state.get("job")
     if not job:
-        st.warning("⚠️ No job requirements configured yet. Please complete Step 1 first.")
+        st.warning(
+            "⚠️ No job requirements configured yet. Please complete Step 1 first."
+        )
         if st.button("Go to Step 1: Define Job"):
             set_page("1 Job")
             st.rerun()
         return
 
-    st.info(f"Target Role: **{job.title}** ({len(job.required_skills)} required skills)")
+    st.info(
+        f"Target Role: **{job.title}** ({len(job.required_skills)} required skills)"
+    )
 
     uploaded_files = st.file_uploader(
         "Select candidate resumes (.pdf, .docx, .txt)",
@@ -258,7 +274,9 @@ def render_resumes_page() -> None:
 
     col_run, col_clear = st.columns([2, 1])
     with col_run:
-        run_clicked = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
+        run_clicked = st.button(
+            "🚀 Run Analysis", type="primary", use_container_width=True
+        )
     with col_clear:
         if st.button("Clear Past Results", use_container_width=True):
             clear_results()
@@ -294,8 +312,12 @@ def render_resumes_page() -> None:
         for r in result.reports:
             try:
                 store.save(r)
-            except Exception:
-                pass
+            except Exception as err:
+                logger.warning(
+                    "Could not auto-save report %s: %s",
+                    getattr(r, "report_id", "unknown"),
+                    err,
+                )
 
         st.success(
             f"Analysis complete! {len(result.reports)} succeeded, {len(result.failures)} failed."
@@ -315,7 +337,9 @@ def render_results_page() -> None:
     failures = st.session_state.get("failures", [])
 
     if not reports and not failures:
-        st.info("No analysis results found. Please upload resumes and run analysis in Step 2.")
+        st.info(
+            "No analysis results found. Please upload resumes and run analysis in Step 2."
+        )
         if st.button("Go to Step 2: Upload Resumes"):
             set_page("2 Resumes")
             st.rerun()
@@ -359,8 +383,16 @@ def render_results_page() -> None:
                 "Candidate": cand.name or "Anonymous",
                 "Score": f"{score.total_score:.1f}",
                 "Fit Band": score.fit_band.value,
-                "Matched Skills": len([s for s in r.match.skill_matches if s.match_type.value != "none"]),
-                "Missing Req": len([s for s in r.match.skill_matches if s.is_required and s.match_type.value == "none"]),
+                "Matched Skills": len(
+                    [s for s in r.match.skill_matches if s.match_type.value != "none"]
+                ),
+                "Missing Req": len(
+                    [
+                        s
+                        for s in r.match.skill_matches
+                        if s.is_required and s.match_type.value == "none"
+                    ]
+                ),
                 "Experience (Yrs)": f"{cand.total_experience_years or 0.0:.1f}",
                 "Education": cand.highest_education_level.value,
             }
@@ -372,7 +404,7 @@ def render_results_page() -> None:
     # Detailed Single Candidate View
     st.subheader("Candidate Detailed Assessment")
     cand_options = [
-        f"#{i+1}: {r.candidate.name or 'Anonymous'} (Score: {r.score.total_score:.1f} - {r.score.fit_band.value})"
+        f"#{i + 1}: {r.candidate.name or 'Anonymous'} (Score: {r.score.total_score:.1f} - {r.score.fit_band.value})"
         for i, r in enumerate(reports)
     ]
     selected_idx = st.selectbox(
@@ -432,7 +464,9 @@ def render_reports_page() -> None:
     # Batch export section if multiple reports
     if len(reports) > 1:
         st.subheader("Batch Ranking Export")
-        st.write("Export all candidate evaluations into a consolidated Excel ranking workbook.")
+        st.write(
+            "Export all candidate evaluations into a consolidated Excel ranking workbook."
+        )
         batch_xlsx = export_batch_workbook(reports)
         st.download_button(
             label=f"📊 Download Batch Ranking Workbook ({len(reports)} Candidates)",
@@ -446,7 +480,7 @@ def render_reports_page() -> None:
 
     # Individual report export section
     cand_options = [
-        f"#{i+1}: {r.candidate.name or 'Anonymous'} (Score: {r.score.total_score:.1f})"
+        f"#{i + 1}: {r.candidate.name or 'Anonymous'} (Score: {r.score.total_score:.1f})"
         for i, r in enumerate(reports)
     ]
     selected_idx = st.selectbox(
@@ -468,13 +502,17 @@ def render_reports_page() -> None:
 def render_history_page() -> None:
     """Render historical analysis viewer, retention manager, and feedback diagnostics (FR-28, NFR-19)."""
     st.title("Step 5: History & Persistence")
-    st.caption("Manage saved analyses, reload past evaluations, configure data retention, and review feedback.")
+    st.caption(
+        "Manage saved analyses, reload past evaluations, configure data retention, and review feedback."
+    )
 
     store = ResultStore()
     summaries = store.list()
 
     if not summaries:
-        st.info("No saved analyses found in `data/results/`. Run an analysis in Step 2 to generate records.")
+        st.info(
+            "No saved analyses found in `data/results/`. Run an analysis in Step 2 to generate records."
+        )
     else:
         st.subheader(f"Saved Analyses ({len(summaries)})")
         table_data = [
@@ -483,7 +521,9 @@ def render_history_page() -> None:
                 "Candidate": s.candidate_name or "Anonymous",
                 "Score": f"{s.total_score:.1f}" if s.total_score is not None else "—",
                 "Fit Band": s.fit_band or "—",
-                "Date (UTC)": s.created_at.strftime("%Y-%m-%d %H:%M") if s.created_at else "—",
+                "Date (UTC)": s.created_at.strftime("%Y-%m-%d %H:%M")
+                if s.created_at
+                else "—",
                 "Status": "✅ OK" if s.readable else "⚠️ Unreadable",
             }
             for s in summaries
@@ -508,19 +548,28 @@ def render_history_page() -> None:
 
             col_load, col_del = st.columns([1, 1])
             with col_load:
-                if st.button("📥 Reload Analysis into Results", type="primary", use_container_width=True):
+                if st.button(
+                    "📥 Reload Analysis into Results",
+                    type="primary",
+                    use_container_width=True,
+                ):
                     try:
                         loaded = store.load(chosen_summary.report_id)
                         st.session_state["reports"] = [loaded]
                         st.session_state["selected_report_idx"] = 0
                         set_page("3 Results")
-                        st.success(f"Loaded analysis for {loaded.candidate.name or 'Candidate'}")
+                        st.success(
+                            f"Loaded analysis for {loaded.candidate.name or 'Candidate'}"
+                        )
                         st.rerun()
                     except Exception as e:
                         st.error(f"Failed to reload analysis: {e}")
 
             with col_del:
-                if st.button(f"🗑️ Delete Analysis ({chosen_summary.report_id[:17]}...)", use_container_width=True):
+                if st.button(
+                    f"🗑️ Delete Analysis ({chosen_summary.report_id[:17]}...)",
+                    use_container_width=True,
+                ):
                     try:
                         store.delete(chosen_summary.report_id)
                         st.success(f"Deleted report `{chosen_summary.report_id}`")
@@ -545,13 +594,21 @@ def render_history_page() -> None:
         st.write("")
         if st.button("🧹 Purge Old Records", use_container_width=True):
             purged = store.purge_older_than(int(purge_days))
-            st.success(f"Purged {purged} analysis record(s) older than {purge_days} day(s).")
+            st.success(
+                f"Purged {purged} analysis record(s) older than {purge_days} day(s)."
+            )
             st.rerun()
 
     with st.expander("⚠️ Danger Zone: Delete All Data", expanded=False):
         st.warning("This will permanently remove all saved analysis records from disk.")
-        confirm_delete_all = st.checkbox("I confirm that I want to delete all saved analyses.")
-        if st.button("Permanently Delete All Analyses", type="secondary", disabled=not confirm_delete_all):
+        confirm_delete_all = st.checkbox(
+            "I confirm that I want to delete all saved analyses."
+        )
+        if st.button(
+            "Permanently Delete All Analyses",
+            type="secondary",
+            disabled=not confirm_delete_all,
+        ):
             count = store.delete_all()
             st.success(f"Successfully deleted all {count} saved analysis file(s).")
             st.rerun()
@@ -563,7 +620,9 @@ def render_history_page() -> None:
     fb_summary = fb_store.summarize()
 
     if fb_summary.total_submissions == 0:
-        st.info("No reviewer feedback recorded yet (`data/feedback.jsonl`). Submit feedback in Step 3 to populate.")
+        st.info(
+            "No reviewer feedback recorded yet (`data/feedback.jsonl`). Submit feedback in Step 3 to populate."
+        )
     else:
         m1, m2 = st.columns(2)
         with m1:

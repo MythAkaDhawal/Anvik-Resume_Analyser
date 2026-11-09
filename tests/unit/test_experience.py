@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import date
-import pytest
 
 from resume_analyzer.models.candidate import ExperienceEntry
 from resume_analyzer.models.enums import Provenance
@@ -121,4 +120,3 @@ def test_ut_exp_06_intern_handling():
     without_intern = total_experience_years(entries, REF_DATE, count_internships=False)
     assert with_intern is not None and without_intern is not None
     assert with_intern > without_intern
-

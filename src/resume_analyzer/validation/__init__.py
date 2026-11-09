@@ -13,4 +13,3 @@ __all__ = [
     "validate_candidate",
     "validate_job",
 ]
-

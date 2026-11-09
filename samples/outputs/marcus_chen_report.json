@@ -1,0 +1,382 @@
+{
+  "schema_version": "1.0",
+  "report_id": "20261109T101547Z_5e8b582c_9852",
+  "created_at": "2026-11-09T10:15:47.259124Z",
+  "app_version": "0.1.0",
+  "config_snapshot": {
+    "strategy": "weighted",
+    "weights": {
+      "required_skills": 0.5,
+      "experience": 0.2,
+      "education": 0.15,
+      "optional_skills": 0.15
+    },
+    "fuzzy_threshold": 85.0,
+    "ai": {
+      "enabled": false,
+      "provider": "none",
+      "model": null
+    }
+  },
+  "candidate": {
+    "candidate_id": "5e8b582c1f1c",
+    "name": "Marcus Chen",
+    "email": "marcus.chen@example.org",
+    "skills": [
+      {
+        "name": "Go",
+        "canonical_name": "Go",
+        "category": "Programming Languages",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 3
+      },
+      {
+        "name": "Docker",
+        "canonical_name": "Docker",
+        "category": "Cloud & DevOps",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 2
+      },
+      {
+        "name": "Kubernetes",
+        "canonical_name": "Kubernetes",
+        "category": "Cloud & DevOps",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 3
+      },
+      {
+        "name": "PostgreSQL",
+        "canonical_name": "PostgreSQL",
+        "category": "Databases",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 2
+      },
+      {
+        "name": "Redis",
+        "canonical_name": "Redis",
+        "category": "Databases",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 2
+      },
+      {
+        "name": "gRPC",
+        "canonical_name": "gRPC",
+        "category": "Frameworks & Libraries",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 1
+      },
+      {
+        "name": "Linux",
+        "canonical_name": "Linux",
+        "category": "Cloud & DevOps",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 1
+      },
+      {
+        "name": "Microservices",
+        "canonical_name": "Microservices",
+        "category": "Other",
+        "category_provenance": null,
+        "provenance": "extracted_rule",
+        "mentions": 2
+      }
+    ],
+    "experience": [
+      {
+        "job_title": "Senior Backend Engineer",
+        "company": "CloudScale Technologies",
+        "start": "2021-03-01",
+        "end": null,
+        "is_current": true,
+        "duration_months": 68,
+        "provenance": "extracted_rule"
+      },
+      {
+        "job_title": "Software Engineer",
+        "company": "MicroSys",
+        "start": "2019-09-01",
+        "end": "2021-02-01",
+        "is_current": false,
+        "duration_months": 17,
+        "provenance": "extracted_rule"
+      }
+    ],
+    "education": [
+      {
+        "degree": "Master of Science in Software Engineering",
+        "level": 4,
+        "field_of_study": "Science in Software Engineering",
+        "institution": "University of Washington",
+        "provenance": "extracted_rule"
+      }
+    ],
+    "total_experience_years": 7.1,
+    "highest_education_level": 4,
+    "source_format": "txt",
+    "parse_warnings": [],
+    "injection_indicators": [],
+    "parser_version": "0.1.0"
+  },
+  "job": {
+    "job_id": "senior-python-developer",
+    "job_title": "Senior Python Developer",
+    "description": "Senior backend developer to design, build, and maintain mission-critical Python microservices.",
+    "required_skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes",
+      "Redis"
+    ],
+    "optional_skills": [
+      "GraphQL",
+      "CI/CD",
+      "AWS",
+      "Terraform"
+    ],
+    "min_experience_years": 5.0,
+    "min_education_level": 3,
+    "preferred_fields": [
+      "Computer Science",
+      "Software Engineering"
+    ]
+  },
+  "match": {
+    "skill_matches": [
+      {
+        "target": "Python",
+        "target_canonical": "Python",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "FastAPI",
+        "target_canonical": "FastAPI",
+        "is_required": true,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "PostgreSQL",
+        "target_canonical": "PostgreSQL",
+        "is_required": true,
+        "matched_candidate_skill": "PostgreSQL",
+        "match_type": "exact",
+        "similarity": 100.0,
+        "credit": 1.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Docker",
+        "target_canonical": "Docker",
+        "is_required": true,
+        "matched_candidate_skill": "Docker",
+        "match_type": "exact",
+        "similarity": 100.0,
+        "credit": 1.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Kubernetes",
+        "target_canonical": "Kubernetes",
+        "is_required": true,
+        "matched_candidate_skill": "Kubernetes",
+        "match_type": "exact",
+        "similarity": 100.0,
+        "credit": 1.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Redis",
+        "target_canonical": "Redis",
+        "is_required": true,
+        "matched_candidate_skill": "Redis",
+        "match_type": "exact",
+        "similarity": 100.0,
+        "credit": 1.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "GraphQL",
+        "target_canonical": "GraphQL",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "CI/CD",
+        "target_canonical": "CI/CD",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "AWS",
+        "target_canonical": "AWS",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      },
+      {
+        "target": "Terraform",
+        "target_canonical": "Terraform",
+        "is_required": false,
+        "matched_candidate_skill": null,
+        "match_type": "none",
+        "similarity": 0.0,
+        "credit": 0.0,
+        "provenance": "computed"
+      }
+    ],
+    "required_credit": 0.6667,
+    "optional_credit": 0.0,
+    "experience": {
+      "required_years": 5.0,
+      "candidate_years": 7.1,
+      "status": "met",
+      "subscore": 1.0,
+      "gap_years": 0.0,
+      "provenance": "computed"
+    },
+    "education": {
+      "required_level": 3,
+      "candidate_level": 4,
+      "status": "met",
+      "field_match": true,
+      "subscore": 1.0,
+      "provenance": "computed"
+    }
+  },
+  "score": {
+    "strategy_name": "weighted",
+    "total_score": 68.3,
+    "components": [
+      {
+        "name": "required_skills",
+        "status": "evaluated",
+        "weight": 0.5,
+        "subscore": 0.6667,
+        "points": 33.3,
+        "explanation": "Weight 0.50 (effective 0.50) x 0.6667"
+      },
+      {
+        "name": "experience",
+        "status": "evaluated",
+        "weight": 0.2,
+        "subscore": 1.0,
+        "points": 20.0,
+        "explanation": "Weight 0.20 (effective 0.20) x 1.0000"
+      },
+      {
+        "name": "education",
+        "status": "evaluated",
+        "weight": 0.15,
+        "subscore": 1.0,
+        "points": 15.0,
+        "explanation": "Weight 0.15 (effective 0.15) x 1.0000"
+      },
+      {
+        "name": "optional_skills",
+        "status": "evaluated",
+        "weight": 0.15,
+        "subscore": 0.0,
+        "points": 0.0,
+        "explanation": "Weight 0.15 (effective 0.15) x 0.0000"
+      }
+    ],
+    "coverage": 1.0,
+    "fit_band": "moderate",
+    "flags": [
+      "MISSING_REQUIRED_SKILLS"
+    ],
+    "provenance": "computed"
+  },
+  "ai": {
+    "categorization": {
+      "feature": "categorization",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "explanation": {
+      "feature": "explanation",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "recommendations": {
+      "feature": "recommendations",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "interview_questions": {
+      "feature": "interview_questions",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    },
+    "extraction_status": {
+      "feature": "extraction",
+      "status": "disabled",
+      "data": null,
+      "error_code": null,
+      "prompt_id": null,
+      "prompt_version": null,
+      "model": null,
+      "provenance": "ai_generated",
+      "dropped_items": 0
+    }
+  },
+  "flags": [
+    {
+      "code": "MISSING_REQUIRED_SKILLS",
+      "message": "2 required skill(s) not found in resume."
+    }
+  ],
+  "human_review_notice": "This report supports, and does not replace, human judgement. Scores reflect alignment between stated requirements and information extracted from the resume. AI-generated sections are interpretations that have not been verified. Do not use this report as the sole basis for any employment decision."
+}

@@ -15,7 +15,7 @@ from resume_analyzer.config.settings import get_settings
 from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
-from resume_analyzer.services.batch_runner import BatchResult, BatchRunner
+from resume_analyzer.services.batch_runner import BatchRunner
 from resume_analyzer.skills.skill_index import get_skill_index
 from tests.data.generate_fixtures import create_encrypted_pdf
 
@@ -74,18 +74,29 @@ def test_it_04_mixed_files_batch_pipeline(it04_job: JobRequirements) -> None:
     assert all(p[1] == len(files) for p in progress_log)
 
     # 2. Successful reports must include the 3 valid resumes
-    assert len(batch_result.reports) == 3, f"Expected 3 valid reports, got {len(batch_result.reports)}"
+    assert len(batch_result.reports) == 3, (
+        f"Expected 3 valid reports, got {len(batch_result.reports)}"
+    )
     # Reports must be sorted descending by total score
     scores = [r.score.total_score for r in batch_result.reports]
     assert scores == sorted(scores, reverse=True)
 
     # 3. Failures must isolate the 4 invalid files
-    assert len(batch_result.failures) == 4, f"Expected 4 failures, got {len(batch_result.failures)}"
+    assert len(batch_result.failures) == 4, (
+        f"Expected 4 failures, got {len(batch_result.failures)}"
+    )
     failed_filenames = {f.display_name for f in batch_result.failures}
-    expected_failures = {"encrypted_2.pdf", "corrupt_4.docx", "empty_6.txt", "oversize_7.txt"}
+    expected_failures = {
+        "encrypted_2.pdf",
+        "corrupt_4.docx",
+        "empty_6.txt",
+        "oversize_7.txt",
+    }
     assert failed_filenames == expected_failures
 
     # Each failure must have a standardized error code and safe message
     for f in batch_result.failures:
-        assert f.error_code.startswith("E-"), f"Failure error code {f.error_code} does not start with E-"
+        assert f.error_code.startswith("E-"), (
+            f"Failure error code {f.error_code} does not start with E-"
+        )
         assert f.user_message, f"Failure user_message is empty for {f.display_name}"

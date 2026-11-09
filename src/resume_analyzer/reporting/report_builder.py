@@ -51,7 +51,9 @@ class ReportBuilder:
             ts = ts.replace(tzinfo=UTC)
 
         ts_part = ts.strftime("%Y%m%dT%H%M%SZ")
-        cid_hex = candidate_id[:8].lower() if len(candidate_id) >= 8 else uuid.uuid4().hex[:8]
+        cid_hex = (
+            candidate_id[:8].lower() if len(candidate_id) >= 8 else uuid.uuid4().hex[:8]
+        )
         rand_hex = uuid.uuid4().hex[:4]
         return f"{ts_part}_{cid_hex}_{rand_hex}"
 
@@ -81,7 +83,8 @@ class ReportBuilder:
 
         # 2. Missing required skills
         missing_required = [
-            m for m in match.skill_matches
+            m
+            for m in match.skill_matches
             if m.is_required and (m.credit < 0.5 or m.match_type == MatchType.NONE)
         ]
         if missing_required:
@@ -127,7 +130,8 @@ class ReportBuilder:
                 ai.extraction_status,
             ]
             has_ai_issue = any(
-                f is not None and f.status in (FeatureStatus.UNAVAILABLE, FeatureStatus.BLOCKED)
+                f is not None
+                and f.status in (FeatureStatus.UNAVAILABLE, FeatureStatus.BLOCKED)
                 for f in features
             )
             if has_ai_issue:
@@ -153,7 +157,9 @@ class ReportBuilder:
         if settings is not None:
             if hasattr(settings, "fuzzy") and hasattr(settings.fuzzy, "threshold"):
                 fuzzy_threshold = settings.fuzzy.threshold
-            elif hasattr(settings, "matching") and hasattr(settings.matching, "fuzzy_threshold"):
+            elif hasattr(settings, "matching") and hasattr(
+                settings.matching, "fuzzy_threshold"
+            ):
                 fuzzy_threshold = settings.matching.fuzzy_threshold
             if hasattr(settings, "ai"):
                 ai_enabled = bool(getattr(settings.ai, "enabled", False))
@@ -207,7 +213,11 @@ class ReportBuilder:
 
         report_id = cls.generate_report_id(candidate.candidate_id, created)
         app_version = "0.1.0"
-        if settings is not None and hasattr(settings, "app") and hasattr(settings.app, "version"):
+        if (
+            settings is not None
+            and hasattr(settings, "app")
+            and hasattr(settings.app, "version")
+        ):
             app_version = settings.app.version
 
         ai_insights = ai or AIInsights()

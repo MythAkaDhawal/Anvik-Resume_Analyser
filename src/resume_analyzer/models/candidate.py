@@ -127,4 +127,3 @@ class Candidate(CandidateBaseModel):
     parse_warnings: list[ParseWarning] = Field(default_factory=list)
     injection_indicators: list[str] = Field(default_factory=list)
     parser_version: str
-

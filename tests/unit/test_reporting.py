@@ -6,14 +6,25 @@ AI unavailability handling, report flags, and JSON round-trip serialization.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-import json
 import re
+from datetime import UTC, datetime
 
 import pytest
 
-from resume_analyzer.models.candidate import Candidate, EducationEntry, ExperienceEntry, ParseWarning, Skill
-from resume_analyzer.models.enums import EducationLevel, FeatureStatus, FitBand, MatchType, Provenance
+from resume_analyzer.models.candidate import (
+    Candidate,
+    EducationEntry,
+    ExperienceEntry,
+    ParseWarning,
+    Skill,
+)
+from resume_analyzer.models.enums import (
+    EducationLevel,
+    FeatureStatus,
+    FitBand,
+    MatchType,
+    Provenance,
+)
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
     DEFAULT_HUMAN_REVIEW_NOTICE,
@@ -303,8 +314,12 @@ def test_ut_rep_02_provenance_tagging(
     )
 
     # Check skill provenances
-    rule_skills = [s for s in report.candidate.skills if s.provenance == Provenance.EXTRACTED_RULE]
-    ai_skills = [s for s in report.candidate.skills if s.provenance == Provenance.EXTRACTED_AI]
+    rule_skills = [
+        s for s in report.candidate.skills if s.provenance == Provenance.EXTRACTED_RULE
+    ]
+    ai_skills = [
+        s for s in report.candidate.skills if s.provenance == Provenance.EXTRACTED_AI
+    ]
     assert len(rule_skills) == 2
     assert len(ai_skills) == 1
 
@@ -360,7 +375,9 @@ def test_ut_rep_03_human_review_notice_and_no_verdict_language(
     assert contains_verdict_language("Reject candidate due to low score")
 
     # Full report text must not contain automated verdicts
-    validate_no_verdict_language(report_json, context="AnalysisReport JSON serialization")
+    validate_no_verdict_language(
+        report_json, context="AnalysisReport JSON serialization"
+    )
 
 
 # -----------------------------------------------------------------------------
@@ -425,7 +442,7 @@ def test_ut_rep_05_json_roundtrip_and_report_id(
         job=sample_job,
         match=sample_match_result,
         score=sample_score_result,
-        created_at=datetime(2026, 11, 8, 10, 15, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 11, 8, 10, 15, 0, tzinfo=UTC),
     )
 
     # Check report_id format: ^\d{8}T\d{6}Z_[0-9a-f]{8}_[0-9a-f]{4}$
@@ -453,7 +470,10 @@ def test_report_builder_injection_and_quality_flags(
     sample_score_result: ScoreResult,
 ) -> None:
     """Assert report builder accurately converts injection and parser warnings into flags."""
-    sample_candidate.injection_indicators = ["IGNORE_INSTRUCTIONS", "SCORE_MANIPULATION"]
+    sample_candidate.injection_indicators = [
+        "IGNORE_INSTRUCTIONS",
+        "SCORE_MANIPULATION",
+    ]
     sample_candidate.parse_warnings.append(
         ParseWarning(code="LOW_TEXT_QUALITY", message="Garbled characters detected")
     )

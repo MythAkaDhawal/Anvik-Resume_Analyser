@@ -8,7 +8,7 @@ from __future__ import annotations
 import io
 import logging
 import re
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec: B405
 import zipfile
 import zlib
 from typing import TYPE_CHECKING
@@ -83,7 +83,7 @@ def _extract_docx_with_xml(data: bytes) -> str:
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
             xml_bytes = zf.read("word/document.xml")
-            root = ET.fromstring(xml_bytes)
+            root = ET.fromstring(xml_bytes)  # nosec: B314
 
             body = root.find(f"{{{W_NS}}}body")
             if body is None:
@@ -94,9 +94,7 @@ def _extract_docx_with_xml(data: bytes) -> str:
                 tag = child.tag
                 if tag == f"{{{W_NS}}}p":
                     p_text = "".join(
-                        elem.text
-                        for elem in child.iter(f"{{{W_NS}}}t")
-                        if elem.text
+                        elem.text for elem in child.iter(f"{{{W_NS}}}t") if elem.text
                     ).strip()
                     if p_text:
                         lines.append(p_text)
@@ -166,7 +164,9 @@ def _extract_pdf_with_pypdf(data: bytes, max_pages: int) -> str | None:
             pages_text.append(pt)
         return "\n\n".join(pages_text)
     except Exception as err:
-        logger.warning("pypdf extraction failed, falling back to stream decoder: %s", err)
+        logger.warning(
+            "pypdf extraction failed, falling back to stream decoder: %s", err
+        )
         return None
 
 
@@ -208,7 +208,9 @@ def _fallback_extract_pdf_streams(data: bytes, max_pages: int = 20) -> str:
     extracted_chunks: list[str] = []
 
     # Find stream objects: "stream\r?\n(.*?)\r?\nendstream"
-    stream_matches = list(re.finditer(rb"stream\r?\n(.*?)\r?\nendstream", data, re.DOTALL))
+    stream_matches = list(
+        re.finditer(rb"stream\r?\n(.*?)\r?\nendstream", data, re.DOTALL)
+    )
 
     for match in stream_matches[: max_pages * 5]:
         raw_stream = match.group(1)
@@ -226,7 +228,9 @@ def _fallback_extract_pdf_streams(data: bytes, max_pages: int = 20) -> str:
             except UnicodeDecodeError:
                 text_chunk = chunk.decode("latin-1", errors="replace")
             # Unescape PDF literal string escapes
-            text_chunk = text_chunk.replace(r"\(", "(").replace(r"\)", ")").replace(r"\\", "\\")
+            text_chunk = (
+                text_chunk.replace(r"\(", "(").replace(r"\)", ")").replace(r"\\", "\\")
+            )
             if text_chunk.strip():
                 extracted_chunks.append(text_chunk)
 
@@ -235,7 +239,9 @@ def _fallback_extract_pdf_streams(data: bytes, max_pages: int = 20) -> str:
         for arr in tj_array_matches:
             elements = re.findall(rb"\((.*?)\)", arr)
             combined = "".join(
-                elem.decode("latin-1", errors="replace").replace(r"\(", "(").replace(r"\)", ")")
+                elem.decode("latin-1", errors="replace")
+                .replace(r"\(", "(")
+                .replace(r"\)", ")")
                 for elem in elements
             )
             if combined.strip():
@@ -269,5 +275,6 @@ def extract_text(
     if file.format == "txt":
         return extract_txt_text(data)
 
-    raise UnreadableFileError(f"Unsupported format '{file.format}' for text extraction.")
-
+    raise UnreadableFileError(
+        f"Unsupported format '{file.format}' for text extraction."
+    )

@@ -317,4 +317,3 @@ def config_snapshot(settings: Settings) -> dict[str, Any]:
             "model": settings.ai.model,
         },
     }
-

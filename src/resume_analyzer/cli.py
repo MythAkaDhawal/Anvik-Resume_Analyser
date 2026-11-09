@@ -51,7 +51,9 @@ def load_job_file(path: Path | str) -> JobRequirements:
         try:
             data = yaml.safe_load(raw)
         except Exception as ye:
-            raise DataValidationError(f"Job file '{p}' is not valid JSON or YAML: {ye}") from ye
+            raise DataValidationError(
+                f"Job file '{p}' is not valid JSON or YAML: {ye}"
+            ) from ye
 
     if not isinstance(data, dict):
         raise DataValidationError(f"Job file '{p}' must contain a key-value mapping.")
@@ -118,11 +120,15 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     print(f"Overall Score:   {report.score.total_score:.1f} / 100")
     print(f"Fit Band:        {report.score.fit_band.value}")
     print(f"Strategy:        {report.strategy_used}")
-    print(f"Matched Skills:  {len(report.match.matched_skills)} / {len(job.required_skills)} required")
+    print(
+        f"Matched Skills:  {len(report.match.matched_skills)} / {len(job.required_skills)} required"
+    )
     print(f"Missing Req:     {', '.join(report.match.missing_required) or 'None'}")
     exp_yrs = report.candidate.total_experience_years or 0.0
     print(f"Experience:      {exp_yrs:.1f} yrs ({report.match.experience_eval.status})")
-    print(f"Education:       {report.candidate.highest_education_level.name} ({report.match.education_eval.status})")
+    print(
+        f"Education:       {report.candidate.highest_education_level.name} ({report.match.education_eval.status})"
+    )
     print(f"Report ID:       {report.report_id}")
     print("--------------------------------\n")
 
@@ -133,7 +139,9 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         for fmt in args.format:
             try:
                 exporter = get_exporter(fmt)
-                target_path = out_dir / f"report_{report.candidate.candidate_id}.{fmt.lower()}"
+                target_path = (
+                    out_dir / f"report_{report.candidate.candidate_id}.{fmt.lower()}"
+                )
                 exporter.export_to_file(report, target_path)
                 print(f"Exported {fmt.upper()} report to: {target_path}")
             except Exception as e:
@@ -157,10 +165,16 @@ def cmd_batch(args: argparse.Namespace) -> int:
 
     # Discover candidate files
     valid_exts = {".pdf", ".docx", ".txt"}
-    files_to_process = [p for p in resumes_dir.iterdir() if p.is_file() and p.suffix.lower() in valid_exts]
+    files_to_process = [
+        p
+        for p in resumes_dir.iterdir()
+        if p.is_file() and p.suffix.lower() in valid_exts
+    ]
 
     if not files_to_process:
-        sys.stderr.write(f"Error: No resume files (.pdf, .docx, .txt) found in '{resumes_dir}'\n")
+        sys.stderr.write(
+            f"Error: No resume files (.pdf, .docx, .txt) found in '{resumes_dir}'\n"
+        )
         return 2
 
     ai_enabled = args.ai.lower() == "on"
@@ -177,6 +191,7 @@ def cmd_batch(args: argparse.Namespace) -> int:
     # Progress bar setup using tqdm
     try:
         from tqdm import tqdm
+
         pbar = tqdm(total=len(files_to_process), desc="Screening resumes", unit="file")
 
         def progress_cb(done: int, total: int, current_file: str) -> None:
@@ -191,7 +206,9 @@ def cmd_batch(args: argparse.Namespace) -> int:
     service = AnalysisService()
     runner = BatchRunner(analysis_service=service)
 
-    result = runner.run_paths(files_to_process, job=job, options=opts, progress=progress_cb)
+    result = runner.run_paths(
+        files_to_process, job=job, options=opts, progress=progress_cb
+    )
 
     if pbar is not None:
         pbar.close()
@@ -207,12 +224,16 @@ def cmd_batch(args: argparse.Namespace) -> int:
 
     # Print ranked summary
     print("\n--- CANDIDATE RANKINGS ---")
-    print(f"{'Rank':<5} {'Candidate Name':<25} {'Score':<8} {'Fit Band':<12} {'Matched Skills'}")
+    print(
+        f"{'Rank':<5} {'Candidate Name':<25} {'Score':<8} {'Fit Band':<12} {'Matched Skills'}"
+    )
     print("-" * 70)
     for idx, r in enumerate(result.reports, start=1):
         cname = r.candidate.name or "Anonymous"
         matched_cnt = f"{len(r.match.matched_skills)}/{len(job.required_skills)}"
-        print(f"{idx:<5} {cname:<25} {r.score.total_score:<8.1f} {r.score.fit_band.value:<12} {matched_cnt}")
+        print(
+            f"{idx:<5} {cname:<25} {r.score.total_score:<8.1f} {r.score.fit_band.value:<12} {matched_cnt}"
+        )
     print("-" * 70)
 
     # Persist batch reports unless disabled
@@ -241,10 +262,14 @@ def cmd_batch(args: argparse.Namespace) -> int:
             try:
                 exporter = get_exporter(fmt)
                 for r in result.reports:
-                    target = out_dir / f"report_{r.candidate.candidate_id}.{fmt.lower()}"
+                    target = (
+                        out_dir / f"report_{r.candidate.candidate_id}.{fmt.lower()}"
+                    )
                     exporter.export_to_file(r, target)
             except Exception as e:
-                sys.stderr.write(f"Warning: Failed to export individual {fmt} reports: {e}\n")
+                sys.stderr.write(
+                    f"Warning: Failed to export individual {fmt} reports: {e}\n"
+                )
 
     # Exit code: 0 if no failures; 1 if one or more files failed
     return 1 if result.failures else 0
@@ -254,11 +279,17 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
     """Execute throughput benchmark on the deterministic parsing and matching pipeline (M-02)."""
     resumes_dir = Path(args.resumes_dir)
     if not resumes_dir.is_dir():
-        sys.stderr.write(f"Error: Benchmark resumes directory not found: '{resumes_dir}'\n")
+        sys.stderr.write(
+            f"Error: Benchmark resumes directory not found: '{resumes_dir}'\n"
+        )
         return 2
 
     valid_exts = {".pdf", ".docx", ".txt"}
-    files = [p for p in resumes_dir.iterdir() if p.is_file() and p.suffix.lower() in valid_exts]
+    files = [
+        p
+        for p in resumes_dir.iterdir()
+        if p.is_file() and p.suffix.lower() in valid_exts
+    ]
     if not files:
         sys.stderr.write(f"Error: No resume files found in '{resumes_dir}'\n")
         return 2
@@ -276,7 +307,9 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
     runner = BatchRunner(analysis_service=service)
     opts = AnalysisOptions(strategy="weighted", ai_enabled=False)
 
-    print(f"\nRunning deterministic throughput benchmark ({runs} run(s) over {len(files)} resume(s))...")
+    print(
+        f"\nRunning deterministic throughput benchmark ({runs} run(s) over {len(files)} resume(s))..."
+    )
     latencies: list[float] = []
 
     for run_idx in range(1, runs + 1):
@@ -285,7 +318,9 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
         elapsed = time.perf_counter() - start_t
         latencies.append(elapsed)
         throughput = len(files) / elapsed if elapsed > 0 else 0
-        print(f"  Run {run_idx}: {elapsed:.3f}s ({throughput:.1f} resumes/sec, {len(res.reports)} parsed, {len(res.failures)} failures)")
+        print(
+            f"  Run {run_idx}: {elapsed:.3f}s ({throughput:.1f} resumes/sec, {len(res.reports)} parsed, {len(res.failures)} failures)"
+        )
 
     avg_elapsed = sum(latencies) / len(latencies)
     avg_throughput = len(files) / avg_elapsed if avg_elapsed > 0 else 0
@@ -306,7 +341,9 @@ def cmd_list(args: argparse.Namespace) -> int:
         return 0
 
     print(f"\nFound {len(summaries)} saved analyses in data/results/:")
-    print(f"{'Report ID':<35} {'Candidate':<25} {'Score':<8} {'Fit Band':<10} {'Status'}")
+    print(
+        f"{'Report ID':<35} {'Candidate':<25} {'Score':<8} {'Fit Band':<10} {'Status'}"
+    )
     print("-" * 90)
     for s in summaries:
         cand = s.candidate_name or "Anonymous"
@@ -349,7 +386,9 @@ def cmd_purge(args: argparse.Namespace) -> int:
     days = args.days
     store = ResultStore()
     if not args.yes:
-        confirm = input(f"Are you sure you want to purge analyses older than {days} days? [y/N]: ")
+        confirm = input(
+            f"Are you sure you want to purge analyses older than {days} days? [y/N]: "
+        )
         if confirm.strip().lower() != "y":
             print("Purge cancelled.")
             return 0
@@ -382,7 +421,6 @@ def cmd_feedback_summary(args: argparse.Namespace) -> int:
     return 0
 
 
-
 def build_parser() -> argparse.ArgumentParser:
     """Construct CLI argument parser with subcommands."""
     parser = argparse.ArgumentParser(
@@ -392,29 +430,74 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # analyze
-    p_analyze = subparsers.add_parser("analyze", help="Analyze a single resume against a job")
-    p_analyze.add_argument("--resume", required=True, help="Path to resume file (.pdf, .docx, .txt)")
-    p_analyze.add_argument("--job", required=True, help="Path to job requirements JSON/YAML file")
-    p_analyze.add_argument("--strategy", choices=["weighted", "basic"], default="weighted", help="Scoring strategy")
-    p_analyze.add_argument("--ai", choices=["on", "off"], default="off", help="Enable AI features")
-    p_analyze.add_argument("--format", nargs="+", choices=["html", "pdf", "xlsx"], help="Report export format(s)")
+    p_analyze = subparsers.add_parser(
+        "analyze", help="Analyze a single resume against a job"
+    )
+    p_analyze.add_argument(
+        "--resume", required=True, help="Path to resume file (.pdf, .docx, .txt)"
+    )
+    p_analyze.add_argument(
+        "--job", required=True, help="Path to job requirements JSON/YAML file"
+    )
+    p_analyze.add_argument(
+        "--strategy",
+        choices=["weighted", "basic"],
+        default="weighted",
+        help="Scoring strategy",
+    )
+    p_analyze.add_argument(
+        "--ai", choices=["on", "off"], default="off", help="Enable AI features"
+    )
+    p_analyze.add_argument(
+        "--format",
+        nargs="+",
+        choices=["html", "pdf", "xlsx"],
+        help="Report export format(s)",
+    )
     p_analyze.add_argument("--output-dir", help="Directory to save exported reports")
-    p_analyze.add_argument("--no-save", action="store_true", help="Do not persist result to disk")
+    p_analyze.add_argument(
+        "--no-save", action="store_true", help="Do not persist result to disk"
+    )
 
     # batch
-    p_batch = subparsers.add_parser("batch", help="Batch analyze resumes in a directory")
-    p_batch.add_argument("--resumes-dir", required=True, help="Directory containing resumes")
-    p_batch.add_argument("--job", required=True, help="Path to job requirements JSON/YAML file")
-    p_batch.add_argument("--strategy", choices=["weighted", "basic"], default="weighted", help="Scoring strategy")
-    p_batch.add_argument("--ai", choices=["on", "off"], default="off", help="Enable AI features")
+    p_batch = subparsers.add_parser(
+        "batch", help="Batch analyze resumes in a directory"
+    )
+    p_batch.add_argument(
+        "--resumes-dir", required=True, help="Directory containing resumes"
+    )
+    p_batch.add_argument(
+        "--job", required=True, help="Path to job requirements JSON/YAML file"
+    )
+    p_batch.add_argument(
+        "--strategy",
+        choices=["weighted", "basic"],
+        default="weighted",
+        help="Scoring strategy",
+    )
+    p_batch.add_argument(
+        "--ai", choices=["on", "off"], default="off", help="Enable AI features"
+    )
     p_batch.add_argument("--output-dir", help="Directory to save exported reports")
-    p_batch.add_argument("--format", nargs="+", choices=["xlsx", "html", "pdf"], default=["xlsx"], help="Export formats")
+    p_batch.add_argument(
+        "--format",
+        nargs="+",
+        choices=["xlsx", "html", "pdf"],
+        default=["xlsx"],
+        help="Export formats",
+    )
     p_batch.add_argument("--workers", type=int, default=1, help="Worker count")
-    p_batch.add_argument("--no-save", action="store_true", help="Do not persist results to disk")
+    p_batch.add_argument(
+        "--no-save", action="store_true", help="Do not persist results to disk"
+    )
 
     # benchmark
-    p_bench = subparsers.add_parser("benchmark", help="Measure deterministic throughput (M-02)")
-    p_bench.add_argument("--resumes-dir", required=True, help="Directory containing resumes")
+    p_bench = subparsers.add_parser(
+        "benchmark", help="Measure deterministic throughput (M-02)"
+    )
+    p_bench.add_argument(
+        "--resumes-dir", required=True, help="Directory containing resumes"
+    )
     p_bench.add_argument("--runs", type=int, default=3, help="Number of benchmark runs")
 
     # list
@@ -423,7 +506,12 @@ def build_parser() -> argparse.ArgumentParser:
     # export
     p_exp = subparsers.add_parser("export", help="Re-export saved analysis")
     p_exp.add_argument("--id", required=True, help="Report ID to export")
-    p_exp.add_argument("--format", choices=["html", "pdf", "xlsx"], default="html", help="Export format")
+    p_exp.add_argument(
+        "--format",
+        choices=["html", "pdf", "xlsx"],
+        default="html",
+        help="Export format",
+    )
     p_exp.add_argument("--output-dir", default=".", help="Output directory")
 
     # purge

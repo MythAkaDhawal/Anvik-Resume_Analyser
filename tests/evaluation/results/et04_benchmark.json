@@ -11,26 +11,26 @@
   "pt01_skill_index_latency": {
     "taxonomy_load_seconds": 0.0009,
     "index_build_seconds": 0.0011,
-    "total_init_seconds": 0.0019,
+    "total_init_seconds": 0.002,
     "total_canonical_skills": 325
   },
   "throughput_resumes_per_second": {
-    "mean": 173.84,
+    "mean": 184.54,
     "passes": [
-      109.19,
-      178.7,
-      212.12,
-      262.93,
-      106.26
+      142.06,
+      255.32,
+      217.19,
+      211.45,
+      96.67
     ]
   },
   "latency_milliseconds": {
-    "median_ms": 3.07,
-    "p95_ms": 31.9
+    "median_ms": 3.0,
+    "p95_ms": 29.71
   },
   "export_throughput_per_second": {
-    "html": 2230.03,
-    "pdf": 15.1,
-    "xlsx": 17.7
+    "html": 2283.29,
+    "pdf": 16.9,
+    "xlsx": 20.79
   }
 }

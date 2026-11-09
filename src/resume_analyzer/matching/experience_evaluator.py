@@ -68,4 +68,3 @@ def evaluate_experience(
         subscore=subscore,
         gap_years=gap,
     )
-

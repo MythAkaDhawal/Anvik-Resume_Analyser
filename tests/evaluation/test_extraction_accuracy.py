@@ -8,9 +8,10 @@ Saves honest baseline evaluation measurements to tests/evaluation/results/et01_b
 
 from __future__ import annotations
 
-from datetime import date
 import json
+from datetime import date
 from pathlib import Path
+
 import pytest
 
 from resume_analyzer.config.settings import get_settings
@@ -35,7 +36,9 @@ def parser() -> ResumeParser:
 def test_et_01_baseline_extraction_accuracy(parser: ResumeParser):
     """ET-01: Run extraction benchmark against gold dataset and persist results."""
     gold_files = sorted(GOLD_DIR.glob("*.json"))
-    assert len(gold_files) >= 15, f"Expected at least 15 gold files, found {len(gold_files)}"
+    assert len(gold_files) >= 15, (
+        f"Expected at least 15 gold files, found {len(gold_files)}"
+    )
 
     settings = get_settings()
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -55,7 +58,9 @@ def test_et_01_baseline_extraction_accuracy(parser: ResumeParser):
     for gf in gold_files:
         gold = json.loads(gf.read_text(encoding="utf-8"))
         res_file = RESUMES_DIR / gold["resume_filename"]
-        assert res_file.exists(), f"Resume file {res_file} missing for gold annotation {gf}"
+        assert res_file.exists(), (
+            f"Resume file {res_file} missing for gold annotation {gf}"
+        )
 
         ext = res_file.suffix.lower().lstrip(".")
         format_counts[ext] = format_counts.get(ext, 0) + 1
@@ -85,7 +90,11 @@ def test_et_01_baseline_extraction_accuracy(parser: ResumeParser):
         email_match = False
         if gold_email is None and extracted_email is None:
             email_match = True
-        elif gold_email and extracted_email and gold_email.lower() == extracted_email.lower():
+        elif (
+            gold_email
+            and extracted_email
+            and gold_email.lower() == extracted_email.lower()
+        ):
             email_match = True
         if email_match:
             email_matches += 1
@@ -96,7 +105,9 @@ def test_et_01_baseline_extraction_accuracy(parser: ResumeParser):
         name_match = False
         if gold_name is None and extracted_name is None:
             name_match = True
-        elif gold_name and extracted_name and gold_name.lower() == extracted_name.lower():
+        elif (
+            gold_name and extracted_name and gold_name.lower() == extracted_name.lower()
+        ):
             name_match = True
         if name_match:
             name_matches += 1
@@ -144,7 +155,11 @@ def test_et_01_baseline_extraction_accuracy(parser: ResumeParser):
     n_samples = len(gold_files)
     precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0.0
     recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0.0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
 
     benchmark_summary = {
         "evaluation_name": "ET-01 Baseline Extraction Accuracy",
@@ -171,8 +186,11 @@ def test_et_01_baseline_extraction_accuracy(parser: ResumeParser):
     out_path.write_text(json.dumps(benchmark_summary, indent=2), encoding="utf-8")
 
     # Assertions for baseline accuracy criteria
-    assert recall >= 0.75, f"Extraction recall ({recall:.3f}) below 0.75 baseline target"
-    assert precision >= 0.70, f"Extraction precision ({precision:.3f}) below 0.70 baseline target"
+    assert recall >= 0.75, (
+        f"Extraction recall ({recall:.3f}) below 0.75 baseline target"
+    )
+    assert precision >= 0.70, (
+        f"Extraction precision ({precision:.3f}) below 0.70 baseline target"
+    )
     assert email_matches / n_samples >= 0.85, "Email extraction accuracy below 85%"
     assert edu_matches / n_samples >= 0.85, "Education extraction accuracy below 85%"
-

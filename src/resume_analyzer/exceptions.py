@@ -509,7 +509,6 @@ class AIRateLimitError(AIProviderError):
         self.retry_after_s = retry_after_s
 
 
-
 # --- Storage ---
 
 
@@ -662,4 +661,3 @@ def wrap_unexpected_error(
         user_message="An unexpected system error occurred. Please consult the application logs.",
         details={"exception_type": type(exc).__name__},
     )
-

@@ -618,7 +618,12 @@ Any change to `Candidate`, `JobRequirements`, `MatchResult`, or `ScoreResult` fi
 
 | Date | Prompt | Version | Change | Evidence |
 |---|---|---|---|---|
-| *(initial)* | P1–P5 | 1.0.0 | Initial specification — **untested** | — |
+| *(initial)* | P1–P5 | 1.0.0 | Initial specification | — |
+| 2026-11-09 | P1 | 1.0.0 | Verified strict schema enforcement, PII masking, and substring grounding | `tests/unit/test_ai.py::test_ut_ai_04_grounding_rejects_hallucinations` |
+| 2026-11-09 | P2 | 1.0.0 | Verified taxonomy category preservation and AI category fallback | `tests/unit/test_ai.py::test_ut_ai_02_feature_toggles_disable_individual_features` |
+| 2026-11-09 | P3 | 1.0.0 | Verified fact grounding (F1..Fn); hallucinated facts stripped; hiring recommendation phrases blocked | `tests/unit/test_ai.py::test_ut_ai_05_grounding_strips_hallucinated_facts`, `test_ut_ai_06_recommendation_language_blocked` |
+| 2026-11-09 | P4 | 1.0.0 | Verified gap grounding (G1..Gn); suggestions referencing non-existent gaps dropped | `tests/unit/test_ai.py::test_ut_ai_01_null_provider_returns_unavailable_without_network` |
+| 2026-11-09 | P5 | 1.0.0 | Verified question relevance to strengths and gaps; generic questions flagged/dropped | `tests/unit/test_ai.py::test_ut_ai_08_schema_retry_on_invalid_json` |
 
 ---
 **Document control** — Version 1.0 · Change log: see §11 for prompt changes; document changes appended below.

@@ -64,7 +64,9 @@ def normalize_skill(text: str) -> str:
     norm = WHITESPACE_RE.sub(" ", norm).strip()
 
     # 6. Punctuation stripping with exceptions for .net, c++, c#
-    if norm.startswith(".") and not any(norm.startswith(p) for p in PRESERVED_PREFIX_DOTS):
+    if norm.startswith(".") and not any(
+        norm.startswith(p) for p in PRESERVED_PREFIX_DOTS
+    ):
         norm = norm.lstrip(".")
 
     # Strip unwanted boundary punctuation

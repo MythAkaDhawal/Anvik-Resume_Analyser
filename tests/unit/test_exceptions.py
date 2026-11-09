@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
-
 from resume_analyzer.exceptions import (
     AIBlockedError,
     AIConfigurationError,
-    AIError,
     AIProviderError,
     AIResponseError,
     CandidateValidationError,
@@ -20,7 +17,6 @@ from resume_analyzer.exceptions import (
     ExportError,
     FileTooLargeError,
     FileTypeMismatchError,
-    FileValidationError,
     InvalidIdentifierError,
     JobValidationError,
     MatchingError,
@@ -71,7 +67,12 @@ def test_exception_hierarchy_and_unique_error_codes() -> None:
 
     for exc_cls in exception_classes:
         # Instantiate with minimal dummy parameters
-        if exc_cls in (JobValidationError, CandidateValidationError, DataValidationError, ConfigurationError):
+        if exc_cls in (
+            JobValidationError,
+            CandidateValidationError,
+            DataValidationError,
+            ConfigurationError,
+        ):
             inst = exc_cls("Validation error")
         elif exc_cls is UnknownStrategyError:
             inst = exc_cls("non_existent")
@@ -103,4 +104,3 @@ def test_wrap_unexpected_error_sanitization() -> None:
     assert "ZeroDivisionError" in wrapped.details.get("exception_type", "")
     assert "resume text" not in wrapped.user_message
     assert "unexpected" in wrapped.user_message.lower()
-

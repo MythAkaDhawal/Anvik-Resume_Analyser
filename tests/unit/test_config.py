@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
 
 from resume_analyzer.config.settings import (
     Settings,
-    clear_settings_cache,
     config_snapshot,
-    get_settings,
     load_settings,
 )
 from resume_analyzer.exceptions import ConfigurationError
@@ -46,7 +43,10 @@ scoring:
     with pytest.raises(ConfigurationError) as exc_info:
         load_settings(bad_yaml)
 
-    assert "scoring.weights" in exc_info.value.message or exc_info.value.details.get("key") == "scoring.weights"
+    assert (
+        "scoring.weights" in exc_info.value.message
+        or exc_info.value.details.get("key") == "scoring.weights"
+    )
     assert exc_info.value.error_code == "E-CFG-001"
 
 
@@ -66,7 +66,9 @@ scoring:
     with pytest.raises(ConfigurationError) as exc_info:
         load_settings(bad_yaml)
 
-    assert "scoring.bands" in exc_info.value.message or "scoring.bands" in str(exc_info.value)
+    assert "scoring.bands" in exc_info.value.message or "scoring.bands" in str(
+        exc_info.value
+    )
     assert exc_info.value.error_code == "E-CFG-001"
 
 
@@ -83,7 +85,9 @@ files:
     with pytest.raises(ConfigurationError) as exc_info:
         load_settings(bad_yaml)
 
-    assert "files.max_size_mb" in exc_info.value.message or "files.max_size_mb" in str(exc_info.value)
+    assert "files.max_size_mb" in exc_info.value.message or "files.max_size_mb" in str(
+        exc_info.value
+    )
     assert exc_info.value.error_code == "E-CFG-001"
 
 
@@ -100,7 +104,9 @@ scoring:
     with pytest.raises(ConfigurationError) as exc_info:
         load_settings(bad_yaml)
 
-    assert "scoring.strategy" in exc_info.value.message or "scoring.strategy" in str(exc_info.value)
+    assert "scoring.strategy" in exc_info.value.message or "scoring.strategy" in str(
+        exc_info.value
+    )
 
 
 def test_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -137,7 +143,9 @@ def test_no_api_keys_in_settings_or_snapshot(monkeypatch: pytest.MonkeyPatch) ->
     assert "api_key" not in snapshot_str
 
 
-def test_missing_config_fallback_and_explicit_not_found(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+def test_missing_config_fallback_and_explicit_not_found(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
     """UT-CFG-04: Verify missing default file falls back with warning, explicit path raises."""
     non_existent = tmp_path / "does_not_exist.yaml"
 
@@ -165,4 +173,3 @@ scorring:
         load_settings(bad_yaml)
 
     assert "scorring" in exc_info.value.message or "scorring" in str(exc_info.value)
-

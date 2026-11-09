@@ -81,7 +81,9 @@ class WeightedScoringStrategy(ScoringStrategy):
         if status == ComponentStatus.EVALUATED and sum_w_evaluated > 0.0:
             renorm_w = weight / sum_w_evaluated
             pts = round(100.0 * renorm_w * (subscore or 0.0), 1)
-            explanation = f"Weight {weight:.2f} (effective {renorm_w:.2f}) x {subscore:.4f}"
+            explanation = (
+                f"Weight {weight:.2f} (effective {renorm_w:.2f}) x {subscore:.4f}"
+            )
         elif status == ComponentStatus.UNKNOWN:
             pts = None
             explanation = "Candidate data unknown; excluded under active policy"
@@ -117,15 +119,44 @@ class WeightedScoringStrategy(ScoringStrategy):
     def score(self, match: MatchResult, job: JobRequirements) -> ScoreResult:
         """Calculate weighted score, evaluate dimensions, and assess data coverage."""
         dim_data: list[tuple[str, float, ComponentStatus, float | None]] = [
-            ("required_skills", self.weights.required_skills, ComponentStatus.EVALUATED, match.required_credit),
-            self._resolve_dim("experience", self.weights.experience, match.experience.status, match.experience.subscore),
-            self._resolve_dim("education", self.weights.education, match.education.status, match.education.subscore),
+            (
+                "required_skills",
+                self.weights.required_skills,
+                ComponentStatus.EVALUATED,
+                match.required_credit,
+            ),
+            self._resolve_dim(
+                "experience",
+                self.weights.experience,
+                match.experience.status,
+                match.experience.subscore,
+            ),
+            self._resolve_dim(
+                "education",
+                self.weights.education,
+                match.education.status,
+                match.education.subscore,
+            ),
         ]
 
         if not job.optional_skills or match.optional_credit is None:
-            dim_data.append(("optional_skills", self.weights.optional_skills, ComponentStatus.NOT_APPLICABLE, None))
+            dim_data.append(
+                (
+                    "optional_skills",
+                    self.weights.optional_skills,
+                    ComponentStatus.NOT_APPLICABLE,
+                    None,
+                )
+            )
         else:
-            dim_data.append(("optional_skills", self.weights.optional_skills, ComponentStatus.EVALUATED, match.optional_credit))
+            dim_data.append(
+                (
+                    "optional_skills",
+                    self.weights.optional_skills,
+                    ComponentStatus.EVALUATED,
+                    match.optional_credit,
+                )
+            )
 
         evaluated_dims = [d for d in dim_data if d[2] == ComponentStatus.EVALUATED]
         unknown_dims = [d for d in dim_data if d[2] == ComponentStatus.UNKNOWN]
@@ -145,7 +176,11 @@ class WeightedScoringStrategy(ScoringStrategy):
             coverage = 1.0
         else:
             total_applicable = sum_w_evaluated + sum_w_unknown
-            coverage = round(sum_w_evaluated / total_applicable, 4) if total_applicable > 0.0 else 1.0
+            coverage = (
+                round(sum_w_evaluated / total_applicable, 4)
+                if total_applicable > 0.0
+                else 1.0
+            )
 
         components = [
             self._build_component(name, weight, status, subscore, sum_w_evaluated)
@@ -162,4 +197,3 @@ class WeightedScoringStrategy(ScoringStrategy):
             fit_band=fit_band,
             flags=flags,
         )
-

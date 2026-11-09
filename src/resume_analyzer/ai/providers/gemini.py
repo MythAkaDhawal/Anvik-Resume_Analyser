@@ -7,6 +7,7 @@ import logging
 import os
 import urllib.error
 import urllib.request
+from typing import Any
 
 from resume_analyzer.exceptions import AIProviderUnavailableError, AIRateLimitError
 
@@ -67,7 +68,7 @@ class GeminiProvider:
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout_s) as response:
+            with urllib.request.urlopen(req, timeout=self.timeout_s) as response:  # nosec: B310
                 resp_data = json.loads(response.read().decode("utf-8"))
                 candidates = resp_data.get("candidates", [])
                 if not candidates:

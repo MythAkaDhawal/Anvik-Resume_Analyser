@@ -24,4 +24,3 @@ __all__ = [
     "get_skill_index",
     "normalize_skill",
 ]
-

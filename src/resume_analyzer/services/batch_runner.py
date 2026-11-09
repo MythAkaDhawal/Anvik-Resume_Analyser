@@ -102,7 +102,9 @@ class BatchRunner:
                 )
                 reports.append(report)
             except ResumeAnalyzerError as e:
-                logger.warning("Batch item '%s' failed with %s: %s", display_name, e.error_code, e)
+                logger.warning(
+                    "Batch item '%s' failed with %s: %s", display_name, e.error_code, e
+                )
                 failures.append(
                     FileFailure(
                         display_name=display_name,
@@ -111,7 +113,9 @@ class BatchRunner:
                     )
                 )
             except Exception as e:
-                logger.exception("Unexpected error processing batch item '%s': %s", display_name, e)
+                logger.exception(
+                    "Unexpected error processing batch item '%s': %s", display_name, e
+                )
                 failures.append(
                     FileFailure(
                         display_name=display_name,
@@ -167,5 +171,3 @@ class BatchRunner:
         # Combine disk-read failures with runner failures
         combined_failures = path_failures + batch_res.failures
         return BatchResult(reports=batch_res.reports, failures=combined_failures)
-
-

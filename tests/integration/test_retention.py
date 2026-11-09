@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from resume_analyzer.models.candidate import Candidate, EducationEntry, ExperienceEntry, Skill
+from resume_analyzer.models.candidate import (
+    Candidate,
+    EducationEntry,
+    ExperienceEntry,
+    Skill,
+)
 from resume_analyzer.models.enums import EducationLevel, FitBand, MatchType, Provenance
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
@@ -22,15 +27,36 @@ from resume_analyzer.storage.feedback_store import FeedbackRecord, FeedbackStore
 from resume_analyzer.storage.result_store import ResultStore
 
 
-def _build_dummy_report(cand_id: str, name: str, created_at: datetime) -> AnalysisReport:
+def _build_dummy_report(
+    cand_id: str, name: str, created_at: datetime
+) -> AnalysisReport:
     """Helper to assemble a minimal valid AnalysisReport."""
     cand = Candidate(
         candidate_id=cand_id,
         name=name,
         email=f"{name.lower().replace(' ', '.')}@example.com",
-        skills=[Skill(name="Python", canonical_name="Python", provenance=Provenance.EXTRACTED_RULE, mentions=1)],
-        experience=[ExperienceEntry(job_title="Engineer", duration_months=12, provenance=Provenance.EXTRACTED_RULE)],
-        education=[EducationEntry(degree="BS CS", level=EducationLevel.BACHELOR, provenance=Provenance.EXTRACTED_RULE)],
+        skills=[
+            Skill(
+                name="Python",
+                canonical_name="Python",
+                provenance=Provenance.EXTRACTED_RULE,
+                mentions=1,
+            )
+        ],
+        experience=[
+            ExperienceEntry(
+                job_title="Engineer",
+                duration_months=12,
+                provenance=Provenance.EXTRACTED_RULE,
+            )
+        ],
+        education=[
+            EducationEntry(
+                degree="BS CS",
+                level=EducationLevel.BACHELOR,
+                provenance=Provenance.EXTRACTED_RULE,
+            )
+        ],
         total_experience_years=1.0,
         highest_education_level=EducationLevel.BACHELOR,
         source_format="txt",
@@ -54,9 +80,14 @@ def _build_dummy_report(cand_id: str, name: str, created_at: datetime) -> Analys
             )
         ],
         required_credit=1.0,
-        experience=ExperienceAnalysis(required_years=1.0, candidate_years=1.0, status="met", subscore=1.0),
+        experience=ExperienceAnalysis(
+            required_years=1.0, candidate_years=1.0, status="met", subscore=1.0
+        ),
         education=EducationAnalysis(
-            required_level=EducationLevel.BACHELOR, candidate_level=EducationLevel.BACHELOR, status="met", subscore=1.0
+            required_level=EducationLevel.BACHELOR,
+            candidate_level=EducationLevel.BACHELOR,
+            status="met",
+            subscore=1.0,
         ),
     )
     score = ScoreResult(
@@ -76,7 +107,9 @@ def _build_dummy_report(cand_id: str, name: str, created_at: datetime) -> Analys
         fit_band=FitBand.STRONG,
         flags=[],
     )
-    return ReportBuilder.build(candidate=cand, job=job, match=match, score=score, created_at=created_at)
+    return ReportBuilder.build(
+        candidate=cand, job=job, match=match, score=score, created_at=created_at
+    )
 
 
 def test_it_08_retention_purge_and_feedback_isolation(tmp_path: Path) -> None:
@@ -88,7 +121,7 @@ def test_it_08_retention_purge_and_feedback_isolation(tmp_path: Path) -> None:
     result_store = ResultStore(base_dir=results_dir)
     feedback_store = FeedbackStore(feedback_path=feedback_file)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     dt_old1 = now - timedelta(days=60)
     dt_old2 = now - timedelta(days=45)
     dt_recent = now - timedelta(days=2)

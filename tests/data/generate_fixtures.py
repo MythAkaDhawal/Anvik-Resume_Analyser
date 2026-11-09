@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import io
-from pathlib import Path
 import zipfile
+from pathlib import Path
 
 
 def create_minimal_pdf(text_lines: list[str]) -> bytes:
@@ -169,4 +169,3 @@ if __name__ == "__main__":
     (resumes_dir / "empty_resume.txt").write_bytes(b"")
 
     print("Fixtures generated in tests/data/resumes/")
-

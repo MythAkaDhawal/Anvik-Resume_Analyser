@@ -80,7 +80,11 @@ class AIService:
         feature_name = "extraction"
         prompt_id = "p1_extract"
 
-        if not self.settings.enabled or not self.settings.features.extraction or isinstance(self.provider, NullProvider):
+        if (
+            not self.settings.enabled
+            or not self.settings.features.extraction
+            or isinstance(self.provider, NullProvider)
+        ):
             return self._disabled_result(feature_name, prompt_id)
 
         # Sanitize and mask PII
@@ -114,7 +118,11 @@ class AIService:
         feature_name = "categorization"
         prompt_id = "p2_categorize"
 
-        if not self.settings.enabled or not self.settings.features.categorization or isinstance(self.provider, NullProvider):
+        if (
+            not self.settings.enabled
+            or not self.settings.features.categorization
+            or isinstance(self.provider, NullProvider)
+        ):
             return self._disabled_result(feature_name, prompt_id)
 
         if not skills:
@@ -133,7 +141,9 @@ class AIService:
             "skills_json_array": json.dumps(skills[:100]),
         }
 
-        def ground_fn(parsed: SkillCategorizationResult) -> tuple[SkillCategorizationResult, int]:
+        def ground_fn(
+            parsed: SkillCategorizationResult,
+        ) -> tuple[SkillCategorizationResult, int]:
             return ground_p2_categorization(
                 parsed,
                 input_skills=skills[:100],
@@ -162,7 +172,11 @@ class AIService:
         feature_name = "explanation"
         prompt_id = "p3_explain"
 
-        if not self.settings.enabled or not self.settings.features.explanation or isinstance(self.provider, NullProvider):
+        if (
+            not self.settings.enabled
+            or not self.settings.features.explanation
+            or isinstance(self.provider, NullProvider)
+        ):
             return self._disabled_result(feature_name, prompt_id)
 
         # Build numbered facts list
@@ -182,14 +196,32 @@ class AIService:
         ]
 
         fact_counter = 7
-        matched_req = [m.target for m in match.skill_matches if m.is_required and m.match_type != MatchType.NONE]
+        matched_req = [
+            m.target
+            for m in match.skill_matches
+            if m.is_required and m.match_type != MatchType.NONE
+        ]
         if matched_req:
-            facts.append({"id": f"F{fact_counter}", "fact": f"Matched Required Skills: {', '.join(matched_req)}"})
+            facts.append(
+                {
+                    "id": f"F{fact_counter}",
+                    "fact": f"Matched Required Skills: {', '.join(matched_req)}",
+                }
+            )
             fact_counter += 1
 
-        missing_req = [m.target for m in match.skill_matches if m.is_required and m.match_type == MatchType.NONE]
+        missing_req = [
+            m.target
+            for m in match.skill_matches
+            if m.is_required and m.match_type == MatchType.NONE
+        ]
         if missing_req:
-            facts.append({"id": f"F{fact_counter}", "fact": f"Missing Required Skills: {', '.join(missing_req)}"})
+            facts.append(
+                {
+                    "id": f"F{fact_counter}",
+                    "fact": f"Missing Required Skills: {', '.join(missing_req)}",
+                }
+            )
             fact_counter += 1
 
         facts_json = json.dumps(facts, indent=2)
@@ -226,7 +258,11 @@ class AIService:
         feature_name = "recommendations"
         prompt_id = "p4_recommend"
 
-        if not self.settings.enabled or not self.settings.features.recommendations or isinstance(self.provider, NullProvider):
+        if (
+            not self.settings.enabled
+            or not self.settings.features.recommendations
+            or isinstance(self.provider, NullProvider)
+        ):
             return self._disabled_result(feature_name, prompt_id)
 
         # Build gap facts
@@ -235,10 +271,22 @@ class AIService:
 
         for m in match.skill_matches:
             if m.is_required and m.match_type == MatchType.NONE:
-                gaps.append({"id": f"G{gap_counter}", "type": "missing_required_skill", "skill": m.target})
+                gaps.append(
+                    {
+                        "id": f"G{gap_counter}",
+                        "type": "missing_required_skill",
+                        "skill": m.target,
+                    }
+                )
                 gap_counter += 1
             elif not m.is_required and m.match_type == MatchType.NONE:
-                gaps.append({"id": f"G{gap_counter}", "type": "missing_optional_skill", "skill": m.target})
+                gaps.append(
+                    {
+                        "id": f"G{gap_counter}",
+                        "type": "missing_optional_skill",
+                        "skill": m.target,
+                    }
+                )
                 gap_counter += 1
             elif m.match_type == MatchType.FUZZY:
                 gaps.append(
@@ -276,13 +324,17 @@ class AIService:
         gap_facts = {
             "job_title": job.job_title,
             "gaps": gaps[:6],
-            "existing_strengths": [m.target for m in match.skill_matches if m.credit >= 1.0][:5],
+            "existing_strengths": [
+                m.target for m in match.skill_matches if m.credit >= 1.0
+            ][:5],
         }
 
         valid_gap_ids = {g["id"] for g in gaps[:6]}
         context = {"gap_facts_json": json.dumps(gap_facts, indent=2)}
 
-        def ground_fn(parsed: ImprovementRecommendations) -> tuple[ImprovementRecommendations, int]:
+        def ground_fn(
+            parsed: ImprovementRecommendations,
+        ) -> tuple[ImprovementRecommendations, int]:
             return ground_p4_recommendations(parsed, valid_gap_ids)
 
         return self._execute_feature(
@@ -306,15 +358,23 @@ class AIService:
         feature_name = "interview_questions"
         prompt_id = "p5_interview"
 
-        if not self.settings.enabled or not self.settings.features.interview_questions or isinstance(self.provider, NullProvider):
+        if (
+            not self.settings.enabled
+            or not self.settings.features.interview_questions
+            or isinstance(self.provider, NullProvider)
+        ):
             return self._disabled_result(feature_name, prompt_id)
 
         count = question_count or self.settings.question_count or 8
         count = max(5, min(12, count))
 
         strength_skills = [m.target for m in match.skill_matches if m.credit >= 1.0]
-        gap_skills = [m.target for m in match.skill_matches if m.match_type == MatchType.NONE]
-        uncertain_skills = [m.target for m in match.skill_matches if m.match_type == MatchType.FUZZY]
+        gap_skills = [
+            m.target for m in match.skill_matches if m.match_type == MatchType.NONE
+        ]
+        uncertain_skills = [
+            m.target for m in match.skill_matches if m.match_type == MatchType.FUZZY
+        ]
 
         interview_facts = {
             "job_title": job.job_title,
@@ -335,8 +395,12 @@ class AIService:
             "question_count": count,
         }
 
-        def ground_fn(parsed: InterviewQuestionsResult) -> tuple[InterviewQuestionsResult, int]:
-            return ground_p5_interview_questions(parsed, allowed_skills, target_count=count)
+        def ground_fn(
+            parsed: InterviewQuestionsResult,
+        ) -> tuple[InterviewQuestionsResult, int]:
+            return ground_p5_interview_questions(
+                parsed, allowed_skills, target_count=count
+            )
 
         return self._execute_feature(
             feature_name=feature_name,
@@ -381,7 +445,9 @@ class AIService:
                 model=self.settings.model,
             )
         except Exception as err:
-            logger.error("Unexpected failure invoking AI provider for %s: %s", feature_name, err)
+            logger.error(
+                "Unexpected failure invoking AI provider for %s: %s", feature_name, err
+            )
             return FeatureResult(
                 feature=feature_name,  # type: ignore[arg-type]
                 status=FeatureStatus.UNAVAILABLE,
@@ -397,7 +463,11 @@ class AIService:
             json_dict = parse_json_response(raw_response)
             parsed_obj = schema_cls.model_validate(json_dict)
         except (AIServiceError, ValidationError, Exception) as err:
-            logger.info("First response validation failed for %s: %s. Initiating repair retry.", feature_name, err)
+            logger.info(
+                "First response validation failed for %s: %s. Initiating repair retry.",
+                feature_name,
+                err,
+            )
             parse_failed = True
 
         # 3. Exactly one repair retry on JSON validation failure (UT-AI-05)
@@ -418,7 +488,9 @@ class AIService:
                 json_dict = parse_json_response(repaired_response)
                 parsed_obj = schema_cls.model_validate(json_dict)
             except Exception as repair_err:
-                logger.warning("Repair retry failed for %s: %s", feature_name, repair_err)
+                logger.warning(
+                    "Repair retry failed for %s: %s", feature_name, repair_err
+                )
                 return FeatureResult(
                     feature=feature_name,  # type: ignore[arg-type]
                     status=FeatureStatus.UNAVAILABLE,
@@ -452,4 +524,3 @@ class AIService:
             model=self.settings.model,
             dropped_items=0,
         )
-

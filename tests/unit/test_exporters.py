@@ -6,32 +6,42 @@ neutralization, error handling, non-Latin Unicode rendering, and batch ranking.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-import os
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
 import openpyxl
-from pypdf import PdfReader
 import pytest
+from pypdf import PdfReader
 
 from resume_analyzer.exceptions import ExportError, UnsupportedExportFormatError
-from resume_analyzer.models.candidate import Candidate, EducationEntry, ExperienceEntry, Skill
-from resume_analyzer.models.enums import EducationLevel, FeatureStatus, FitBand, MatchType, Provenance
+from resume_analyzer.models.candidate import (
+    Candidate,
+    EducationEntry,
+    ExperienceEntry,
+    Skill,
+)
+from resume_analyzer.models.enums import (
+    EducationLevel,
+    FitBand,
+    MatchType,
+    Provenance,
+)
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
-    AIInsights,
     AnalysisReport,
     EducationAnalysis,
     ExperienceAnalysis,
-    FeatureResult,
     MatchResult,
     ScoreComponent,
     ScoreResult,
     SkillMatch,
 )
 from resume_analyzer.reporting.exporters.base import export_batch_workbook, get_exporter
-from resume_analyzer.reporting.exporters.excel_exporter import ExcelExporter, sanitize_excel_value
+from resume_analyzer.reporting.exporters.excel_exporter import (
+    ExcelExporter,
+    sanitize_excel_value,
+)
 from resume_analyzer.reporting.exporters.html_exporter import HTMLExporter
 from resume_analyzer.reporting.exporters.pdf_exporter import PDFExporter
 from resume_analyzer.reporting.report_builder import ReportBuilder
@@ -45,8 +55,18 @@ def standard_report() -> AnalysisReport:
         name="Asha Verma",
         email="asha@example.com",
         skills=[
-            Skill(name="Python", canonical_name="Python", provenance=Provenance.EXTRACTED_RULE, mentions=3),
-            Skill(name="SQL", canonical_name="SQL", provenance=Provenance.EXTRACTED_RULE, mentions=2),
+            Skill(
+                name="Python",
+                canonical_name="Python",
+                provenance=Provenance.EXTRACTED_RULE,
+                mentions=3,
+            ),
+            Skill(
+                name="SQL",
+                canonical_name="SQL",
+                provenance=Provenance.EXTRACTED_RULE,
+                mentions=2,
+            ),
         ],
         experience=[
             ExperienceEntry(
@@ -180,7 +200,7 @@ def standard_report() -> AnalysisReport:
         job=job,
         match=match,
         score=score,
-        created_at=datetime(2026, 11, 8, 10, 15, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 11, 8, 10, 15, 0, tzinfo=UTC),
     )
 
 
@@ -223,7 +243,7 @@ def test_ut_xpt_02_html_sections_and_no_external_urls(
     html_content = out_file.read_text(encoding="utf-8")
 
     # CSP header
-    assert 'Content-Security-Policy" content="default-src \'none\'' in html_content
+    assert "Content-Security-Policy\" content=\"default-src 'none'" in html_content
 
     # Provenance badges
     assert "badge-rule" in html_content
@@ -286,7 +306,12 @@ def test_ut_xpt_04_excel_sheets_and_batch_ranking(
     exporter.export(standard_report, out_file)
 
     wb = openpyxl.load_workbook(out_file)
-    assert set(wb.sheetnames) == {"Summary", "Skills", "Experience-Education", "AI-Insights"}
+    assert set(wb.sheetnames) == {
+        "Summary",
+        "Skills",
+        "Experience-Education",
+        "AI-Insights",
+    }
 
     summary_sheet = wb["Summary"]
     assert summary_sheet.freeze_panes == "A2"
@@ -370,7 +395,10 @@ def test_ut_xpt_07_excel_formula_injection_defense(
 ) -> None:
     """Assert cells starting with =, +, -, @, \\t, \\r are prefixed with '."""
     assert sanitize_excel_value("=1+1") == "'=1+1"
-    assert sanitize_excel_value("+HYPERLINK('http://evil.com')") == "'+HYPERLINK('http://evil.com')"
+    assert (
+        sanitize_excel_value("+HYPERLINK('http://evil.com')")
+        == "'+HYPERLINK('http://evil.com')"
+    )
     assert sanitize_excel_value("-5+5") == "'-5+5"
     assert sanitize_excel_value("@SUM(A1:A10)") == "'@SUM(A1:A10)"
     assert sanitize_excel_value("\tTabbed") == "'\tTabbed"
@@ -394,7 +422,9 @@ def test_ut_xpt_07_excel_formula_injection_defense(
     assert found_escaped, "Malicious name cell was not found or was unescaped"
 
 
-def test_exporter_registry_and_lazy_load(standard_report: AnalysisReport, tmp_path: Path) -> None:
+def test_exporter_registry_and_lazy_load(
+    standard_report: AnalysisReport, tmp_path: Path
+) -> None:
     """Assert get_exporter lazy loads html, pdf, xlsx, and rejects unsupported format."""
     from resume_analyzer.reporting.exporters.base import _EXPORTER_REGISTRY
 
@@ -419,6 +449,7 @@ def test_exporter_registry_and_lazy_load(standard_report: AnalysisReport, tmp_pa
         assert isinstance(lazy_excel, ExcelExporter)
 
         from resume_analyzer.exceptions import UnsupportedExportFormatError
+
         with pytest.raises(UnsupportedExportFormatError):
             get_exporter("unknown_format")
     finally:
@@ -429,4 +460,3 @@ def test_exporter_registry_and_lazy_load(standard_report: AnalysisReport, tmp_pa
         with pytest.raises(Exception):
             html_e.export(standard_report, tmp_path / "fail.html")
     assert not (tmp_path / "fail.html").exists()
-

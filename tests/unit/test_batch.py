@@ -6,7 +6,7 @@ Verifies per-file error isolation, progress tracking, ranking tie-breaking, and 
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -15,7 +15,7 @@ from resume_analyzer.config.settings import get_settings
 from resume_analyzer.exceptions import AIRateLimitError
 from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.models.job import JobRequirements
-from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
+from resume_analyzer.services.analysis_service import AnalysisService
 from resume_analyzer.services.batch_runner import BatchResult, BatchRunner
 from resume_analyzer.skills.skill_index import get_skill_index
 
@@ -43,7 +43,9 @@ def batch_service() -> AnalysisService:
 # -----------------------------------------------------------------------------
 # UT-BATCH-01: Per-file failure isolation
 # -----------------------------------------------------------------------------
-def test_ut_batch_01_failure_isolation(batch_service: AnalysisService, batch_job: JobRequirements) -> None:
+def test_ut_batch_01_failure_isolation(
+    batch_service: AnalysisService, batch_job: JobRequirements
+) -> None:
     """Assert that a corrupt or empty file does not crash the batch and is recorded (FR-30, UT-BATCH-01)."""
     runner = BatchRunner(analysis_service=batch_service)
 
@@ -78,7 +80,9 @@ def test_ut_batch_01_failure_isolation(batch_service: AnalysisService, batch_job
 # -----------------------------------------------------------------------------
 # UT-BATCH-02: Progress callback and stable ranking order
 # -----------------------------------------------------------------------------
-def test_ut_batch_02_progress_and_ranking(batch_service: AnalysisService, batch_job: JobRequirements) -> None:
+def test_ut_batch_02_progress_and_ranking(
+    batch_service: AnalysisService, batch_job: JobRequirements
+) -> None:
     """Assert progress callback invocation count, monotonicity, and stable ranking order (UT-BATCH-02)."""
     runner = BatchRunner(analysis_service=batch_service)
 
@@ -103,12 +107,18 @@ def test_ut_batch_02_progress_and_ranking(batch_service: AnalysisService, batch_
     assert len(progress_events) == 3
     assert [e[0] for e in progress_events] == [1, 2, 3]
     assert all(e[1] == 3 for e in progress_events)
-    assert [e[2] for e in progress_events] == ["cand_01.txt", "cand_02.txt", "cand_03.txt"]
+    assert [e[2] for e in progress_events] == [
+        "cand_01.txt",
+        "cand_02.txt",
+        "cand_03.txt",
+    ]
 
     # 2. Ranking check (scores sorted descending)
     assert len(result.reports) == 3
     scores = [r.score.total_score for r in result.reports]
-    assert scores == sorted(scores, reverse=True), f"Reports not sorted by score descending: {scores}"
+    assert scores == sorted(scores, reverse=True), (
+        f"Reports not sorted by score descending: {scores}"
+    )
 
     # 3. Tie-break stability check: equal scores sort by required_credit desc, then candidate_id asc
     for i in range(len(result.reports) - 1):
@@ -144,4 +154,3 @@ def test_ut_batch_03_rate_limiter_clock() -> None:
         # Advance fake time by 61 seconds: window slides, new call succeeds
         fake_time += 61.0
         limiter.acquire(blocking=False)
-

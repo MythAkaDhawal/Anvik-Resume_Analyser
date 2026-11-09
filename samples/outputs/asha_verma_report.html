@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
+  <title>Analysis Report - Asha Verma</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #3b82f6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --strong-fit: #166534;
+      --strong-fit-bg: #dcfce7;
+      --mod-fit: #854d0e;
+      --mod-fit-bg: #fef9c3;
+      --lim-fit: #9a3412;
+      --lim-fit-bg: #ffedd5;
+      --low-fit: #991b1b;
+      --low-fit-bg: #fee2e2;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1, h2, h3 { color: var(--primary); margin-top: 24px; margin-bottom: 12px; }
+    h1 { border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-top: 0; }
+    h2 { font-size: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-rule { background: #e0f2fe; color: #0369a1; }
+    .badge-ai-extracted { background: #ede9fe; color: #6d28d9; }
+    .badge-computed { background: #f1f5f9; color: #475569; }
+    .badge-ai-generated { background: #fef3c7; color: #b45309; }
+    .fit-strong { background: var(--strong-fit-bg); color: var(--strong-fit); }
+    .fit-moderate { background: var(--mod-fit-bg); color: var(--mod-fit); }
+    .fit-limited { background: var(--lim-fit-bg); color: var(--lim-fit); }
+    .fit-low { background: var(--low-fit-bg); color: var(--low-fit); }
+    .alert-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--secondary);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.9rem;
+    }
+    .alert-warning {
+      background: #fffbeb;
+      border-left-color: #f59e0b;
+      color: #92400e;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+    }
+    th {
+      background-color: #f8fafc;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    tr:nth-child(even) { background-color: #fcfdfe; }
+    .score-summary {
+      display: flex;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .score-card {
+      flex: 1;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-align: center;
+      background: #f8fafc;
+    }
+    .score-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .score-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .item-list { padding-left: 20px; }
+    .footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Section 0: Header -->
+    <header>
+      <h1>Resume Analysis Report</h1>
+      <p style="color: var(--muted); margin: 0 0 12px 0;">
+        Report ID: <code>20261109T101547Z_ee7e3f80_1399</code> &bull; Date: 2026-11-09 10:15 UTC &bull; Version: 0.1.0
+      </p>
+      <div class="alert-box">
+        <strong>Notice:</strong> This report supports, and does not replace, human judgement. Scores reflect alignment between stated requirements and information extracted from the resume. AI-generated sections are interpretations that have not been verified. Do not use this report as the sole basis for any employment decision.
+      </div>
+    </header>
+
+    <!-- Section 1: Candidate Information -->
+    <section>
+      <h2>1. Candidate Information <span class="badge badge-rule">EXTRACTED</span></h2>
+      <table>
+        <tr><th style="width: 25%;">Candidate ID</th><td><code>ee7e3f8026f7</code></td></tr>
+        <tr><th>Name</th><td>Asha Verma</td></tr>
+        <tr><th>Email</th><td>asha.verma@example.com</td></tr>
+        <tr><th>Source Format</th><td>TXT</td></tr>
+      </table>
+    </section>
+
+    <!-- Section 2: Job Information -->
+    <section>
+      <h2>2. Job Requirements</h2>
+      <table>
+        <tr><th style="width: 25%;">Target Position</th><td><strong>Senior Python Developer</strong></td></tr>
+        <tr><th>Required Skills</th><td>Python, FastAPI, PostgreSQL, Docker, Kubernetes, Redis</td></tr>
+        <tr><th>Optional Skills</th><td>GraphQL, CI/CD, AWS, Terraform</td></tr>
+        <tr><th>Min Experience</th><td>5.0 year(s)</td></tr>
+        <tr><th>Min Education</th><td>BACHELOR</td></tr>
+        <tr><th>Scoring Strategy</th><td><code>weighted</code></td></tr>
+      </table>
+    </section>
+
+    <!-- Section 3: Overall Match Score -->
+    <section>
+      <h2>3. Overall Match Score <span class="badge badge-computed">COMPUTED</span></h2>
+      <div class="score-summary">
+        <div class="score-card">
+          <div class="score-value">54.6</div>
+          <div class="score-label">Match Score (0-100)</div>
+        </div>
+        <div class="score-card">
+          <div class="score-value">
+            <span class="badge fit-limited" style="font-size: 1.1rem; padding: 4px 12px;">
+              LIMITED
+            </span>
+          </div>
+          <div class="score-label">Fit Band</div>
+        </div>
+        <div class="score-card">
+          <div class="score-value">100%</div>
+          <div class="score-label">Data Coverage</div>
+        </div>
+      </div>
+
+      <div class="alert-box alert-warning">
+        <strong>Review Flags:</strong>
+        <ul style="margin: 4px 0 0 0; padding-left: 20px;">
+          <li><strong>MISSING_REQUIRED_SKILLS:</strong> 4 required skill(s) not found in resume.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 4: Score Breakdown -->
+    <section>
+      <h2>4. Score Component Breakdown <span class="badge badge-computed">COMPUTED</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Status</th>
+            <th>Weight</th>
+            <th>Subscore</th>
+            <th>Points</th>
+            <th>Explanation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>required_skills</strong></td>
+            <td><code>ComponentStatus.EVALUATED</code></td>
+            <td>50%</td>
+            <td>0.33</td>
+            <td>16.7</td>
+            <td>Weight 0.50 (effective 0.50) x 0.3333</td>
+          </tr>
+          <tr>
+            <td><strong>experience</strong></td>
+            <td><code>ComponentStatus.EVALUATED</code></td>
+            <td>20%</td>
+            <td>0.96</td>
+            <td>19.2</td>
+            <td>Weight 0.20 (effective 0.20) x 0.9600</td>
+          </tr>
+          <tr>
+            <td><strong>education</strong></td>
+            <td><code>ComponentStatus.EVALUATED</code></td>
+            <td>15%</td>
+            <td>1.00</td>
+            <td>15.0</td>
+            <td>Weight 0.15 (effective 0.15) x 1.0000</td>
+          </tr>
+          <tr>
+            <td><strong>optional_skills</strong></td>
+            <td><code>ComponentStatus.EVALUATED</code></td>
+            <td>15%</td>
+            <td>0.25</td>
+            <td>3.8</td>
+            <td>Weight 0.15 (effective 0.15) x 0.2500</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 5: Matched Skills -->
+    <section>
+      <h2>5. Matched Skills <span class="badge badge-computed">COMPUTED</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Job Requirement</th>
+            <th>Role Type</th>
+            <th>Candidate Skill Match</th>
+            <th>Match Type</th>
+            <th>Similarity</th>
+            <th>Credit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Python</strong></td>
+            <td>Required</td>
+            <td>Python</td>
+            <td><code>exact</code></td>
+            <td>100%</td>
+            <td>1.00</td>
+          </tr>
+          <tr>
+            <td><strong>Docker</strong></td>
+            <td>Required</td>
+            <td>Docker</td>
+            <td><code>exact</code></td>
+            <td>100%</td>
+            <td>1.00</td>
+          </tr>
+          <tr>
+            <td><strong>AWS</strong></td>
+            <td>Optional</td>
+            <td>AWS</td>
+            <td><code>exact</code></td>
+            <td>100%</td>
+            <td>1.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 6: Missing Skills -->
+    <section>
+      <h2>6. Missing Skills <span class="badge badge-computed">COMPUTED</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Missing Skill</th>
+            <th>Priority</th>
+            <th>Credit Awarded</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>FastAPI</strong></td>
+            <td>
+              <span style="color: #b91c1c; font-weight: 600;">Required (Must-have)</span>
+            </td>
+            <td>0.00</td>
+          </tr>
+          <tr>
+            <td><strong>Kubernetes</strong></td>
+            <td>
+              <span style="color: #b91c1c; font-weight: 600;">Required (Must-have)</span>
+            </td>
+            <td>0.00</td>
+          </tr>
+          <tr>
+            <td><strong>PostgreSQL</strong></td>
+            <td>
+              <span style="color: #b91c1c; font-weight: 600;">Required (Must-have)</span>
+            </td>
+            <td>0.00</td>
+          </tr>
+          <tr>
+            <td><strong>Redis</strong></td>
+            <td>
+              <span style="color: #b91c1c; font-weight: 600;">Required (Must-have)</span>
+            </td>
+            <td>0.00</td>
+          </tr>
+          <tr>
+            <td><strong>CI/CD</strong></td>
+            <td>
+              <span style="color: var(--muted);">Optional (Nice-to-have)</span>
+            </td>
+            <td>0.00</td>
+          </tr>
+          <tr>
+            <td><strong>GraphQL</strong></td>
+            <td>
+              <span style="color: var(--muted);">Optional (Nice-to-have)</span>
+            </td>
+            <td>0.00</td>
+          </tr>
+          <tr>
+            <td><strong>Terraform</strong></td>
+            <td>
+              <span style="color: var(--muted);">Optional (Nice-to-have)</span>
+            </td>
+            <td>0.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 7: Experience Analysis -->
+    <section>
+      <h2>7. Experience Analysis <span class="badge badge-computed">COMPUTED</span></h2>
+      <p>
+        Required: <strong>5.0 year(s)</strong> &bull;
+        Candidate: <strong>4.8 year(s)</strong> &bull;
+        Status: <code>PARTIAL</code>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Role Title</th>
+            <th>Company</th>
+            <th>Dates</th>
+            <th>Duration</th>
+            <th>Provenance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Data Analyst Intern</strong></td>
+            <td>DataCorp Inc</td>
+            <td>
+              Jun 2023 &ndash;
+              Present
+            </td>
+            <td>41 mo</td>
+            <td><span class="badge badge-rule">extracted_rule</span></td>
+          </tr>
+          <tr>
+            <td><strong>Junior Analyst</strong></td>
+            <td>Alpha Solutions</td>
+            <td>
+              Jan 2022 &ndash;
+              May 2023
+            </td>
+            <td>16 mo</td>
+            <td><span class="badge badge-rule">extracted_rule</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 8: Education Analysis -->
+    <section>
+      <h2>8. Education Analysis <span class="badge badge-computed">COMPUTED</span></h2>
+      <p>
+        Required Level: <strong>BACHELOR</strong> &bull;
+        Candidate Level: <strong>BACHELOR</strong> &bull;
+        Status: <code>MET</code>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Degree Description</th>
+            <th>Detected Level</th>
+            <th>Field of Study</th>
+            <th>Institution</th>
+            <th>Provenance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bachelor of Science in Computer Science</strong></td>
+            <td>BACHELOR</td>
+            <td>Science in Computer Science</td>
+            <td>State University, 2022</td>
+            <td><span class="badge badge-rule">extracted_rule</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 9: Recommendations -->
+    <section>
+      <h2>9. Recommendations <span class="badge badge-ai-generated">AI-GENERATED &mdash; NOT VERIFIED</span></h2>
+      <h3>9a. Reviewer Match Explanation</h3>
+        <p style="color: var(--muted); font-style: italic;">
+          AI-generated content unavailable (disabled).
+        </p>
+
+      <h3>9b. Candidate Development Suggestions</h3>
+        <p style="color: var(--muted); font-style: italic;">
+          AI-generated content unavailable (disabled).
+        </p>
+    </section>
+
+    <!-- Section 10: Hiring-Suitability Assessment -->
+    <section>
+      <h2>10. Alignment &amp; Suitability Assessment <span class="badge badge-computed">COMPUTED</span></h2>
+      <p>
+        Candidate profile demonstrates <strong>LIMITED</strong> alignment with position requirements based on deterministic scoring criteria (Score: 54.6/100, Coverage: 100%).
+      </p>
+      <p><strong>Assessment Considerations:</strong></p>
+      <ul class="item-list">
+        <li>4 required skill(s) not found in resume.</li>
+      </ul>
+      <p style="font-size: 0.85rem; color: var(--muted);">
+        Disclaimer: Alignment scores evaluate lexical and structured criteria extracted from the submitted resume text. Human reviewers must verify qualifications, conduct interviews, and assess contextual factors before reaching employment conclusions.
+      </p>
+    </section>
+
+    <!-- Section 11: Suggested Interview Questions -->
+    <section>
+      <h2>11. Suggested Interview Questions <span class="badge badge-ai-generated">AI-GENERATED &mdash; NOT VERIFIED</span></h2>
+      <p style="color: var(--muted); font-style: italic;">
+        AI-generated content unavailable (disabled).
+      </p>
+    </section>
+
+    <!-- Section 12: Appendix -->
+    <section>
+      <h2>12. Appendix &amp; System Limitations</h2>
+      <p style="font-size: 0.85rem; color: var(--muted);">
+        <strong>Scoring Model Limitations:</strong>
+        Lexical matching may miss semantic equivalents not captured in the taxonomy.
+        Experience calculations assume continuous employment within month intervals.
+        Education attainment is mapped hierarchically without institution-ranking bias.
+      </p>
+      <p style="font-size: 0.85rem; color: var(--muted);">
+        Configuration: Strategy: <code>weighted</code> &bull;
+        Fuzzy Threshold: 85.0 &bull;
+        AI Provider: <code>none</code>
+      </p>
+    </section>
+
+    <div class="footer">
+      Generated by Intelligent Resume Analyzer v0.1.0 &bull; Report ID: 20261109T101547Z_ee7e3f80_1399
+    </div>
+  </div>
+</body>
+</html>

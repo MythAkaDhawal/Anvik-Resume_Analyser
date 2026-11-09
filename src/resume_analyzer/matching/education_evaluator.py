@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from rapidfuzz import fuzz
 
 from resume_analyzer.models.candidate import Candidate
@@ -113,4 +115,3 @@ def evaluate_education(
         subscore=final_subscore,
         field_match=field_match,
     )
-

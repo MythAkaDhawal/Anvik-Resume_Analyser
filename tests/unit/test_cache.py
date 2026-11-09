@@ -58,9 +58,14 @@ def test_normalizer_and_fuzzy_cache_hits_and_clearing() -> None:
 
 def test_skill_index_and_taxonomy_caching() -> None:
     """UT-CACHE-05: Verify SkillIndex and Taxonomy caching and reuse across AnalysisService."""
-    from resume_analyzer.services.analysis_service import AnalysisService, DEFAULT_TAXONOMY_PATH
+    from resume_analyzer.services.analysis_service import (
+        DEFAULT_TAXONOMY_PATH,
+        AnalysisService,
+    )
     from resume_analyzer.skills.skill_index import get_skill_index
-    from resume_analyzer.skills.taxonomy import _load_taxonomy_cached, clear_taxonomy_cache
+    from resume_analyzer.skills.taxonomy import (
+        clear_taxonomy_cache,
+    )
 
     clear_taxonomy_cache()
     get_skill_index.cache_clear()
@@ -74,5 +79,3 @@ def test_skill_index_and_taxonomy_caching() -> None:
     svc2 = AnalysisService()
     assert svc1.skill_index is svc2.skill_index
     assert get_skill_index.cache_info().hits >= 2
-
-

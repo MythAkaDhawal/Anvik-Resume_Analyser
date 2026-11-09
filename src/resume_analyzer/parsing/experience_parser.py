@@ -158,7 +158,9 @@ def parse_experience(
         if line_idx > 0:
             candidate_lines.append(lines[line_idx - 1])
         # Line containing the date, with the date string removed
-        line_no_date = (lines[line_idx][: match.start()] + " " + lines[line_idx][match.end() :]).strip()
+        line_no_date = (
+            lines[line_idx][: match.start()] + " " + lines[line_idx][match.end() :]
+        ).strip()
         if line_no_date:
             candidate_lines.append(line_no_date)
 
@@ -168,7 +170,9 @@ def parse_experience(
         duration_months: int | None = None
         if start_date:
             # Future date check: start > 12 months after reference_date
-            ref_future_bound = date(reference_date.year + 1, reference_date.month, reference_date.day)
+            ref_future_bound = date(
+                reference_date.year + 1, reference_date.month, reference_date.day
+            )
             if start_date > ref_future_bound:
                 warnings.append(
                     ParseWarning(
@@ -271,10 +275,16 @@ def _extract_valid_intervals(
 ) -> list[tuple[date, date]]:
     """Extract valid, sanitized start and end date intervals from entries."""
     valid_intervals: list[tuple[date, date]] = []
-    ref_future_bound = date(reference_date.year + 1, reference_date.month, reference_date.day)
+    ref_future_bound = date(
+        reference_date.year + 1, reference_date.month, reference_date.day
+    )
 
     for entry in entries:
-        if not count_internships and entry.job_title and "intern" in entry.job_title.lower():
+        if (
+            not count_internships
+            and entry.job_title
+            and "intern" in entry.job_title.lower()
+        ):
             continue
         if not entry.start or entry.start > ref_future_bound:
             continue
@@ -288,7 +298,9 @@ def _extract_valid_intervals(
     return valid_intervals
 
 
-def _merge_date_intervals(intervals: list[tuple[date, date]]) -> list[tuple[date, date]]:
+def _merge_date_intervals(
+    intervals: list[tuple[date, date]],
+) -> list[tuple[date, date]]:
     """Sort and merge overlapping or contiguous date ranges."""
     if not intervals:
         return []
@@ -323,7 +335,9 @@ def total_experience_years(
     Returns:
         Total experience years as float, or None if no valid dates were present.
     """
-    valid_intervals = _extract_valid_intervals(entries, reference_date, count_internships)
+    valid_intervals = _extract_valid_intervals(
+        entries, reference_date, count_internships
+    )
     if not valid_intervals:
         return None
 

@@ -26,7 +26,9 @@ PROTECTED_TERMS_REGEX = re.compile(
 URL_REGEX = re.compile(r"(?i)(?:https?://|www\.|\.com|\.org|\.io|\.net|@)")
 
 
-def ground_p1_extraction(result: ExtractionResult, raw_text: str) -> tuple[ExtractionResult, int]:
+def ground_p1_extraction(
+    result: ExtractionResult, raw_text: str
+) -> tuple[ExtractionResult, int]:
     """Verify extracted skills and companies appear in the raw resume text."""
     dropped = 0
     raw_lower = raw_text.lower()
@@ -122,7 +124,9 @@ def ground_p3_explanation(
     dropped = 0
 
     # 1. Summary checks
-    if VERDICT_REGEX.search(result.summary) or PROTECTED_TERMS_REGEX.search(result.summary):
+    if VERDICT_REGEX.search(result.summary) or PROTECTED_TERMS_REGEX.search(
+        result.summary
+    ):
         result.summary = "Match summary withheld due to safety policy violation."
         dropped += 1
 
@@ -190,7 +194,9 @@ def ground_p4_recommendations(
         if VERDICT_REGEX.search(r.action) or VERDICT_REGEX.search(r.rationale):
             dropped += 1
             continue
-        if PROTECTED_TERMS_REGEX.search(r.action) or PROTECTED_TERMS_REGEX.search(r.rationale):
+        if PROTECTED_TERMS_REGEX.search(r.action) or PROTECTED_TERMS_REGEX.search(
+            r.rationale
+        ):
             dropped += 1
             continue
 
@@ -212,7 +218,9 @@ def ground_p5_interview_questions(
 
     for q in result.questions:
         # Protected-topic check
-        if PROTECTED_TERMS_REGEX.search(q.question) or PROTECTED_TERMS_REGEX.search(q.rationale):
+        if PROTECTED_TERMS_REGEX.search(q.question) or PROTECTED_TERMS_REGEX.search(
+            q.rationale
+        ):
             dropped += 1
             continue
 
@@ -230,4 +238,3 @@ def ground_p5_interview_questions(
 
     result.questions = valid_qs[:target_count]
     return result, dropped
-

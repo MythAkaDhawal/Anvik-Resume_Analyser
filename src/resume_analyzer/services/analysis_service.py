@@ -21,6 +21,7 @@ from resume_analyzer.config.settings import Settings, get_settings
 from resume_analyzer.ingestion.file_loader import load_resume
 from resume_analyzer.matching.matching_engine import MatchingEngine
 from resume_analyzer.models.candidate import (
+    Candidate,
     EducationEntry,
     ExperienceEntry,
     Skill,
@@ -31,6 +32,8 @@ from resume_analyzer.models.results import (
     AIInsights,
     AnalysisReport,
     FeatureResult,
+    MatchResult,
+    ScoreResult,
 )
 from resume_analyzer.parsing.education_parser import detect_education_level
 from resume_analyzer.parsing.experience_parser import (
@@ -78,13 +81,15 @@ class AnalysisOptions(BaseModel):
             features: set[str] = set()
             if ai_enabled or (
                 ai_enabled is None
-                and any([
-                    ai_extract_candidate,
-                    ai_categorize_skills,
-                    ai_explain_match,
-                    ai_recommendations,
-                    ai_interview_questions,
-                ])
+                and any(
+                    [
+                        ai_extract_candidate,
+                        ai_categorize_skills,
+                        ai_explain_match,
+                        ai_recommendations,
+                        ai_interview_questions,
+                    ]
+                )
             ):
                 if ai_extract_candidate:
                     features.add("extraction")
@@ -107,12 +112,13 @@ class AnalysisOptions(BaseModel):
         else:
             features = set(ai_features)
 
-        super().__init__(strategy=strategy, ai_features=features, persist=persist, **data)
+        super().__init__(
+            strategy=strategy, ai_features=features, persist=persist, **data
+        )
 
     @property
     def ai_enabled(self) -> bool:
         return bool(self.ai_features)
-
 
 
 class AnalysisService:
@@ -141,10 +147,17 @@ class AnalysisService:
         else:
             try:
                 provider = get_provider(self.settings.ai)
-                self.ai_service = AIService(settings=self.settings.ai, provider=provider)
+                self.ai_service = AIService(
+                    settings=self.settings.ai, provider=provider
+                )
             except Exception as e:
-                logger.warning("Failed to initialize AI provider (%s); defaulting to NullProvider", e)
-                self.ai_service = AIService(settings=self.settings.ai, provider=NullProvider())
+                logger.warning(
+                    "Failed to initialize AI provider (%s); defaulting to NullProvider",
+                    e,
+                )
+                self.ai_service = AIService(
+                    settings=self.settings.ai, provider=NullProvider()
+                )
 
         self.result_store = result_store
 
@@ -155,7 +168,10 @@ class AnalysisService:
         ref_date: date,
     ) -> None:
         """Merge rule-precedent AI extraction results into parsed candidate profile."""
-        if extraction_res.status not in (FeatureStatus.OK, FeatureStatus.PARTIAL) or not extraction_res.data:
+        if (
+            extraction_res.status not in (FeatureStatus.OK, FeatureStatus.PARTIAL)
+            or not extraction_res.data
+        ):
             return
 
         if candidate.name is None and extraction_res.data.name:
@@ -175,7 +191,9 @@ class AnalysisService:
                         name=ai_sk.name,
                         canonical_name=canon,
                         category=category,
-                        category_provenance=Provenance.EXTRACTED_AI if category else None,
+                        category_provenance=Provenance.EXTRACTED_AI
+                        if category
+                        else None,
                         provenance=Provenance.EXTRACTED_AI,
                         mentions=ai_sk.mentions,
                     )
@@ -185,7 +203,9 @@ class AnalysisService:
         if not candidate.experience and extraction_res.data.experience:
             new_exp: list[ExperienceEntry] = []
             for e in extraction_res.data.experience:
-                dur = compute_duration_months(e.start, e.end, e.is_current, reference_date=ref_date)
+                dur = compute_duration_months(
+                    e.start, e.end, e.is_current, reference_date=ref_date
+                )
                 new_exp.append(
                     ExperienceEntry(
                         job_title=e.job_title,
@@ -198,12 +218,18 @@ class AnalysisService:
                     )
                 )
             candidate.experience = new_exp
-            candidate.total_experience_years = total_experience_years(new_exp, reference_date=ref_date)
+            candidate.total_experience_years = total_experience_years(
+                new_exp, reference_date=ref_date
+            )
 
         if not candidate.education and extraction_res.data.education:
             new_edu: list[EducationEntry] = []
             for edu in extraction_res.data.education:
-                lvl = detect_education_level(edu.degree) if edu.degree else EducationLevel.UNSPECIFIED
+                lvl = (
+                    detect_education_level(edu.degree)
+                    if edu.degree
+                    else EducationLevel.UNSPECIFIED
+                )
                 new_edu.append(
                     EducationEntry(
                         degree=edu.degree,
@@ -231,19 +257,35 @@ class AnalysisService:
         if not ai_available or not self.ai_service:
             disabled_or_unavail = (
                 FeatureStatus.DISABLED
-                if (not self.settings.ai.enabled or (self.ai_service and isinstance(self.ai_service.provider, NullProvider)))
+                if (
+                    not self.settings.ai.enabled
+                    or (
+                        self.ai_service
+                        and isinstance(self.ai_service.provider, NullProvider)
+                    )
+                )
                 else FeatureStatus.UNAVAILABLE
             )
-            ai_insights.categorization = FeatureResult(feature="categorization", status=disabled_or_unavail)
-            ai_insights.explanation = FeatureResult(feature="explanation", status=disabled_or_unavail)
-            ai_insights.recommendations = FeatureResult(feature="recommendations", status=disabled_or_unavail)
-            ai_insights.interview_questions = FeatureResult(feature="interview_questions", status=disabled_or_unavail)
+            ai_insights.categorization = FeatureResult(
+                feature="categorization", status=disabled_or_unavail
+            )
+            ai_insights.explanation = FeatureResult(
+                feature="explanation", status=disabled_or_unavail
+            )
+            ai_insights.recommendations = FeatureResult(
+                feature="recommendations", status=disabled_or_unavail
+            )
+            ai_insights.interview_questions = FeatureResult(
+                feature="interview_questions", status=disabled_or_unavail
+            )
             return
 
         # P2: Categorization
         if "categorization" in opts.ai_features:
             unrecognized = [s.name for s in candidate.skills if not s.category]
-            cat_res = self.ai_service.categorize_skills(unrecognized, allowed_categories=self.skill_index.categories)
+            cat_res = self.ai_service.categorize_skills(
+                unrecognized, allowed_categories=self.skill_index.categories
+            )
             ai_insights.categorization = FeatureResult(
                 feature="categorization",
                 status=cat_res.status,
@@ -256,13 +298,19 @@ class AnalysisService:
                 dropped_items=cat_res.dropped_items,
             )
         else:
-            ai_insights.categorization = FeatureResult(feature="categorization", status=FeatureStatus.DISABLED)
+            ai_insights.categorization = FeatureResult(
+                feature="categorization", status=FeatureStatus.DISABLED
+            )
 
         # P3: Explanation
         if "explanation" in opts.ai_features:
-            ai_insights.explanation = self.ai_service.explain_match(match_result, score_result, job)
+            ai_insights.explanation = self.ai_service.explain_match(
+                match_result, score_result, job
+            )
         else:
-            ai_insights.explanation = FeatureResult(feature="explanation", status=FeatureStatus.DISABLED)
+            ai_insights.explanation = FeatureResult(
+                feature="explanation", status=FeatureStatus.DISABLED
+            )
 
         # P4: Recommendations
         if "recommendations" in opts.ai_features:
@@ -279,7 +327,9 @@ class AnalysisService:
                 dropped_items=rec_res.dropped_items,
             )
         else:
-            ai_insights.recommendations = FeatureResult(feature="recommendations", status=FeatureStatus.DISABLED)
+            ai_insights.recommendations = FeatureResult(
+                feature="recommendations", status=FeatureStatus.DISABLED
+            )
 
         # P5: Interview Questions
         if "interview_questions" in opts.ai_features:
@@ -296,7 +346,9 @@ class AnalysisService:
                 dropped_items=iq_res.dropped_items,
             )
         else:
-            ai_insights.interview_questions = FeatureResult(feature="interview_questions", status=FeatureStatus.DISABLED)
+            ai_insights.interview_questions = FeatureResult(
+                feature="interview_questions", status=FeatureStatus.DISABLED
+            )
 
     def analyze(
         self,
@@ -381,7 +433,9 @@ class AnalysisService:
         score_result = strategy.score(match_result, job)
 
         # Stage 9: Optional AI Insights (P2 - P5)
-        self._run_ai_insights(opts, candidate, job, match_result, score_result, ai_insights)
+        self._run_ai_insights(
+            opts, candidate, job, match_result, score_result, ai_insights
+        )
 
         # Stage 10: Assemble Report
         report = ReportBuilder.build(
@@ -398,6 +452,8 @@ class AnalysisService:
             try:
                 self.result_store.save(report)
             except Exception as e:
-                logger.error("Failed to persist analysis report %s: %s", report.report_id, e)
+                logger.error(
+                    "Failed to persist analysis report %s: %s", report.report_id, e
+                )
 
         return report

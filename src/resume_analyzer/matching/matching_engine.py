@@ -74,13 +74,17 @@ class MatchingEngine:
         # 3. Calculate required and optional credit
         required_matches = [m for m in skill_matches if m.is_required]
         if required_matches:
-            required_credit = sum(m.credit for m in required_matches) / len(required_matches)
+            required_credit = sum(m.credit for m in required_matches) / len(
+                required_matches
+            )
         else:
             required_credit = 0.0
 
         optional_matches = [m for m in skill_matches if not m.is_required]
         if optional_matches:
-            optional_credit = sum(m.credit for m in optional_matches) / len(optional_matches)
+            optional_credit = sum(m.credit for m in optional_matches) / len(
+                optional_matches
+            )
         else:
             optional_credit = None
 
@@ -99,8 +103,9 @@ class MatchingEngine:
         return MatchResult(
             skill_matches=skill_matches,
             required_credit=round(required_credit, 4),
-            optional_credit=round(optional_credit, 4) if optional_credit is not None else None,
+            optional_credit=round(optional_credit, 4)
+            if optional_credit is not None
+            else None,
             experience=exp_analysis,
             education=edu_analysis,
         )
-

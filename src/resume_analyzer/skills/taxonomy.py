@@ -10,6 +10,7 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -188,7 +189,9 @@ def _load_taxonomy_cached(resolved_path_str: str) -> SkillTaxonomy:
     seen_canonicals: dict[str, str] = {}
     seen_aliases: dict[str, str] = {}
     validated_entries = [
-        _validate_taxonomy_item(idx, item, allowed_categories, seen_canonicals, seen_aliases)
+        _validate_taxonomy_item(
+            idx, item, allowed_categories, seen_canonicals, seen_aliases
+        )
         for idx, item in enumerate(skills_raw)
     ]
 
@@ -211,4 +214,3 @@ def _load_taxonomy_cached(resolved_path_str: str) -> SkillTaxonomy:
 def clear_taxonomy_cache() -> None:
     """Clear cached taxonomy instances (called in test fixtures)."""
     _load_taxonomy_cached.cache_clear()
-

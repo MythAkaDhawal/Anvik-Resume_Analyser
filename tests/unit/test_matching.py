@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import date
 from pathlib import Path
+
 import pytest
 
-from resume_analyzer.config.settings import FuzzySettings
 from resume_analyzer.matching.education_evaluator import evaluate_education
 from resume_analyzer.matching.experience_evaluator import evaluate_experience
 from resume_analyzer.matching.matching_engine import MatchingEngine
@@ -146,7 +145,13 @@ def test_ut_match_06_skill_match_invariant_and_order(skill_index: SkillIndex):
     )
     matches = match_skills(candidate, job, skill_index)
     assert len(matches) == 5
-    assert [m.target for m in matches] == ["PostgreSQL", "Python", "Kubernetes", "Docker", "AWS"]
+    assert [m.target for m in matches] == [
+        "PostgreSQL",
+        "Python",
+        "Kubernetes",
+        "Docker",
+        "AWS",
+    ]
     assert [m.is_required for m in matches] == [True, True, True, False, False]
 
 
@@ -262,7 +267,11 @@ def test_ut_expev_04_experience_unknown():
 def test_ut_eduev_01_education_not_required():
     """UT-EDUEV-01: Unspecified requirement results in not_required status and None subscore."""
     cand = _make_candidate([], highest_edu=EducationLevel.BACHELOR)
-    job = JobRequirements(job_title="Dev", required_skills=["Python"], min_education_level=EducationLevel.UNSPECIFIED)
+    job = JobRequirements(
+        job_title="Dev",
+        required_skills=["Python"],
+        min_education_level=EducationLevel.UNSPECIFIED,
+    )
     res = evaluate_education(cand, job)
     assert res.status == "not_required"
     assert res.subscore is None
@@ -271,7 +280,11 @@ def test_ut_eduev_01_education_not_required():
 def test_ut_eduev_02_education_met():
     """UT-EDUEV-02: Candidate meets or exceeds education level, achieving 1.0 subscore."""
     cand = _make_candidate([], highest_edu=EducationLevel.MASTER)
-    job = JobRequirements(job_title="Dev", required_skills=["Python"], min_education_level=EducationLevel.BACHELOR)
+    job = JobRequirements(
+        job_title="Dev",
+        required_skills=["Python"],
+        min_education_level=EducationLevel.BACHELOR,
+    )
     res = evaluate_education(cand, job)
     assert res.status == "met"
     assert res.subscore == 1.0
@@ -281,7 +294,11 @@ def test_ut_eduev_03_education_below_graduated_penalty():
     """UT-EDUEV-03: Candidate 1 level below gets 0.5 subscore; >=2 levels below gets 0.0."""
     # 1 level below: Diploma (level 2) vs Bachelor (level 3) -> 0.5 subscore
     cand_1_below = _make_candidate([], highest_edu=EducationLevel.DIPLOMA)
-    job_bachelor = JobRequirements(job_title="Dev", required_skills=["Python"], min_education_level=EducationLevel.BACHELOR)
+    job_bachelor = JobRequirements(
+        job_title="Dev",
+        required_skills=["Python"],
+        min_education_level=EducationLevel.BACHELOR,
+    )
     res_1 = evaluate_education(cand_1_below, job_bachelor)
     assert res_1.status == "below"
     assert res_1.subscore == 0.5
@@ -299,7 +316,13 @@ def test_ut_eduev_04_preferred_fields_cap():
     cand_matched = _make_candidate(
         [],
         highest_edu=EducationLevel.BACHELOR,
-        edu_entries=[EducationEntry(degree="BS", level=EducationLevel.BACHELOR, field_of_study="Computer Science")],
+        edu_entries=[
+            EducationEntry(
+                degree="BS",
+                level=EducationLevel.BACHELOR,
+                field_of_study="Computer Science",
+            )
+        ],
     )
     job_pref = JobRequirements(
         job_title="Dev",
@@ -316,10 +339,13 @@ def test_ut_eduev_04_preferred_fields_cap():
     cand_unmatched = _make_candidate(
         [],
         highest_edu=EducationLevel.BACHELOR,
-        edu_entries=[EducationEntry(degree="BA", level=EducationLevel.BACHELOR, field_of_study="Art History")],
+        edu_entries=[
+            EducationEntry(
+                degree="BA", level=EducationLevel.BACHELOR, field_of_study="Art History"
+            )
+        ],
     )
     res_unmatched = evaluate_education(cand_unmatched, job_pref)
     assert res_unmatched.status == "met"
     assert res_unmatched.field_match is False
     assert res_unmatched.subscore == 0.75  # Capped at 0.75
-

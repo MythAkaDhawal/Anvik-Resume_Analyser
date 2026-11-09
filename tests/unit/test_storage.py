@@ -5,11 +5,11 @@ Tests UT-STORE-01 through UT-STORE-08 per TESTING_STRATEGY §5.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 import json
-import os
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
+
 import pytest
 
 from resume_analyzer.exceptions import (
@@ -18,7 +18,12 @@ from resume_analyzer.exceptions import (
     ResultNotFoundError,
     StorageError,
 )
-from resume_analyzer.models.candidate import Candidate, EducationEntry, ExperienceEntry, Skill
+from resume_analyzer.models.candidate import (
+    Candidate,
+    EducationEntry,
+    ExperienceEntry,
+    Skill,
+)
 from resume_analyzer.models.enums import EducationLevel, FitBand, MatchType, Provenance
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
@@ -45,20 +50,38 @@ def make_report():
         created_at: datetime | None = None,
         total_score: float = 85.0,
     ) -> AnalysisReport:
-        dt = created_at or datetime(2026, 11, 8, 12, 0, 0, tzinfo=timezone.utc)
+        dt = created_at or datetime(2026, 11, 8, 12, 0, 0, tzinfo=UTC)
         cand = Candidate(
             candidate_id=cand_id,
             name=name,
             email=f"{name.lower().replace(' ', '.')}@example.com",
             skills=[
-                Skill(name="Python", canonical_name="Python", provenance=Provenance.EXTRACTED_RULE, mentions=2),
-                Skill(name="SQL", canonical_name="SQL", provenance=Provenance.EXTRACTED_RULE, mentions=1),
+                Skill(
+                    name="Python",
+                    canonical_name="Python",
+                    provenance=Provenance.EXTRACTED_RULE,
+                    mentions=2,
+                ),
+                Skill(
+                    name="SQL",
+                    canonical_name="SQL",
+                    provenance=Provenance.EXTRACTED_RULE,
+                    mentions=1,
+                ),
             ],
             experience=[
-                ExperienceEntry(job_title="Software Developer", duration_months=24, provenance=Provenance.EXTRACTED_RULE)
+                ExperienceEntry(
+                    job_title="Software Developer",
+                    duration_months=24,
+                    provenance=Provenance.EXTRACTED_RULE,
+                )
             ],
             education=[
-                EducationEntry(degree="BS Computer Science", level=EducationLevel.BACHELOR, provenance=Provenance.EXTRACTED_RULE)
+                EducationEntry(
+                    degree="BS Computer Science",
+                    level=EducationLevel.BACHELOR,
+                    provenance=Provenance.EXTRACTED_RULE,
+                )
             ],
             total_experience_years=2.0,
             highest_education_level=EducationLevel.BACHELOR,
@@ -164,7 +187,9 @@ def test_ut_store_01_save_load_equality(tmp_path: Path, make_report) -> None:
 # -----------------------------------------------------------------------------
 # UT-STORE-02: Atomic write resilience: simulated failure leaves target intact
 # -----------------------------------------------------------------------------
-def test_ut_store_02_atomic_write_failure_resilience(tmp_path: Path, make_report) -> None:
+def test_ut_store_02_atomic_write_failure_resilience(
+    tmp_path: Path, make_report
+) -> None:
     """Assert interrupted write never corrupts existing record and leaves no .tmp residue (FR-27)."""
     store = ResultStore(base_dir=tmp_path)
     original_report = make_report(total_score=80.0)
@@ -176,7 +201,9 @@ def test_ut_store_02_atomic_write_failure_resilience(tmp_path: Path, make_report
     # Simulate crash/failure during atomic replace of updated report
     updated_report = make_report(total_score=95.0)
     # Monkeypatch os.replace to simulate an abrupt failure
-    with patch("os.replace", side_effect=OSError("Disk write error during atomic move")):
+    with patch(
+        "os.replace", side_effect=OSError("Disk write error during atomic move")
+    ):
         with pytest.raises(StorageError) as exc_info:
             store.save(updated_report)
 
@@ -206,7 +233,10 @@ def test_ut_store_03_corrupt_partial_json_handling(tmp_path: Path, make_report) 
     # 2. Corrupt partial JSON file with a valid report_id filename
     corrupt_id = "20261108T120000Z_bbbbbbbb_cccc"
     corrupt_file = tmp_path / f"{corrupt_id}.json"
-    corrupt_file.write_text('{"report_id": "' + corrupt_id + '", "candidate": {"name": "Broken", ', encoding="utf-8")
+    corrupt_file.write_text(
+        '{"report_id": "' + corrupt_id + '", "candidate": {"name": "Broken", ',
+        encoding="utf-8",
+    )
 
     # Direct load must raise CorruptResultError
     with pytest.raises(CorruptResultError) as exc_info:
@@ -299,9 +329,9 @@ def test_ut_store_06_listing_order_newest_first(tmp_path: Path, make_report) -> 
     store = ResultStore(base_dir=tmp_path)
 
     # Create 3 reports with distinct creation dates
-    dt1 = datetime(2026, 11, 1, 10, 0, 0, tzinfo=timezone.utc)
-    dt2 = datetime(2026, 11, 8, 15, 30, 0, tzinfo=timezone.utc)
-    dt3 = datetime(2026, 11, 5, 12, 0, 0, tzinfo=timezone.utc)
+    dt1 = datetime(2026, 11, 1, 10, 0, 0, tzinfo=UTC)
+    dt2 = datetime(2026, 11, 8, 15, 30, 0, tzinfo=UTC)
+    dt3 = datetime(2026, 11, 5, 12, 0, 0, tzinfo=UTC)
 
     r1 = make_report(cand_id="111111111111", name="Nov 1 Candidate", created_at=dt1)
     r2 = make_report(cand_id="222222222222", name="Nov 8 Candidate", created_at=dt2)
@@ -330,12 +360,16 @@ def test_ut_store_07_purge_older_than_and_delete(tmp_path: Path, make_report) ->
     """Assert purge_older_than deletes only expired records and delete() removes single item (FR-28, NFR-19)."""
     store = ResultStore(base_dir=tmp_path)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     old_dt = now - timedelta(days=45)
     recent_dt = now - timedelta(days=5)
 
-    old_report = make_report(cand_id="aaaaaaaaaaaa", name="Old Candidate", created_at=old_dt)
-    recent_report = make_report(cand_id="bbbbbbbbbbbb", name="Recent Candidate", created_at=recent_dt)
+    old_report = make_report(
+        cand_id="aaaaaaaaaaaa", name="Old Candidate", created_at=old_dt
+    )
+    recent_report = make_report(
+        cand_id="bbbbbbbbbbbb", name="Recent Candidate", created_at=recent_dt
+    )
 
     store.save(old_report)
     store.save(recent_report)
@@ -373,7 +407,10 @@ def test_ut_store_08_permission_error_mapping(tmp_path: Path, make_report) -> No
     report = make_report()
 
     # Simulate filesystem permission failure on temp file creation
-    with patch("pathlib.Path.write_text", side_effect=PermissionError("EACCES: permission denied")):
+    with patch(
+        "pathlib.Path.write_text",
+        side_effect=PermissionError("EACCES: permission denied"),
+    ):
         with pytest.raises(StorageError) as exc_info:
             store.save(report)
 
@@ -404,8 +441,7 @@ def test_ut_store_edge_cases(tmp_path: Path, make_report) -> None:
     # Non-dict JSON file handling in load
     bad_root_id = "20261108T120000Z_99999999_9999"
     bad_root_file = tmp_path / f"{bad_root_id}.json"
-    bad_root_file.write_text("[\"not an object\"]", encoding="utf-8")
+    bad_root_file.write_text('["not an object"]', encoding="utf-8")
     with pytest.raises(CorruptResultError) as exc:
         store.load(bad_root_id)
     assert "root must be an object" in str(exc.value)
-
