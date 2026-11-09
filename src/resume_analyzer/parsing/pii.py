@@ -35,7 +35,7 @@ INJECTION_RULES: list[tuple[str, re.Pattern[str]]] = [
     (
         "ROLE_OVERRIDE",
         re.compile(
-            r"(?i)\b(?:you\s+are\s+now|act\s+as\s+a?|new\s+instructions|system\s+prompt|developer\s+message)\b"
+            r"(?i)\b(?:you\s+are\s+now|act\s+as\s+a?|new\s+instructions|system\s+prompt|system\s*:|developer\s+message)\b"
         ),
     ),
     (
@@ -52,7 +52,7 @@ INJECTION_RULES: list[tuple[str, re.Pattern[str]]] = [
     ),
     (
         "DELIMITER_SPOOF",
-        re.compile(r"<<<|>>>|_BEGIN|_END"),
+        re.compile(r"<<<|>>>|_BEGIN|_END|</?RESUME>|</?SYSTEM>", re.IGNORECASE),
     ),
 ]
 

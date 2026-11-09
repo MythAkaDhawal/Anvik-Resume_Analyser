@@ -1,0 +1,16 @@
+{
+  "id": "cand_17_maya_lin",
+  "resume_filename": "cand_17_maya_lin.txt",
+  "name": "Maya Lin",
+  "email": "maya.lin@testlab.org",
+  "skills": [
+    "Python",
+    "Selenium",
+    "Pytest",
+    "Git",
+    "Jira",
+    "Postman"
+  ],
+  "total_experience_years": 3.0,
+  "highest_education_level": "BACHELOR"
+}

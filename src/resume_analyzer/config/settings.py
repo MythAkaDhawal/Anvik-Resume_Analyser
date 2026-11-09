@@ -6,15 +6,15 @@ and environment variable overrides while ensuring no secrets are exposed.
 
 from __future__ import annotations
 
-from functools import lru_cache
 import logging
 import math
 import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 import yaml
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from resume_analyzer.exceptions import ConfigurationError
 
@@ -228,7 +228,7 @@ def load_settings(path: Path | str | None = None) -> Settings:
     raw_data: dict[str, Any] = {}
     if target_path and target_path.exists():
         try:
-            with open(target_path, "r", encoding="utf-8") as f:
+            with open(target_path, encoding="utf-8") as f:
                 content = yaml.safe_load(f)
                 if content is not None:
                     if not isinstance(content, dict):

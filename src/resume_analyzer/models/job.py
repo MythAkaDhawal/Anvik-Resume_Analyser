@@ -6,9 +6,8 @@ via JobValidationError (code E-DATA-001).
 
 from __future__ import annotations
 
-import re
-from typing import Any
 import uuid
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 

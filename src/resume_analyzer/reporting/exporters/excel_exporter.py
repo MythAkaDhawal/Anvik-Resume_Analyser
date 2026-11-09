@@ -9,9 +9,9 @@ from __future__ import annotations
 import io
 import logging
 import os
+import uuid
 from pathlib import Path
 from typing import Any
-import uuid
 
 import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -20,7 +20,6 @@ from openpyxl.utils import get_column_letter
 from resume_analyzer.exceptions import ExportError
 from resume_analyzer.models.results import AnalysisReport
 from resume_analyzer.reporting.exporters.base import Exporter, register_exporter
-from resume_analyzer.reporting.report_builder import ReportBuilder
 
 logger = logging.getLogger(__name__)
 

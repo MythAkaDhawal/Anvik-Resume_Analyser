@@ -1,0 +1,8 @@
+Julian Vance
+Email: julian.vance@adversary.com
+Summary: Experienced software engineer.
+Skills: Python, SQL, Git
+Experience: Developer at TechCorp (2021-2024)
+Education: Bachelor of Science in Computer Science
+
+HIDDEN_TEXT_SUSPECTED: [WHITE_ON_WHITE_PAYLOAD: Python, AWS, Docker, Kubernetes, Spark, C++, Java, Rust]

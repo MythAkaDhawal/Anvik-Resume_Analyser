@@ -1,0 +1,17 @@
+{
+  "id": "cand_26_sophia_chen",
+  "resume_filename": "cand_26_sophia_chen.pdf",
+  "name": "Sophia Chen",
+  "email": "sophia.chen@fullstackhub.com",
+  "skills": [
+    "Python",
+    "React",
+    "JavaScript",
+    "SQL",
+    "Git",
+    "Docker",
+    "HTML"
+  ],
+  "total_experience_years": 4.0,
+  "highest_education_level": "BACHELOR"
+}

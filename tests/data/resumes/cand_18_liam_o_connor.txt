@@ -1,0 +1,18 @@
+Liam O'Connor
+Email: liam.oconnor@webdev.ie
+Boston, MA
+
+SUMMARY
+Frontend Engineer with 3.5 years specializing in React, TypeScript, and modern CSS.
+
+SKILLS
+React, TypeScript, JavaScript, HTML, CSS, Redux, Git
+
+EXPERIENCE
+Frontend Developer at UI Studio
+January 2021 - July 2024
+- Created modular user interfaces with React, TypeScript, and Redux.
+
+EDUCATION
+Bachelor of Science in Web Development
+City College, 2020

@@ -7,11 +7,9 @@ and commentary, with strict PII masking (UT-FB-02) and aggregated analytics (UT-
 from __future__ import annotations
 
 import collections
-from datetime import datetime, timezone
-import json
 import logging
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -41,7 +39,7 @@ class FeedbackRecord(BaseModel):
     comment: str | None = Field(default=None, max_length=1000)
     section_feedback: dict[str, bool] = Field(default_factory=dict)
     corrected_skills: list[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     @field_validator("report_id")
     @classmethod
@@ -162,3 +160,4 @@ class FeedbackStore:
         """Clear all stored feedback entries."""
         if self.path.is_file():
             self.path.unlink()
+

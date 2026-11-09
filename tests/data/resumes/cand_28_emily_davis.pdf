@@ -1,0 +1,72 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 704 >>
+stream
+BT
+/F1 12 Tf
+72 712 Td
+(Emily Davis) Tj
+0 -20 Td
+(Email: emily.davis@bigdatapoc.com) Tj
+0 -20 Td
+(Philadelphia, PA) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(SUMMARY) Tj
+0 -20 Td
+(Lead Data Engineer with 5 years building big data ETL pipelines on AWS.) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(SKILLS) Tj
+0 -20 Td
+(Python, SQL, Apache Spark, ETL, PostgreSQL, AWS) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(EXPERIENCE) Tj
+0 -20 Td
+(Senior Data Engineer at DataStream Inc) Tj
+0 -20 Td
+(June 2019 - June 2024) Tj
+0 -20 Td
+(- Spearheaded Apache Spark pipelines processing petabytes of data with Python and SQL.) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(EDUCATION) Tj
+0 -20 Td
+(Master of Science in Data Engineering) Tj
+0 -20 Td
+(Penn State, 2019) Tj
+0 -20 Td
+ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1066
+%%EOF

@@ -1,0 +1,72 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 714 >>
+stream
+BT
+/F1 12 Tf
+72 712 Td
+(Ahmed Hassan) Tj
+0 -20 Td
+(Email: ahmed.hassan@cloudscale.net) Tj
+0 -20 Td
+(Dallas, TX) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(SUMMARY) Tj
+0 -20 Td
+(Cloud DevOps Engineer with 5 years managing AWS environments and Kubernetes.) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(SKILLS) Tj
+0 -20 Td
+(AWS, Docker, Kubernetes, Linux, Terraform, CI/CD) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(EXPERIENCE) Tj
+0 -20 Td
+(Cloud Infrastructure Engineer at ScaleOps) Tj
+0 -20 Td
+(June 2019 - June 2024) Tj
+0 -20 Td
+(- Provisioned AWS infrastructure using Terraform and configured Kubernetes clusters.) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(EDUCATION) Tj
+0 -20 Td
+(Bachelor of Science in Information Technology) Tj
+0 -20 Td
+(UT Dallas, 2019) Tj
+0 -20 Td
+ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1076
+%%EOF

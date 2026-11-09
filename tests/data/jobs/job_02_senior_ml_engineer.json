@@ -1,0 +1,11 @@
+{
+  "job_id": "job_02_senior_ml_engineer",
+  "job_title": "Senior Machine Learning Engineer",
+  "required_skills": ["Python", "PyTorch", "TensorFlow", "Scikit-Learn", "Machine Learning"],
+  "optional_skills": ["Docker", "Kubernetes", "MLflow", "Git", "NLP"],
+  "min_experience_years": 4.0,
+  "min_education_level": "MASTER",
+  "preferred_fields": ["Computer Science", "Artificial Intelligence", "Data Science", "Electrical Engineering"],
+  "description": "Design, train, and deploy deep learning models and scalable NLP systems with PyTorch, TensorFlow, and Kubernetes."
+}
+

@@ -102,3 +102,4 @@ def test_it_07_storage_pipeline_roundtrip(tmp_path: Path) -> None:
     html_content = html_out.read_text(encoding="utf-8")
     assert "Alex Morgan" in html_content
     assert loaded_report.report_id in html_content
+

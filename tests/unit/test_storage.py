@@ -381,3 +381,31 @@ def test_ut_store_08_permission_error_mapping(tmp_path: Path, make_report) -> No
         assert err.error_code == "E-STORE-001"
         assert err.user_message == "Could not write the result."
         assert "EACCES: permission denied" in str(err)
+
+
+def test_ut_store_edge_cases(tmp_path: Path, make_report) -> None:
+    """Test store edge cases: negative purge days, delete_all, unparseable date."""
+    store = ResultStore(base_dir=tmp_path)
+
+    # Negative purge days returns 0
+    assert store.purge_older_than(-1) == 0
+
+    # delete_all on multiple reports
+    r1 = make_report(cand_id="111111111111")
+    r2 = make_report(cand_id="222222222222")
+    store.save(r1)
+    store.save(r2)
+    assert len(store.list()) == 2
+
+    count = store.delete_all()
+    assert count == 2
+    assert len(store.list()) == 0
+
+    # Non-dict JSON file handling in load
+    bad_root_id = "20261108T120000Z_99999999_9999"
+    bad_root_file = tmp_path / f"{bad_root_id}.json"
+    bad_root_file.write_text("[\"not an object\"]", encoding="utf-8")
+    with pytest.raises(CorruptResultError) as exc:
+        store.load(bad_root_id)
+    assert "root must be an object" in str(exc.value)
+

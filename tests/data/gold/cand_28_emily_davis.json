@@ -1,0 +1,16 @@
+{
+  "id": "cand_28_emily_davis",
+  "resume_filename": "cand_28_emily_davis.pdf",
+  "name": "Emily Davis",
+  "email": "emily.davis@bigdatapoc.com",
+  "skills": [
+    "Python",
+    "SQL",
+    "Apache Spark",
+    "ETL",
+    "PostgreSQL",
+    "AWS"
+  ],
+  "total_experience_years": 5.0,
+  "highest_education_level": "MASTER"
+}

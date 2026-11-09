@@ -7,7 +7,6 @@ absence of automated employment verdicts or recommendation language (FR-16, NFR-
 from __future__ import annotations
 
 import re
-from typing import Any
 
 from resume_analyzer.models.enums import Provenance
 from resume_analyzer.models.results import DEFAULT_HUMAN_REVIEW_NOTICE

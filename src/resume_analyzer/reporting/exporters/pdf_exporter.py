@@ -9,9 +9,8 @@ from __future__ import annotations
 import io
 import logging
 import os
-from pathlib import Path
-from typing import Any
 import xml.sax.saxutils as saxutils
+from typing import Any
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -20,8 +19,6 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import (
-    HRFlowable,
-    KeepTogether,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -31,7 +28,6 @@ from reportlab.platypus import (
 
 from resume_analyzer.models.results import AnalysisReport
 from resume_analyzer.reporting.exporters.base import Exporter, register_exporter
-from resume_analyzer.reporting.provenance import get_provenance_display
 from resume_analyzer.reporting.report_builder import ReportBuilder
 
 logger = logging.getLogger(__name__)

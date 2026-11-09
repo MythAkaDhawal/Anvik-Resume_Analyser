@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from resume_analyzer.models.job import JobRequirements
-from resume_analyzer.models.results import AnalysisReport
 from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
-from resume_analyzer.services.batch_runner import BatchRunner, FileFailure
+from resume_analyzer.services.batch_runner import BatchRunner
 
 PAGES = ["1 Job", "2 Resumes", "3 Results", "4 Reports", "5 History"]
 

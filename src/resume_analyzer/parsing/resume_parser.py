@@ -6,13 +6,12 @@ experience, education, and injection security scans. Never raises on missing sec
 
 from __future__ import annotations
 
-from datetime import date
 import logging
+from datetime import date
 from pathlib import Path
 
 from resume_analyzer.ingestion.file_loader import LoadedResume
 from resume_analyzer.models.candidate import Candidate, ParseWarning
-from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.parsing.contact_extractor import extract_email, extract_name
 from resume_analyzer.parsing.education_parser import parse_education
 from resume_analyzer.parsing.experience_parser import (

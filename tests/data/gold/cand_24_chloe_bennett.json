@@ -1,0 +1,16 @@
+{
+  "id": "cand_24_chloe_bennett",
+  "resume_filename": "cand_24_chloe_bennett.docx",
+  "name": "Chloe Bennett",
+  "email": "chloe.b@qualityfirst.org",
+  "skills": [
+    "Python",
+    "Pytest",
+    "Selenium",
+    "Postman",
+    "CI/CD",
+    "Git"
+  ],
+  "total_experience_years": 4.0,
+  "highest_education_level": "BACHELOR"
+}

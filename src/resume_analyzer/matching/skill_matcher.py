@@ -7,7 +7,6 @@ SkillMatch per job skill (both required and optional), preserving order.
 from __future__ import annotations
 
 import logging
-from typing import Sequence
 
 from resume_analyzer.config.settings import FuzzySettings
 from resume_analyzer.models.candidate import Candidate, Skill

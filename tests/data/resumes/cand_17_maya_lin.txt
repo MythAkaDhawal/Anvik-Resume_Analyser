@@ -1,0 +1,18 @@
+Maya Lin
+Email: maya.lin@testlab.org
+Austin, TX
+
+SUMMARY
+QA Automation Engineer with 3 years building automated test suites in Python and Pytest.
+
+SKILLS
+Python, Selenium, Pytest, Git, Jira, Postman
+
+EXPERIENCE
+QA Engineer at Software Quality Labs
+May 2021 - May 2024
+- Built web regression suites using Selenium, Pytest, and Python.
+
+EDUCATION
+Bachelor of Science in Software Engineering
+Tech Institute, 2021

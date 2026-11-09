@@ -1,0 +1,17 @@
+{
+  "id": "cand_21_vikram_singh",
+  "resume_filename": "cand_21_vikram_singh.docx",
+  "name": "Vikram Singh",
+  "email": "vikram.singh@infra.io",
+  "skills": [
+    "Docker",
+    "Kubernetes",
+    "AWS",
+    "Terraform",
+    "Linux",
+    "CI/CD",
+    "Bash"
+  ],
+  "total_experience_years": 6.0,
+  "highest_education_level": "MASTER"
+}

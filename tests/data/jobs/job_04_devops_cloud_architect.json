@@ -1,0 +1,11 @@
+{
+  "job_id": "job_04_devops_cloud_architect",
+  "job_title": "DevOps & Cloud Engineer",
+  "required_skills": ["Docker", "Kubernetes", "AWS", "CI/CD", "Linux"],
+  "optional_skills": ["Terraform", "Git", "Python", "Bash"],
+  "min_experience_years": 3.0,
+  "min_education_level": "BACHELOR",
+  "preferred_fields": ["Computer Science", "Information Systems", "Computer Engineering"],
+  "description": "Architect and automate cloud infrastructure, container orchestration, and CI/CD deployment pipelines on AWS."
+}
+

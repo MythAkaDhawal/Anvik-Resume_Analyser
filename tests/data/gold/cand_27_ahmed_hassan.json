@@ -1,0 +1,16 @@
+{
+  "id": "cand_27_ahmed_hassan",
+  "resume_filename": "cand_27_ahmed_hassan.pdf",
+  "name": "Ahmed Hassan",
+  "email": "ahmed.hassan@cloudscale.net",
+  "skills": [
+    "AWS",
+    "Docker",
+    "Kubernetes",
+    "Linux",
+    "Terraform",
+    "CI/CD"
+  ],
+  "total_experience_years": 5.0,
+  "highest_education_level": "BACHELOR"
+}

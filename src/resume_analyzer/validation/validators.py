@@ -6,9 +6,9 @@ and emits parse-quality warnings without ever echoing untrusted resume text or P
 
 from __future__ import annotations
 
-from datetime import date
 import logging
 import re
+from datetime import date
 from typing import Any
 
 from resume_analyzer.exceptions import DataValidationError, JobValidationError

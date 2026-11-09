@@ -6,9 +6,9 @@ body scanning, deduplicates by canonical name, and enforces stuffing bounds.
 
 from __future__ import annotations
 
-from collections import Counter
 import logging
 import re
+from collections import Counter
 
 from resume_analyzer.models.candidate import ParseWarning, Skill
 from resume_analyzer.models.enums import Provenance

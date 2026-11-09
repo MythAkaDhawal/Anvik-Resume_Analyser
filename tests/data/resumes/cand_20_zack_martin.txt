@@ -1,0 +1,18 @@
+Zack Martin
+Email: zack.martin@codeworks.dev
+Denver, CO
+
+SUMMARY
+Backend Developer with 2.5 years experience in Python and PostgreSQL.
+
+SKILLS
+Python, FastAPI, SQL, PostgreSQL, Docker, Git
+
+EXPERIENCE
+Backend Developer at CodeWorks LLC
+December 2021 - June 2024
+- Developed RESTful APIs using Python and PostgreSQL.
+
+EDUCATION
+Bachelor of Science in Computer Science
+State College, 2021

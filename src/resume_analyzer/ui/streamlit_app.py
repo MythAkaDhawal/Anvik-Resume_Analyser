@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import streamlit as st
 
-from resume_analyzer.exceptions import ResumeAnalyzerError
 from resume_analyzer.models.enums import EducationLevel
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.reporting.exporters.base import export_batch_workbook

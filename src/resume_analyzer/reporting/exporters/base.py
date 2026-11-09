@@ -6,12 +6,12 @@ and strict format validation (FR-24–FR-26).
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 import logging
 import os
+import uuid
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import ClassVar, Literal
-import uuid
 
 from resume_analyzer.exceptions import ExportError, UnsupportedExportFormatError
 from resume_analyzer.models.results import AnalysisReport

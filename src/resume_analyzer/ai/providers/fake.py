@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
-
-from resume_analyzer.exceptions import AIProviderUnavailableError, AIRateLimitError
+from collections.abc import Callable
+from typing import Any
 
 
 class FakeProvider:

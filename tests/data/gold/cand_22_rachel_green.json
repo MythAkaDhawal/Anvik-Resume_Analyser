@@ -1,0 +1,16 @@
+{
+  "id": "cand_22_rachel_green",
+  "resume_filename": "cand_22_rachel_green.docx",
+  "name": "Rachel Green",
+  "email": "rachel.green@designweb.co",
+  "skills": [
+    "React",
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Figma",
+    "Git"
+  ],
+  "total_experience_years": 2.0,
+  "highest_education_level": "BACHELOR"
+}

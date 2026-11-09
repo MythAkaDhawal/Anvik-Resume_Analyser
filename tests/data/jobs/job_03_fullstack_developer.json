@@ -1,0 +1,11 @@
+{
+  "job_id": "job_03_fullstack_developer",
+  "job_title": "Full Stack Developer",
+  "required_skills": ["Python", "JavaScript", "React", "SQL", "Git"],
+  "optional_skills": ["TypeScript", "Node.js", "Docker", "REST API", "HTML"],
+  "min_experience_years": 3.0,
+  "min_education_level": "BACHELOR",
+  "preferred_fields": ["Computer Science", "Software Engineering"],
+  "description": "Develop and maintain robust web applications with modern React frontends, Python REST backends, and relational databases."
+}
+

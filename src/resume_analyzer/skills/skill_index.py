@@ -6,15 +6,14 @@ multi-word taxonomy skill matching, and provides symmetric confusable pair check
 
 from __future__ import annotations
 
-from collections import Counter
 import logging
 import re
+from collections import Counter
+from functools import lru_cache
+from pathlib import Path
 
 from resume_analyzer.skills.normalizer import normalize_skill
 from resume_analyzer.skills.taxonomy import SkillTaxonomy
-
-from functools import lru_cache
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 

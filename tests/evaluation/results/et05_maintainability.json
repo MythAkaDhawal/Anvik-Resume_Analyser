@@ -1,0 +1,25 @@
+{
+  "evaluation_name": "ET-05 Maintainability & Architecture Health",
+  "total_source_modules": 75,
+  "architectural_violations_count": 0,
+  "architectural_violations": [],
+  "oversized_modules_count": 2,
+  "oversized_modules": [
+    {
+      "file": "exceptions.py",
+      "lines": 665
+    },
+    {
+      "file": "ui\\streamlit_app.py",
+      "lines": 586
+    }
+  ],
+  "cyclomatic_complexity_summary": [
+    "    F 136:0 validate_candidate - D (21)",
+    "    F 240:0 assess_parse_quality - C (11)",
+    "",
+    "359 blocks (classes, functions, methods) analyzed.",
+    "Average complexity: B (5.272980501392758)"
+  ],
+  "maintainability_index_summary": "All modules Rank A/B"
+}

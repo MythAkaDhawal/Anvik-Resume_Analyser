@@ -1,0 +1,18 @@
+Suresh Nair
+Email: suresh.nair@cloudops.net
+Seattle, WA
+
+SUMMARY
+DevOps engineer with 4 years deploying Kubernetes clusters on AWS with Docker and Linux.
+
+SKILLS
+Docker, Kubernetes, AWS, CI/CD, Linux, Git, Bash
+
+EXPERIENCE
+DevOps Engineer at CloudOps Inc
+June 2020 - June 2024
+- Automated deployment pipelines using CI/CD, Docker, and Kubernetes on AWS.
+
+EDUCATION
+Bachelor of Science in Computer Science
+State University, 2020

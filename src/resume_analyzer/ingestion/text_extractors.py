@@ -8,10 +8,10 @@ from __future__ import annotations
 import io
 import logging
 import re
-from typing import TYPE_CHECKING
 import xml.etree.ElementTree as ET
 import zipfile
 import zlib
+from typing import TYPE_CHECKING
 
 from resume_analyzer.exceptions import UnreadableFileError
 

@@ -1,0 +1,16 @@
+{
+  "id": "cand_20_zack_martin",
+  "resume_filename": "cand_20_zack_martin.txt",
+  "name": "Zack Martin",
+  "email": "zack.martin@codeworks.dev",
+  "skills": [
+    "Python",
+    "FastAPI",
+    "SQL",
+    "PostgreSQL",
+    "Docker",
+    "Git"
+  ],
+  "total_experience_years": 2.5,
+  "highest_education_level": "BACHELOR"
+}

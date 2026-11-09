@@ -6,9 +6,9 @@ overlapping intervals, and extracts job titles and company names.
 
 from __future__ import annotations
 
-from datetime import date
 import logging
 import re
+from datetime import date
 
 from resume_analyzer.models.candidate import ExperienceEntry, ParseWarning
 from resume_analyzer.models.enums import Provenance

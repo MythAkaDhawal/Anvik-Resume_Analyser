@@ -1,0 +1,16 @@
+{
+  "id": "cand_25_daniel_vogel",
+  "resume_filename": "cand_25_daniel_vogel.docx",
+  "name": "Daniel Vogel",
+  "email": "daniel.vogel@mlresearch.de",
+  "skills": [
+    "Python",
+    "PyTorch",
+    "Machine Learning",
+    "Docker",
+    "Git",
+    "Scikit-Learn"
+  ],
+  "total_experience_years": 4.5,
+  "highest_education_level": "MASTER"
+}

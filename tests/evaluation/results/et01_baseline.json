@@ -1,22 +1,24 @@
 {
   "evaluation_name": "ET-01 Baseline Extraction Accuracy",
-  "sample_count": 15,
+  "sample_count": 30,
   "format_distribution": {
-    "txt": 15
+    "txt": 20,
+    "docx": 5,
+    "pdf": 5
   },
   "skills_micro_metrics": {
-    "tp": 78,
-    "fp": 15,
-    "fn": 0,
-    "precision": 0.8387,
-    "recall": 1.0,
-    "f1": 0.9123
+    "tp": 167,
+    "fp": 25,
+    "fn": 3,
+    "precision": 0.8698,
+    "recall": 0.9824,
+    "f1": 0.9227
   },
   "exact_match_rates": {
     "email_accuracy": 1.0,
     "name_accuracy": 1.0,
-    "education_accuracy": 1.0,
-    "experience_accuracy": 0.8
+    "education_accuracy": 0.9667,
+    "experience_accuracy": 0.9
   },
   "detailed": [
     {
@@ -288,6 +290,276 @@
       "experience_match": true,
       "extracted_exp": null,
       "gold_exp": null
+    },
+    {
+      "id": "cand_16_suresh_nair",
+      "filename": "cand_16_suresh_nair.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 7,
+        "extracted_count": 7,
+        "tp": 7,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.0,
+      "gold_exp": 4.0
+    },
+    {
+      "id": "cand_17_maya_lin",
+      "filename": "cand_17_maya_lin.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 7,
+        "tp": 6,
+        "fp": 1,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 3.0,
+      "gold_exp": 3.0
+    },
+    {
+      "id": "cand_18_liam_o_connor",
+      "filename": "cand_18_liam_o_connor.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 7,
+        "extracted_count": 7,
+        "tp": 7,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 3.5,
+      "gold_exp": 3.5
+    },
+    {
+      "id": "cand_19_olivia_taylor",
+      "filename": "cand_19_olivia_taylor.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 7,
+        "tp": 5,
+        "fp": 2,
+        "fn": 1
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 5.5,
+      "gold_exp": 5.5
+    },
+    {
+      "id": "cand_20_zack_martin",
+      "filename": "cand_20_zack_martin.txt",
+      "format": "txt",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 7,
+        "tp": 6,
+        "fp": 1,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 2.5,
+      "gold_exp": 2.5
+    },
+    {
+      "id": "cand_21_vikram_singh",
+      "filename": "cand_21_vikram_singh.docx",
+      "format": "docx",
+      "skills": {
+        "gold_count": 7,
+        "extracted_count": 7,
+        "tp": 7,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 6.0,
+      "gold_exp": 6.0
+    },
+    {
+      "id": "cand_22_rachel_green",
+      "filename": "cand_22_rachel_green.docx",
+      "format": "docx",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 2.0,
+      "gold_exp": 2.0
+    },
+    {
+      "id": "cand_23_tariq_al_mansoori",
+      "filename": "cand_23_tariq_al_mansoori.docx",
+      "format": "docx",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 5,
+        "fp": 1,
+        "fn": 1
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.0,
+      "gold_exp": 4.0
+    },
+    {
+      "id": "cand_24_chloe_bennett",
+      "filename": "cand_24_chloe_bennett.docx",
+      "format": "docx",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 8,
+        "tp": 6,
+        "fp": 2,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.0,
+      "gold_exp": 4.0
+    },
+    {
+      "id": "cand_25_daniel_vogel",
+      "filename": "cand_25_daniel_vogel.docx",
+      "format": "docx",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 8,
+        "tp": 6,
+        "fp": 2,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.4,
+      "gold_exp": 4.5
+    },
+    {
+      "id": "cand_26_sophia_chen",
+      "filename": "cand_26_sophia_chen.pdf",
+      "format": "pdf",
+      "skills": {
+        "gold_count": 7,
+        "extracted_count": 7,
+        "tp": 7,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 4.0,
+      "gold_exp": 4.0
+    },
+    {
+      "id": "cand_27_ahmed_hassan",
+      "filename": "cand_27_ahmed_hassan.pdf",
+      "format": "pdf",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 5.0,
+      "gold_exp": 5.0
+    },
+    {
+      "id": "cand_28_emily_davis",
+      "filename": "cand_28_emily_davis.pdf",
+      "format": "pdf",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 5.0,
+      "gold_exp": 5.0
+    },
+    {
+      "id": "cand_29_aravind_swaminathan",
+      "filename": "cand_29_aravind_swaminathan.pdf",
+      "format": "pdf",
+      "skills": {
+        "gold_count": 6,
+        "extracted_count": 6,
+        "tp": 5,
+        "fp": 1,
+        "fn": 1
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": true,
+      "experience_match": true,
+      "extracted_exp": 6.0,
+      "gold_exp": 6.0
+    },
+    {
+      "id": "cand_30_hannah_abbott",
+      "filename": "cand_30_hannah_abbott.pdf",
+      "format": "pdf",
+      "skills": {
+        "gold_count": 4,
+        "extracted_count": 4,
+        "tp": 4,
+        "fp": 0,
+        "fn": 0
+      },
+      "email_match": true,
+      "name_match": true,
+      "education_match": false,
+      "experience_match": true,
+      "extracted_exp": 1.4,
+      "gold_exp": 1.5
     }
   ]
 }

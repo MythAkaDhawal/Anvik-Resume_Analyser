@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 import openpyxl
 from pypdf import PdfReader
@@ -391,3 +392,41 @@ def test_ut_xpt_07_excel_formula_injection_defense(
             found_escaped = True
             break
     assert found_escaped, "Malicious name cell was not found or was unescaped"
+
+
+def test_exporter_registry_and_lazy_load(standard_report: AnalysisReport, tmp_path: Path) -> None:
+    """Assert get_exporter lazy loads html, pdf, xlsx, and rejects unsupported format."""
+    from resume_analyzer.reporting.exporters.base import _EXPORTER_REGISTRY
+
+    # Test registry lookup
+    html_e = get_exporter("html")
+    assert isinstance(html_e, HTMLExporter)
+
+    # Test fallback lazy load by clearing registry temporarily
+    orig_registry = dict(_EXPORTER_REGISTRY)
+    try:
+        _EXPORTER_REGISTRY.clear()
+        lazy_html = get_exporter("html")
+        assert isinstance(lazy_html, HTMLExporter)
+
+        lazy_pdf = get_exporter("pdf")
+        assert isinstance(lazy_pdf, PDFExporter)
+
+        lazy_xlsx = get_exporter("xlsx")
+        assert isinstance(lazy_xlsx, ExcelExporter)
+
+        lazy_excel = get_exporter("excel")
+        assert isinstance(lazy_excel, ExcelExporter)
+
+        from resume_analyzer.exceptions import UnsupportedExportFormatError
+        with pytest.raises(UnsupportedExportFormatError):
+            get_exporter("unknown_format")
+    finally:
+        _EXPORTER_REGISTRY.update(orig_registry)
+
+    # Error handling and temp file cleanup during failed export
+    with patch("os.replace", side_effect=OSError("Atomic replace failure")):
+        with pytest.raises(Exception):
+            html_e.export(standard_report, tmp_path / "fail.html")
+    assert not (tmp_path / "fail.html").exists()
+

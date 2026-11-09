@@ -6,9 +6,9 @@ syntactically meaningful symbols (C++, C#, .NET, Node.js), and LRU-cached operat
 
 from __future__ import annotations
 
-from functools import lru_cache
 import re
 import unicodedata
+from functools import lru_cache
 
 from rapidfuzz import fuzz
 

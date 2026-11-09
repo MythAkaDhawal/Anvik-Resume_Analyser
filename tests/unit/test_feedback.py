@@ -154,3 +154,4 @@ def test_ut_fb_03_summary_aggregation(tmp_path: Path) -> None:
     assert skills_map["Docker"] == 3
     assert skills_map["FastAPI"] == 1
     assert skills_map["Kubernetes"] == 1
+

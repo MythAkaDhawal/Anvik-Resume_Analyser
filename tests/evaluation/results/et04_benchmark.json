@@ -1,0 +1,36 @@
+{
+  "evaluation_name": "ET-04 / PT-01 / PT-02 Performance Benchmark",
+  "environment": {
+    "os": "Windows 11",
+    "architecture": "AMD64",
+    "python_version": "3.14.0",
+    "processor": "Intel64 Family 6 Model 142 Stepping 12, GenuineIntel"
+  },
+  "corpus_size": 100,
+  "measured_passes": 5,
+  "pt01_skill_index_latency": {
+    "taxonomy_load_seconds": 0.0404,
+    "index_build_seconds": 0.002,
+    "total_init_seconds": 0.0424,
+    "total_canonical_skills": 325
+  },
+  "throughput_resumes_per_second": {
+    "mean": 83.39,
+    "passes": [
+      33.12,
+      107.88,
+      96.7,
+      90.71,
+      88.53
+    ]
+  },
+  "latency_milliseconds": {
+    "median_ms": 3.98,
+    "p95_ms": 45.59
+  },
+  "export_throughput_per_second": {
+    "html": 1490.11,
+    "pdf": 10.49,
+    "xlsx": 10.24
+  }
+}

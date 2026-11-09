@@ -5,7 +5,8 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 from pydantic import ValidationError
 
@@ -22,7 +23,7 @@ from resume_analyzer.ai.provider_base import LLMProvider
 from resume_analyzer.ai.provider_factory import get_provider
 from resume_analyzer.ai.providers.null import NullProvider
 from resume_analyzer.ai.rate_limiter import AIRateLimiter
-from resume_analyzer.ai.sanitizer import mask_and_delimit_resume, sanitize_prompt_text
+from resume_analyzer.ai.sanitizer import sanitize_prompt_text
 from resume_analyzer.ai.schemas import (
     ExtractionResult,
     ImprovementRecommendations,
@@ -35,7 +36,6 @@ from resume_analyzer.exceptions import (
     AIProviderUnavailableError,
     AIRateLimitError,
     AIServiceError,
-    ResumeAnalyzerError,
 )
 from resume_analyzer.models.enums import FeatureStatus, MatchType
 from resume_analyzer.models.job import JobRequirements

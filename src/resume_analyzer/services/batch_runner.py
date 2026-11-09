@@ -6,8 +6,8 @@ never abort processing of the remaining batch.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
 import logging
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field

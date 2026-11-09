@@ -6,17 +6,16 @@ AI insights, human-review notice, provenance, and diagnostic flags.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import re
-from typing import Any
 import uuid
+from datetime import UTC, datetime
+from typing import Any
 
 from resume_analyzer.config.settings import Settings
 from resume_analyzer.models.candidate import Candidate
 from resume_analyzer.models.enums import FeatureStatus, MatchType
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
-    DEFAULT_HUMAN_REVIEW_NOTICE,
     AIInsights,
     AnalysisReport,
     MatchResult,
@@ -47,9 +46,9 @@ class ReportBuilder:
         Returns:
             Formatted report ID string.
         """
-        ts = timestamp or datetime.now(timezone.utc)
+        ts = timestamp or datetime.now(UTC)
         if ts.tzinfo is None:
-            ts = ts.replace(tzinfo=timezone.utc)
+            ts = ts.replace(tzinfo=UTC)
 
         ts_part = ts.strftime("%Y%m%dT%H%M%SZ")
         cid_hex = candidate_id[:8].lower() if len(candidate_id) >= 8 else uuid.uuid4().hex[:8]
@@ -202,9 +201,9 @@ class ReportBuilder:
         Returns:
             Validated AnalysisReport instance.
         """
-        created = created_at or datetime.now(timezone.utc)
+        created = created_at or datetime.now(UTC)
         if created.tzinfo is None:
-            created = created.replace(tzinfo=timezone.utc)
+            created = created.replace(tzinfo=UTC)
 
         report_id = cls.generate_report_id(candidate.candidate_id, created)
         app_version = "0.1.0"

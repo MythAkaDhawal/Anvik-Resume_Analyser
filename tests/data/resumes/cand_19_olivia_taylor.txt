@@ -1,0 +1,18 @@
+Olivia Taylor
+Email: olivia.taylor@ai-res.com
+New York, NY
+
+SUMMARY
+Senior ML Engineer with 5.5 years designing NLP and deep learning systems.
+
+SKILLS
+Python, PyTorch, TensorFlow, Scikit-Learn, Machine Learning, NLP
+
+EXPERIENCE
+Machine Learning Engineer at DeepMind Labs
+January 2019 - July 2024
+- Trained transformer models using PyTorch and TensorFlow for NLP tasks.
+
+EDUCATION
+Master of Science in Artificial Intelligence
+Columbia University, 2018

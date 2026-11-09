@@ -1,0 +1,11 @@
+{
+  "job_id": "job_05_qa_automation_engineer",
+  "job_title": "QA Automation Engineer",
+  "required_skills": ["Python", "Selenium", "Pytest", "Git", "CI/CD"],
+  "optional_skills": ["Postman", "Docker", "SQL", "Jira"],
+  "min_experience_years": 2.0,
+  "min_education_level": "BACHELOR",
+  "preferred_fields": ["Computer Science", "Software Engineering"],
+  "description": "Develop and maintain end-to-end automated testing suites and regression frameworks using Python and Selenium."
+}
+

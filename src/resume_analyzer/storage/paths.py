@@ -7,8 +7,8 @@ against the canonical naming regex (NFR-05).
 from __future__ import annotations
 
 import os
-from pathlib import Path
 import re
+from pathlib import Path
 
 from resume_analyzer.exceptions import InvalidIdentifierError
 

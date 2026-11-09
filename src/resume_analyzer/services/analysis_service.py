@@ -7,8 +7,8 @@ Enforces that deterministic scoring never depends on AI availability (FR-32).
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
 import logging
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -18,28 +18,35 @@ from resume_analyzer.ai.ai_service import AIService
 from resume_analyzer.ai.provider_factory import get_provider
 from resume_analyzer.ai.providers.null import NullProvider
 from resume_analyzer.config.settings import Settings, get_settings
-from resume_analyzer.exceptions import ResumeAnalyzerError
-from resume_analyzer.ingestion.file_loader import LoadedResume, load_resume
+from resume_analyzer.ingestion.file_loader import load_resume
 from resume_analyzer.matching.matching_engine import MatchingEngine
-from resume_analyzer.models.candidate import Candidate, EducationEntry, ExperienceEntry, Skill
+from resume_analyzer.models.candidate import (
+    EducationEntry,
+    ExperienceEntry,
+    Skill,
+)
 from resume_analyzer.models.enums import EducationLevel, FeatureStatus, Provenance
 from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import (
     AIInsights,
     AnalysisReport,
     FeatureResult,
-    MatchResult,
-    ScoreResult,
 )
 from resume_analyzer.parsing.education_parser import detect_education_level
-from resume_analyzer.parsing.experience_parser import compute_duration_months, total_experience_years
-from resume_analyzer.parsing.pii import mask_pii
+from resume_analyzer.parsing.experience_parser import (
+    compute_duration_months,
+    total_experience_years,
+)
 from resume_analyzer.parsing.resume_parser import ResumeParser
 from resume_analyzer.reporting.report_builder import ReportBuilder
 from resume_analyzer.scoring.registry import get_strategy
 from resume_analyzer.skills.normalizer import normalize_skill
 from resume_analyzer.skills.skill_index import SkillIndex, get_skill_index
-from resume_analyzer.validation.validators import assess_parse_quality, validate_candidate, validate_job
+from resume_analyzer.validation.validators import (
+    assess_parse_quality,
+    validate_candidate,
+    validate_job,
+)
 
 logger = logging.getLogger(__name__)
 

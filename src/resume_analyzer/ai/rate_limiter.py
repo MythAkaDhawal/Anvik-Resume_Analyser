@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import collections
 import time
+
 from resume_analyzer.exceptions import AIRateLimitError
 
 

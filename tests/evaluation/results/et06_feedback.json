@@ -1,0 +1,23 @@
+{
+  "evaluation_name": "ET-06 User Satisfaction & Reviewer Feedback Loop",
+  "sample_size": 10,
+  "average_rating": 4.4,
+  "ratings_ge_4_ratio": 0.9,
+  "section_positive_ratios": {
+    "skills": 0.9,
+    "experience": 0.9,
+    "education": 1.0
+  },
+  "total_corrections": 2,
+  "correction_rate_per_analysis": 0.2,
+  "top_corrected_skills": [
+    [
+      "FastAPI",
+      1
+    ],
+    [
+      "Polars",
+      1
+    ]
+  ]
+}

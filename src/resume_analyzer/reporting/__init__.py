@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from resume_analyzer.reporting.exporters.base import Exporter, export_batch_workbook, get_exporter
+from resume_analyzer.reporting.exporters.base import (
+    Exporter,
+    export_batch_workbook,
+    get_exporter,
+)
 from resume_analyzer.reporting.provenance import (
     AI_UNAVAILABLE_NOTICE_TEMPLATE,
     AI_UNVERIFIED_NOTICE,

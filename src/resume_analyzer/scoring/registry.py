@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Type
-
 from resume_analyzer.config.settings import ScoringSettings
 from resume_analyzer.exceptions import UnknownStrategyError
 from resume_analyzer.scoring.base import ScoringStrategy
 from resume_analyzer.scoring.basic import BasicScoringStrategy
 from resume_analyzer.scoring.weighted import WeightedScoringStrategy
 
-STRATEGY_REGISTRY: dict[str, Type[ScoringStrategy]] = {
+STRATEGY_REGISTRY: dict[str, type[ScoringStrategy]] = {
     BasicScoringStrategy.name: BasicScoringStrategy,
     WeightedScoringStrategy.name: WeightedScoringStrategy,
 }

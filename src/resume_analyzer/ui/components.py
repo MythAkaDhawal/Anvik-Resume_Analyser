@@ -7,9 +7,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import AnalysisReport
-from resume_analyzer.reporting.exporters.base import export_batch_workbook, get_exporter
+from resume_analyzer.reporting.exporters.base import get_exporter
 from resume_analyzer.reporting.provenance import DEFAULT_HUMAN_REVIEW_NOTICE
 
 SCORING_LIMITATIONS = [
@@ -260,7 +259,10 @@ def render_feedback_widget(report: AnalysisReport) -> None:
             submitted = st.form_submit_button("Submit Feedback", use_container_width=True)
 
         if submitted:
-            from resume_analyzer.storage.feedback_store import FeedbackRecord, FeedbackStore
+            from resume_analyzer.storage.feedback_store import (
+                FeedbackRecord,
+                FeedbackStore,
+            )
 
             corrected = [s.strip() for s in corrected_raw.split(",") if s.strip()]
             record = FeedbackRecord(

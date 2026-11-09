@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 import os
 
-from resume_analyzer.config.settings import AISettings
 from resume_analyzer.ai.provider_base import LLMProvider
 from resume_analyzer.ai.providers.gemini import GeminiProvider
 from resume_analyzer.ai.providers.null import NullProvider
 from resume_analyzer.ai.providers.ollama import OllamaProvider
 from resume_analyzer.ai.providers.openai_compatible import OpenAICompatibleProvider
+from resume_analyzer.config.settings import AISettings
 
 logger = logging.getLogger(__name__)
 

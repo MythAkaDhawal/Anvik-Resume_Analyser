@@ -1,0 +1,16 @@
+{
+  "id": "cand_19_olivia_taylor",
+  "resume_filename": "cand_19_olivia_taylor.txt",
+  "name": "Olivia Taylor",
+  "email": "olivia.taylor@ai-res.com",
+  "skills": [
+    "Python",
+    "PyTorch",
+    "TensorFlow",
+    "Scikit-Learn",
+    "Machine Learning",
+    "NLP"
+  ],
+  "total_experience_years": 5.5,
+  "highest_education_level": "MASTER"
+}

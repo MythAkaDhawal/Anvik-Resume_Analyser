@@ -13,11 +13,10 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
-from pathlib import Path
 import sys
 import time
-from typing import Any, Sequence
+from collections.abc import Sequence
+from pathlib import Path
 
 import yaml
 
@@ -27,17 +26,13 @@ from resume_analyzer.exceptions import (
     InvalidIdentifierError,
     ResultNotFoundError,
     ResumeAnalyzerError,
-    StorageError,
-    UnknownStrategyError,
 )
 from resume_analyzer.models.job import JobRequirements
-from resume_analyzer.models.results import AnalysisReport
 from resume_analyzer.reporting.exporters.base import export_batch_workbook, get_exporter
 from resume_analyzer.services.analysis_service import AnalysisOptions, AnalysisService
 from resume_analyzer.services.batch_runner import BatchRunner
 from resume_analyzer.storage.feedback_store import FeedbackStore
 from resume_analyzer.storage.result_store import ResultStore
-
 
 logger = logging.getLogger(__name__)
 

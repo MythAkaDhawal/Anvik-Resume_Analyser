@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from resume_analyzer.parsing.contact_extractor import extract_email, extract_name
-from resume_analyzer.parsing.education_parser import detect_education_level, parse_education
+from resume_analyzer.parsing.education_parser import (
+    detect_education_level,
+    parse_education,
+)
 from resume_analyzer.parsing.experience_parser import (
     compute_duration_months,
     parse_experience,

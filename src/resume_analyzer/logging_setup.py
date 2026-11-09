@@ -7,12 +7,11 @@ redaction of e-mail and phone numbers from all log output.
 from __future__ import annotations
 
 import logging
-from logging.handlers import RotatingFileHandler
-from pathlib import Path
 import re
 import sys
 import time
-from typing import Any
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from resume_analyzer.config.settings import LoggingSettings, Settings
 

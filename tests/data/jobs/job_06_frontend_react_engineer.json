@@ -1,0 +1,11 @@
+{
+  "job_id": "job_06_frontend_react_engineer",
+  "job_title": "Frontend React Engineer",
+  "required_skills": ["React", "JavaScript", "TypeScript", "HTML", "CSS"],
+  "optional_skills": ["Redux", "Webpack", "Git", "Figma", "REST API"],
+  "min_experience_years": 2.0,
+  "min_education_level": "BACHELOR",
+  "preferred_fields": ["Computer Science", "Web Development", "Design"],
+  "description": "Build high-performance, accessible, and responsive user interfaces using React, TypeScript, and modern CSS."
+}
+

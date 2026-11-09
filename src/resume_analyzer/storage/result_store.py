@@ -6,20 +6,18 @@ safe listing with corruption isolation, single report deletion, and retention-ba
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import json
 import logging
 import os
-from pathlib import Path
-from typing import Any
 import uuid
+from datetime import UTC, datetime
+from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from resume_analyzer.config.settings import Settings, get_settings
 from resume_analyzer.exceptions import (
     CorruptResultError,
-    InvalidIdentifierError,
     ResultNotFoundError,
     StorageError,
 )
@@ -204,9 +202,9 @@ class ResultStore:
                     try:
                         created_dt = datetime.fromisoformat(created_raw)
                     except Exception:
-                        created_dt = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+                        created_dt = datetime.fromtimestamp(f.stat().st_mtime, tz=UTC)
                 else:
-                    created_dt = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+                    created_dt = datetime.fromtimestamp(f.stat().st_mtime, tz=UTC)
 
                 fit_band_val = score.get("fit_band")
                 if isinstance(fit_band_val, dict):
@@ -228,7 +226,7 @@ class ResultStore:
                 )
             except Exception as e:
                 logger.warning("Unreadable analysis file in store '%s': %s", f.name, e)
-                file_dt = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+                file_dt = datetime.fromtimestamp(f.stat().st_mtime, tz=UTC)
                 summaries.append(
                     ReportSummary(
                         report_id=file_id,
@@ -241,7 +239,7 @@ class ResultStore:
 
         # Sort newest first by created_at descending
         summaries.sort(
-            key=lambda s: (s.created_at or datetime.min.replace(tzinfo=timezone.utc)),
+            key=lambda s: (s.created_at or datetime.min.replace(tzinfo=UTC)),
             reverse=True,
         )
         return summaries
@@ -287,7 +285,7 @@ class ResultStore:
         if days < 0:
             return 0
 
-        cutoff_sec = datetime.now(timezone.utc).timestamp() - (days * 86400)
+        cutoff_sec = datetime.now(UTC).timestamp() - (days * 86400)
         deleted = 0
 
         for f in self.base_dir.glob("*.json"):
@@ -325,3 +323,4 @@ class ResultStore:
             except OSError:
                 pass
         return deleted
+

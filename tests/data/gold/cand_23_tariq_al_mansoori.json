@@ -1,0 +1,16 @@
+{
+  "id": "cand_23_tariq_al_mansoori",
+  "resume_filename": "cand_23_tariq_al_mansoori.docx",
+  "name": "Tariq Al-Mansoori",
+  "email": "tariq.mansoori@dataflow.ae",
+  "skills": [
+    "Python",
+    "SQL",
+    "Apache Spark",
+    "Airflow",
+    "AWS",
+    "ETL"
+  ],
+  "total_experience_years": 4.0,
+  "highest_education_level": "BACHELOR"
+}

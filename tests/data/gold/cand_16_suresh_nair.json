@@ -1,0 +1,17 @@
+{
+  "id": "cand_16_suresh_nair",
+  "resume_filename": "cand_16_suresh_nair.txt",
+  "name": "Suresh Nair",
+  "email": "suresh.nair@cloudops.net",
+  "skills": [
+    "Docker",
+    "Kubernetes",
+    "AWS",
+    "CI/CD",
+    "Linux",
+    "Git",
+    "Bash"
+  ],
+  "total_experience_years": 4.0,
+  "highest_education_level": "BACHELOR"
+}

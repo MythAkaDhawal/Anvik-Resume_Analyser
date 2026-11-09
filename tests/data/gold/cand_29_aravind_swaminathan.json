@@ -1,0 +1,16 @@
+{
+  "id": "cand_29_aravind_swaminathan",
+  "resume_filename": "cand_29_aravind_swaminathan.pdf",
+  "name": "Aravind Swaminathan",
+  "email": "aravind.s@ai-institute.edu",
+  "skills": [
+    "Python",
+    "PyTorch",
+    "TensorFlow",
+    "Scikit-Learn",
+    "NLP",
+    "Machine Learning"
+  ],
+  "total_experience_years": 6.0,
+  "highest_education_level": "DOCTORATE"
+}

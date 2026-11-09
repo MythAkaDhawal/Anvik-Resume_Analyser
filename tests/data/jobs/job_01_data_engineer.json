@@ -1,0 +1,11 @@
+{
+  "job_id": "job_01_data_engineer",
+  "job_title": "Data Engineer",
+  "required_skills": ["Python", "SQL", "Apache Spark", "ETL"],
+  "optional_skills": ["AWS", "Docker", "PostgreSQL", "Airflow"],
+  "min_experience_years": 2.0,
+  "min_education_level": "BACHELOR",
+  "preferred_fields": ["Computer Science", "Information Technology", "Data Engineering"],
+  "description": "Build high-throughput batch and streaming ETL pipelines using Python, SQL, and Apache Spark on cloud infrastructure."
+}
+

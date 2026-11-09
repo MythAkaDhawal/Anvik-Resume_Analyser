@@ -1,0 +1,17 @@
+{
+  "id": "cand_18_liam_o_connor",
+  "resume_filename": "cand_18_liam_o_connor.txt",
+  "name": "Liam O'Connor",
+  "email": "liam.oconnor@webdev.ie",
+  "skills": [
+    "React",
+    "TypeScript",
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Redux",
+    "Git"
+  ],
+  "total_experience_years": 3.5,
+  "highest_education_level": "BACHELOR"
+}
