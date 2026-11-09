@@ -42,6 +42,9 @@ resume-analyzer = "resume_analyzer.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"*" = ["*.j2"]
+
 [tool.black]
 line-length = 88
 target-version = ["py311"]
