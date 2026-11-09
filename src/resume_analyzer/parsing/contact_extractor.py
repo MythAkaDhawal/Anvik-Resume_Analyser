@@ -100,6 +100,33 @@ def extract_email(
     return primary, warnings
 
 
+def _is_valid_name_candidate(line: str) -> str | None:
+    """Validate whether a candidate header line represents a real name."""
+    if any(char.isdigit() for char in line) or "@" in line:
+        return None
+    lower_raw = line.lower()
+    if "http:" in lower_raw or "https:" in lower_raw or "www." in lower_raw:
+        return None
+
+    clean_line = re.sub(r"^[#\s\-*•]+", "", line).strip()
+    lower_line = clean_line.lower()
+
+    if _detect_heading(clean_line) is not None:
+        return None
+    if lower_line in DISALLOWED_NAME_PHRASES:
+        return None
+    if any(phrase in lower_line for phrase in ("curriculum vitae", "resume of", "resume")):
+        return None
+
+    tokens = clean_line.split()
+    if not (2 <= len(tokens) <= 4):
+        return None
+
+    if all(NAME_TOKEN_REGEX.match(tok) for tok in tokens):
+        return clean_line
+    return None
+
+
 def extract_name(
     header_text: str,
     email: str | None,
@@ -135,37 +162,9 @@ def extract_name(
     lines = [line.strip() for line in header_text.split("\n") if line.strip()]
 
     for line in lines:
-        # Reject lines with digits, '@', or URLs
-        if any(char.isdigit() for char in line) or "@" in line:
-            continue
-        if "http:" in line.lower() or "https:" in line.lower() or "www." in line.lower():
-            continue
-
-        # Strip bullet points or decorative formatting
-        clean_line = re.sub(r"^[#\s\-*•]+", "", line).strip()
-        lower_line = clean_line.lower()
-
-        # Reject heading synonyms and generic terms
-        if _detect_heading(clean_line) is not None:
-            continue
-        if lower_line in DISALLOWED_NAME_PHRASES:
-            continue
-        if any(phrase in lower_line for phrase in ("curriculum vitae", "resume of", "resume")):
-            continue
-
-        tokens = clean_line.split()
-        if not (2 <= len(tokens) <= 4):
-            continue
-
-        # Each token must be alphabetic allowing standard name punctuation
-        tokens_valid = True
-        for tok in tokens:
-            if not NAME_TOKEN_REGEX.match(tok):
-                tokens_valid = False
-                break
-
-        if tokens_valid:
-            return clean_line, warnings
+        name_found = _is_valid_name_candidate(line)
+        if name_found:
+            return name_found, warnings
 
     warnings.append(
         ParseWarning(

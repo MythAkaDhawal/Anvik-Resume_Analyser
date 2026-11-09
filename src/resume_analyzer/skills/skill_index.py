@@ -130,10 +130,19 @@ class SkillIndex:
                 cleaned_tokens.append(cleaned)
 
         num_tokens = len(cleaned_tokens)
-        for n in range(1, self.max_ngram + 1):
+        alias_map = self.alias_to_canonical
+
+        # 1-grams (avoid string slicing and join overhead)
+        for tok in cleaned_tokens:
+            canonical_name = alias_map.get(tok)
+            if canonical_name:
+                counts[canonical_name] += 1
+
+        # Multi-word n-grams (2 to max_ngram)
+        for n in range(2, self.max_ngram + 1):
             for i in range(num_tokens - n + 1):
                 ngram_str = " ".join(cleaned_tokens[i : i + n])
-                canonical_name = self.alias_to_canonical.get(ngram_str)
+                canonical_name = alias_map.get(ngram_str)
                 if canonical_name:
                     counts[canonical_name] += 1
 

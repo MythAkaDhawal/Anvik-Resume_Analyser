@@ -99,6 +99,48 @@ def extract_skills(
     return extracted_list, warnings
 
 
+def _record_skill_token(
+    token: str,
+    index: SkillIndex,
+    skills_map: dict[str, Skill],
+) -> None:
+    """Validate, normalize, and record a single skill token into the skills map."""
+    token_clean = token.strip()
+    if len(token_clean) > 40 or len(token_clean.split()) > 5:
+        return
+
+    norm = normalize_skill(token_clean)
+    if not norm:
+        return
+
+    canonical = index.canonical(norm)
+    if canonical:
+        key = canonical.lower()
+        if key in skills_map:
+            skills_map[key].mentions += 1
+        else:
+            category = index.category(canonical)
+            skills_map[key] = Skill(
+                name=token_clean,
+                canonical_name=canonical,
+                category=category,
+                provenance=Provenance.EXTRACTED_RULE,
+                mentions=1,
+            )
+    else:
+        key = norm
+        if key not in skills_map:
+            skills_map[key] = Skill(
+                name=token_clean,
+                canonical_name=None,
+                category=None,
+                provenance=Provenance.EXTRACTED_RULE,
+                mentions=1,
+            )
+        else:
+            skills_map[key].mentions += 1
+
+
 def _extract_from_skills_section(
     skills_text: str,
     index: SkillIndex,
@@ -106,75 +148,31 @@ def _extract_from_skills_section(
 ) -> None:
     """Parse comma/pipe/newline separated skills in dedicated skills section."""
     lines = skills_text.split("\n")
-    raw_fragments: list[str] = []
-
     for line in lines:
         clean_line = line.strip()
         if not clean_line:
             continue
 
-        # Drop category label before colon if present (e.g. 'Languages: Python, Java')
         if ":" in clean_line:
-            prefix, rest = clean_line.split(":", 1)
-            # If rest has items, use rest; otherwise use line as is
+            _, rest = clean_line.split(":", 1)
             if rest.strip():
                 clean_line = rest.strip()
 
-        # Split on standard delimiters
         chunks = SECTION_DELIMITERS.split(clean_line)
         for chunk in chunks:
-            c = chunk.strip()
-            if c:
-                raw_fragments.append(c)
+            frag = chunk.strip()
+            if not frag:
+                continue
 
-    for frag in raw_fragments:
-        # Check if fragment has slash '/'
-        # Keep whole if token is in taxonomy (e.g. 'CI/CD'), otherwise split
-        sub_tokens: list[str] = []
-        if "/" in frag:
-            norm_whole = normalize_skill(frag)
-            if index.canonical(norm_whole) is not None:
+            if "/" in frag:
+                norm_whole = normalize_skill(frag)
+                if index.canonical(norm_whole) is not None:
+                    sub_tokens = [frag]
+                else:
+                    sub_tokens = [p.strip() for p in frag.split("/") if p.strip()]
+            else:
                 sub_tokens = [frag]
-            else:
-                sub_tokens = [p.strip() for p in frag.split("/") if p.strip()]
-        else:
-            sub_tokens = [frag]
 
-        for token in sub_tokens:
-            token_clean = token.strip()
-            # Discard fragments longer than 40 chars or > 5 words (likely prose/sentences)
-            if len(token_clean) > 40 or len(token_clean.split()) > 5:
-                continue
-
-            norm = normalize_skill(token_clean)
-            if not norm or len(norm) < 1:
-                continue
-
-            canonical = index.canonical(norm)
-            if canonical:
-                key = canonical.lower()
-                category = index.category(canonical)
-                if key in skills_map:
-                    skills_map[key].mentions += 1
-                else:
-                    skills_map[key] = Skill(
-                        name=token_clean,
-                        canonical_name=canonical,
-                        category=category,
-                        provenance=Provenance.EXTRACTED_RULE,
-                        mentions=1,
-                    )
-            else:
-                # Unrecognized skill in skills section
-                key = norm
-                if key not in skills_map:
-                    skills_map[key] = Skill(
-                        name=token_clean,
-                        canonical_name=None,
-                        category=None,
-                        provenance=Provenance.EXTRACTED_RULE,
-                        mentions=1,
-                    )
-                else:
-                    skills_map[key].mentions += 1
+            for tok in sub_tokens:
+                _record_skill_token(tok, index, skills_map)
 

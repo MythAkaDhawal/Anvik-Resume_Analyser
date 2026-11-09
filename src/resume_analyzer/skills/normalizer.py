@@ -12,6 +12,13 @@ from functools import lru_cache
 
 from rapidfuzz import fuzz
 
+# Precompiled regular expressions for skill string cleanup
+PAREN_RE = re.compile(r"\(.*?\)")
+DASHES_RE = re.compile(r"[\u2010\u2012\u2013\u2014\u2015\u2212]")
+WHITESPACE_RE = re.compile(r"\s+")
+LEADING_PUNCT_RE = re.compile(r"^[\s,;:!?'\"*()\[\]{}|\\_~`]+")
+TRAILING_PUNCT_RE = re.compile(r"[\s,;:!?'\"*()\[\]{}|\\_~`.]+$")
+
 # Punctuation to strip from ends, keeping meaningful +, #, ., / when internal or prefix/suffix
 LEADING_PUNCT_CHARS = r"^[\s,;:!?'\"*()\[\]{}|\\_~`]+"
 TRAILING_PUNCT_CHARS = r"[\s,;:!?'\"*()\[\]{}|\\_~`.]+$"
@@ -48,28 +55,28 @@ def normalize_skill(text: str) -> str:
     norm = norm.lower()
 
     # 3. Remove parenthetical notes
-    norm = re.sub(r"\(.*?\)", "", norm)
+    norm = PAREN_RE.sub("", norm)
 
     # 4. Normalize dashes (em-dash, en-dash, minus)
-    norm = re.sub(r"[\u2010\u2012\u2013\u2014\u2015\u2212]", "-", norm)
+    norm = DASHES_RE.sub("-", norm)
 
     # 5. Collapse spaces and strip
-    norm = re.sub(r"\s+", " ", norm).strip()
+    norm = WHITESPACE_RE.sub(" ", norm).strip()
 
     # 6. Punctuation stripping with exceptions for .net, c++, c#
     if norm.startswith(".") and not any(norm.startswith(p) for p in PRESERVED_PREFIX_DOTS):
         norm = norm.lstrip(".")
 
     # Strip unwanted boundary punctuation
-    norm = re.sub(LEADING_PUNCT_CHARS, "", norm)
+    norm = LEADING_PUNCT_RE.sub("", norm)
 
     # Strip trailing punctuation, but protect trailing '+' or '#' (C++, C#)
     # Also allow 'node.js' (internal dot) but strip trailing period like 'python.'
     if not norm.endswith(("+", "#")):
-        norm = re.sub(TRAILING_PUNCT_CHARS, "", norm)
+        norm = TRAILING_PUNCT_RE.sub("", norm)
 
     # Final whitespace cleanup
-    norm = re.sub(r"\s+", " ", norm).strip()
+    norm = WHITESPACE_RE.sub(" ", norm).strip()
     return norm
 
 

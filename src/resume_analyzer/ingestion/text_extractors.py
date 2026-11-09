@@ -20,6 +20,22 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Preload format parsers at module initialization to eliminate per-call import latency
+try:
+    import docx
+except ImportError:  # pragma: no cover
+    docx = None  # type: ignore[assignment]
+
+try:
+    import pdfplumber
+except ImportError:  # pragma: no cover
+    pdfplumber = None  # type: ignore[assignment]
+
+try:
+    import pypdf
+except ImportError:  # pragma: no cover
+    pypdf = None  # type: ignore[assignment]
+
 # WordprocessingML XML namespace
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -43,41 +59,27 @@ def extract_txt_text(data: bytes) -> str:
     return data.decode("latin-1", errors="replace")
 
 
-def extract_docx_text(data: bytes) -> str:
-    """Extract text from DOCX body paragraphs and table cells.
-
-    Uses python-docx if installed, with a robust zipfile + XML fallback.
-
-    Args:
-        data: Raw DOCX file bytes.
-
-    Returns:
-        Extracted body text in reading order.
-
-    Raises:
-        UnreadableFileError: If archive or XML structure cannot be parsed.
-    """
-    # 1. Try python-docx if available
+def _extract_docx_with_python_docx(data: bytes) -> str | None:
+    """Extract text from DOCX using python-docx if installed and readable."""
+    if docx is None:
+        return None
     try:
-        import docx
+        doc = docx.Document(io.BytesIO(data))
+        paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+        tables_text: list[str] = []
+        for table in doc.tables:
+            for row in table.rows:
+                row_cells = [cell.text.strip() for cell in row.cells]
+                if any(row_cells):
+                    tables_text.append("\t".join(row_cells))
+        return "\n".join(paragraphs + tables_text)
+    except Exception as err:
+        logger.warning("python-docx extraction failed, trying XML fallback: %s", err)
+        return None
 
-        try:
-            doc = docx.Document(io.BytesIO(data))
-            paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-            tables_text = []
-            for table in doc.tables:
-                for row in table.rows:
-                    row_cells = [cell.text.strip() for cell in row.cells]
-                    if any(row_cells):
-                        tables_text.append("\t".join(row_cells))
-            combined = "\n".join(paragraphs + tables_text)
-            return combined
-        except Exception as err:
-            logger.warning("python-docx extraction failed, trying XML fallback: %s", err)
-    except ImportError:
-        pass
 
-    # 2. Pure Python zipfile + ElementTree fallback
+def _extract_docx_with_xml(data: bytes) -> str:
+    """Pure-Python zipfile + ElementTree fallback extractor for DOCX files."""
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
             xml_bytes = zf.read("word/document.xml")
@@ -91,7 +93,6 @@ def extract_docx_text(data: bytes) -> str:
             for child in body:
                 tag = child.tag
                 if tag == f"{{{W_NS}}}p":
-                    # Body paragraph
                     p_text = "".join(
                         elem.text
                         for elem in child.iter(f"{{{W_NS}}}t")
@@ -100,7 +101,6 @@ def extract_docx_text(data: bytes) -> str:
                     if p_text:
                         lines.append(p_text)
                 elif tag == f"{{{W_NS}}}tbl":
-                    # Table in document body
                     for row in child.iter(f"{{{W_NS}}}tr"):
                         row_cells = []
                         for cell in row.iter(f"{{{W_NS}}}tc"):
@@ -116,6 +116,58 @@ def extract_docx_text(data: bytes) -> str:
             return "\n".join(lines)
     except Exception as err:
         raise UnreadableFileError(f"Could not parse DOCX contents: {err}") from err
+
+
+def extract_docx_text(data: bytes) -> str:
+    """Extract text from DOCX body paragraphs and table cells.
+
+    Uses python-docx if installed, with a robust zipfile + XML fallback.
+
+    Args:
+        data: Raw DOCX file bytes.
+
+    Returns:
+        Extracted body text in reading order.
+
+    Raises:
+        UnreadableFileError: If archive or XML structure cannot be parsed.
+    """
+    text = _extract_docx_with_python_docx(data)
+    if text is not None:
+        return text
+    return _extract_docx_with_xml(data)
+
+
+def _extract_pdf_with_pdfplumber(data: bytes, max_pages: int) -> str | None:
+    """Extract text from PDF pages using pdfplumber if available."""
+    if pdfplumber is None:
+        return None
+    try:
+        pages_text: list[str] = []
+        with pdfplumber.open(io.BytesIO(data)) as pdf:
+            for page in pdf.pages[:max_pages]:
+                pt = page.extract_text() or ""
+                pages_text.append(pt)
+        return "\n\n".join(pages_text)
+    except Exception as err:
+        logger.warning("pdfplumber failed, falling back to pypdf: %s", err)
+        return None
+
+
+def _extract_pdf_with_pypdf(data: bytes, max_pages: int) -> str | None:
+    """Extract text from PDF pages using pypdf if available."""
+    if pypdf is None:
+        return None
+    try:
+        reader = pypdf.PdfReader(io.BytesIO(data))
+        pages_text: list[str] = []
+        for page in reader.pages[:max_pages]:
+            pt = page.extract_text() or ""
+            pages_text.append(pt)
+        return "\n\n".join(pages_text)
+    except Exception as err:
+        logger.warning("pypdf extraction failed, falling back to stream decoder: %s", err)
+        return None
 
 
 def extract_pdf_text(data: bytes, max_pages: int = 20) -> str:
@@ -135,36 +187,14 @@ def extract_pdf_text(data: bytes, max_pages: int = 20) -> str:
         UnreadableFileError: If PDF structure is unreadable or corrupted.
     """
     # 1. Try pdfplumber
-    try:
-        import pdfplumber
-
-        try:
-            pages_text: list[str] = []
-            with pdfplumber.open(io.BytesIO(data)) as pdf:
-                for page in pdf.pages[:max_pages]:
-                    pt = page.extract_text() or ""
-                    pages_text.append(pt)
-            return "\n\n".join(pages_text)
-        except Exception as err:
-            logger.warning("pdfplumber failed, falling back to pypdf: %s", err)
-    except ImportError:
-        pass
+    text = _extract_pdf_with_pdfplumber(data, max_pages)
+    if text is not None:
+        return text
 
     # 2. Try pypdf fallback
-    try:
-        import pypdf
-
-        try:
-            reader = pypdf.PdfReader(io.BytesIO(data))
-            pages_text = []
-            for page in reader.pages[:max_pages]:
-                pt = page.extract_text() or ""
-                pages_text.append(pt)
-            return "\n\n".join(pages_text)
-        except Exception as err:
-            logger.warning("pypdf extraction failed, falling back to stream decoder: %s", err)
-    except ImportError:
-        pass
+    text = _extract_pdf_with_pypdf(data, max_pages)
+    if text is not None:
+        return text
 
     # 3. Pure Python PDF stream extractor
     try:

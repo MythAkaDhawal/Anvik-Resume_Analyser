@@ -22,6 +22,62 @@ logger = logging.getLogger(__name__)
 EMAIL_REGEX = re.compile(r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$")
 
 
+def _validate_job_title_desc(job: JobRequirements, errors: list[str]) -> str:
+    title = (job.job_title or "").strip()
+    if not title:
+        errors.append("Job title is required and cannot be empty (must be 1-100 characters)")
+    elif len(title) > 100:
+        errors.append(f"Job title exceeds 100 characters (length: {len(title)})")
+    if job.description is not None:
+        desc = job.description.strip()
+        if len(desc) > 5000:
+            errors.append(f"Description exceeds 5000 characters (length: {len(desc)})")
+    return title
+
+
+def _validate_job_skills_list(
+    job: JobRequirements, errors: list[str]
+) -> tuple[list[str], list[str]]:
+    cleaned_required: list[str] = []
+    seen_required_lower: set[str] = set()
+    for item in job.required_skills:
+        if not item:
+            continue
+        s = str(item).strip()
+        if not s:
+            continue
+        if len(s) > 60:
+            errors.append(f"Required skill '{s[:30]}...' exceeds 60 characters")
+        lower = s.lower()
+        if lower not in seen_required_lower:
+            seen_required_lower.add(lower)
+            cleaned_required.append(s)
+    if not cleaned_required:
+        errors.append("At least one required skill must be specified")
+    elif len(cleaned_required) > 50:
+        errors.append(f"Required skills list exceeds 50 items (count: {len(cleaned_required)})")
+
+    cleaned_optional: list[str] = []
+    seen_optional_lower: set[str] = set()
+    for item in job.optional_skills:
+        if not item:
+            continue
+        s = str(item).strip()
+        if not s:
+            continue
+        if len(s) > 60:
+            errors.append(f"Optional skill '{s[:30]}...' exceeds 60 characters")
+        lower = s.lower()
+        if lower in seen_required_lower:
+            errors.append(f"Skill '{s}' appears in both required and optional skills")
+        elif lower not in seen_optional_lower:
+            seen_optional_lower.add(lower)
+            cleaned_optional.append(s)
+    if len(cleaned_optional) > 50:
+        errors.append(f"Optional skills list exceeds 50 items (count: {len(cleaned_optional)})")
+    return cleaned_required, cleaned_optional
+
+
 def validate_job(job: JobRequirements | dict[str, Any]) -> JobRequirements:
     """Validate a job specification, collecting all errors before failing.
 
@@ -47,70 +103,14 @@ def validate_job(job: JobRequirements | dict[str, Any]) -> JobRequirements:
 
     errors: list[str] = []
 
-    # 1. Job title checks
-    title = (job.job_title or "").strip()
-    if not title:
-        errors.append("Job title is required and cannot be empty (must be 1-100 characters)")
-    elif len(title) > 100:
-        errors.append(f"Job title exceeds 100 characters (length: {len(title)})")
+    title = _validate_job_title_desc(job, errors)
+    cleaned_required, cleaned_optional = _validate_job_skills_list(job, errors)
 
-    # 2. Description checks
-    if job.description is not None:
-        desc = job.description.strip()
-        if len(desc) > 5000:
-            errors.append(f"Description exceeds 5000 characters (length: {len(desc)})")
-
-    # 3. Required skills checks & deduplication
-    cleaned_required: list[str] = []
-    seen_required_lower: set[str] = set()
-
-    for item in job.required_skills:
-        if not item:
-            continue
-        s = str(item).strip()
-        if not s:
-            continue
-        if len(s) > 60:
-            errors.append(f"Required skill '{s[:30]}...' exceeds 60 characters")
-        lower = s.lower()
-        if lower not in seen_required_lower:
-            seen_required_lower.add(lower)
-            cleaned_required.append(s)
-
-    if not cleaned_required:
-        errors.append("At least one required skill must be specified")
-    elif len(cleaned_required) > 50:
-        errors.append(f"Required skills list exceeds 50 items (count: {len(cleaned_required)})")
-
-    # 4. Optional skills checks & collision detection
-    cleaned_optional: list[str] = []
-    seen_optional_lower: set[str] = set()
-
-    for item in job.optional_skills:
-        if not item:
-            continue
-        s = str(item).strip()
-        if not s:
-            continue
-        if len(s) > 60:
-            errors.append(f"Optional skill '{s[:30]}...' exceeds 60 characters")
-        lower = s.lower()
-        if lower in seen_required_lower:
-            errors.append(f"Skill '{s}' appears in both required and optional skills")
-        elif lower not in seen_optional_lower:
-            seen_optional_lower.add(lower)
-            cleaned_optional.append(s)
-
-    if len(cleaned_optional) > 50:
-        errors.append(f"Optional skills list exceeds 50 items (count: {len(cleaned_optional)})")
-
-    # 5. Experience bounds
     if job.min_experience_years < 0.0 or job.min_experience_years > 50.0:
         errors.append(
             f"min_experience_years must be between 0 and 50 (got {job.min_experience_years})"
         )
 
-    # 6. Preferred fields
     if len(job.preferred_fields) > 10:
         errors.append(f"preferred_fields exceeds 10 items (got {len(job.preferred_fields)})")
 
@@ -133,27 +133,8 @@ def validate_job(job: JobRequirements | dict[str, Any]) -> JobRequirements:
     )
 
 
-def validate_candidate(candidate: Candidate, reference_date: date | None = None) -> list[ParseWarning]:
-    """Perform sanity checks on a parsed Candidate profile.
-
-    Validates structurally plausible bounds and emits non-fatal ParseWarnings.
-    Never echoes raw resume text or candidate PII in warning messages.
-
-    Args:
-        candidate: Candidate profile to validate.
-        reference_date: Reference date for current/future date checks. Defaults to date.today().
-
-    Returns:
-        List of generated ParseWarnings.
-
-    Raises:
-        DataValidationError: If candidate data contains structurally impossible values
-            (e.g., negative duration or negative total experience years) with code E-DATA-002.
-    """
-    ref_date = reference_date or date.today()
-    warnings: list[ParseWarning] = []
-
-    # 1. Structural impossibility checks -> raise DataValidationError(E-DATA-002)
+def _check_candidate_impossibilities(candidate: Candidate) -> None:
+    """Assert candidate structural bounds, raising DataValidationError on impossibility."""
     if (
         not candidate.candidate_id
         or len(candidate.candidate_id) != 12
@@ -180,29 +161,29 @@ def validate_candidate(candidate: Candidate, reference_date: date | None = None)
                 user_message="Candidate experience entry contains invalid negative duration.",
             )
 
-    # 2. Candidate name sanity checks
-    if candidate.name is not None:
-        if len(candidate.name) > 100:
-            warnings.append(
-                ParseWarning(
-                    code="NAME_TOO_LONG",
-                    message="Extracted candidate name exceeds 100 characters.",
-                    field="name",
-                )
-            )
 
-    # 3. Email structure sanity check
-    if candidate.email is not None:
-        if not EMAIL_REGEX.match(candidate.email):
-            warnings.append(
-                ParseWarning(
-                    code="INVALID_EMAIL",
-                    message="Extracted candidate email does not match standard email structure.",
-                    field="email",
-                )
-            )
+def _check_candidate_warnings(candidate: Candidate, ref_date: date) -> list[ParseWarning]:
+    """Check non-fatal data sanity warnings for candidate profile."""
+    warnings: list[ParseWarning] = []
 
-    # 4. Skills count sanity checks (cap at 300)
+    if candidate.name and len(candidate.name) > 100:
+        warnings.append(
+            ParseWarning(
+                code="NAME_TOO_LONG",
+                message="Extracted candidate name exceeds 100 characters.",
+                field="name",
+            )
+        )
+
+    if candidate.email and not EMAIL_REGEX.match(candidate.email):
+        warnings.append(
+            ParseWarning(
+                code="INVALID_EMAIL",
+                message="Extracted candidate email does not match standard email structure.",
+                field="email",
+            )
+        )
+
     if len(candidate.skills) > 300:
         warnings.append(
             ParseWarning(
@@ -212,9 +193,7 @@ def validate_candidate(candidate: Candidate, reference_date: date | None = None)
             )
         )
 
-    # 5. Experience sanity checks (end >= start, future start > 1 year)
     future_bound = date(ref_date.year + 1, ref_date.month, ref_date.day)
-
     for entry in candidate.experience:
         if entry.start and entry.start > future_bound:
             warnings.append(
@@ -224,7 +203,6 @@ def validate_candidate(candidate: Candidate, reference_date: date | None = None)
                     field="experience",
                 )
             )
-
         if entry.start and entry.end and entry.end < entry.start:
             warnings.append(
                 ParseWarning(
@@ -235,6 +213,28 @@ def validate_candidate(candidate: Candidate, reference_date: date | None = None)
             )
 
     return warnings
+
+
+def validate_candidate(candidate: Candidate, reference_date: date | None = None) -> list[ParseWarning]:
+    """Perform sanity checks on a parsed Candidate profile.
+
+    Validates structurally plausible bounds and emits non-fatal ParseWarnings.
+    Never echoes raw resume text or candidate PII in warning messages.
+
+    Args:
+        candidate: Candidate profile to validate.
+        reference_date: Reference date for current/future date checks. Defaults to date.today().
+
+    Returns:
+        List of generated ParseWarnings.
+
+    Raises:
+        DataValidationError: If candidate data contains structurally impossible values
+            (e.g., negative duration or negative total experience years) with code E-DATA-002.
+    """
+    ref_date = reference_date or date.today()
+    _check_candidate_impossibilities(candidate)
+    return _check_candidate_warnings(candidate, ref_date)
 
 
 def assess_parse_quality(candidate: Candidate) -> list[ParseWarning]:

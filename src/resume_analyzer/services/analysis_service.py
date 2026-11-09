@@ -148,6 +148,156 @@ class AnalysisService:
 
         self.result_store = result_store
 
+    def _merge_p1_extraction(
+        self,
+        candidate: Candidate,
+        extraction_res: Any,
+        ref_date: date,
+    ) -> None:
+        """Merge rule-precedent AI extraction results into parsed candidate profile."""
+        if extraction_res.status not in (FeatureStatus.OK, FeatureStatus.PARTIAL) or not extraction_res.data:
+            return
+
+        if candidate.name is None and extraction_res.data.name:
+            candidate.name = extraction_res.data.name
+
+        existing_keys = {
+            s.canonical_name or normalize_skill(s.name) for s in candidate.skills
+        }
+        for ai_sk in extraction_res.data.skills:
+            norm = normalize_skill(ai_sk.name)
+            canon = self.skill_index.get_canonical(norm)
+            key = canon or norm
+            if key not in existing_keys:
+                category = self.skill_index.get_category(canon) if canon else None
+                candidate.skills.append(
+                    Skill(
+                        name=ai_sk.name,
+                        canonical_name=canon,
+                        category=category,
+                        category_provenance=Provenance.EXTRACTED_AI if category else None,
+                        provenance=Provenance.EXTRACTED_AI,
+                        mentions=ai_sk.mentions,
+                    )
+                )
+                existing_keys.add(key)
+
+        if not candidate.experience and extraction_res.data.experience:
+            new_exp: list[ExperienceEntry] = []
+            for e in extraction_res.data.experience:
+                dur = compute_duration_months(e.start, e.end, e.is_current, reference_date=ref_date)
+                new_exp.append(
+                    ExperienceEntry(
+                        job_title=e.job_title,
+                        company=e.company,
+                        start=e.start,
+                        end=e.end,
+                        is_current=e.is_current,
+                        duration_months=dur,
+                        provenance=Provenance.EXTRACTED_AI,
+                    )
+                )
+            candidate.experience = new_exp
+            candidate.total_experience_years = total_experience_years(new_exp, reference_date=ref_date)
+
+        if not candidate.education and extraction_res.data.education:
+            new_edu: list[EducationEntry] = []
+            for edu in extraction_res.data.education:
+                lvl = detect_education_level(edu.degree) if edu.degree else EducationLevel.UNSPECIFIED
+                new_edu.append(
+                    EducationEntry(
+                        degree=edu.degree,
+                        level=lvl,
+                        field_of_study=edu.field_of_study,
+                        institution=edu.institution,
+                        provenance=Provenance.EXTRACTED_AI,
+                    )
+                )
+            candidate.education = new_edu
+            if new_edu:
+                candidate.highest_education_level = max(e.level for e in new_edu)
+
+    def _run_ai_insights(
+        self,
+        opts: AnalysisOptions,
+        candidate: Candidate,
+        job: JobRequirements,
+        match_result: MatchResult,
+        score_result: ScoreResult,
+        ai_insights: AIInsights,
+    ) -> None:
+        """Run requested P2-P5 generative insights with grounding and provenance."""
+        ai_available = bool(self.ai_service and self.ai_service.is_available())
+        if not ai_available or not self.ai_service:
+            disabled_or_unavail = (
+                FeatureStatus.DISABLED
+                if (not self.settings.ai.enabled or (self.ai_service and isinstance(self.ai_service.provider, NullProvider)))
+                else FeatureStatus.UNAVAILABLE
+            )
+            ai_insights.categorization = FeatureResult(feature="categorization", status=disabled_or_unavail)
+            ai_insights.explanation = FeatureResult(feature="explanation", status=disabled_or_unavail)
+            ai_insights.recommendations = FeatureResult(feature="recommendations", status=disabled_or_unavail)
+            ai_insights.interview_questions = FeatureResult(feature="interview_questions", status=disabled_or_unavail)
+            return
+
+        # P2: Categorization
+        if "categorization" in opts.ai_features:
+            unrecognized = [s.name for s in candidate.skills if not s.category]
+            cat_res = self.ai_service.categorize_skills(unrecognized, allowed_categories=self.skill_index.categories)
+            ai_insights.categorization = FeatureResult(
+                feature="categorization",
+                status=cat_res.status,
+                data=cat_res.data.categories if cat_res.data else None,
+                error_code=cat_res.error_code,
+                prompt_id=cat_res.prompt_id,
+                prompt_version=cat_res.prompt_version,
+                model=cat_res.model,
+                provenance=cat_res.provenance,
+                dropped_items=cat_res.dropped_items,
+            )
+        else:
+            ai_insights.categorization = FeatureResult(feature="categorization", status=FeatureStatus.DISABLED)
+
+        # P3: Explanation
+        if "explanation" in opts.ai_features:
+            ai_insights.explanation = self.ai_service.explain_match(match_result, score_result, job)
+        else:
+            ai_insights.explanation = FeatureResult(feature="explanation", status=FeatureStatus.DISABLED)
+
+        # P4: Recommendations
+        if "recommendations" in opts.ai_features:
+            rec_res = self.ai_service.generate_recommendations(match_result, job)
+            ai_insights.recommendations = FeatureResult(
+                feature="recommendations",
+                status=rec_res.status,
+                data=rec_res.data.recommendations if rec_res.data else None,
+                error_code=rec_res.error_code,
+                prompt_id=rec_res.prompt_id,
+                prompt_version=rec_res.prompt_version,
+                model=rec_res.model,
+                provenance=rec_res.provenance,
+                dropped_items=rec_res.dropped_items,
+            )
+        else:
+            ai_insights.recommendations = FeatureResult(feature="recommendations", status=FeatureStatus.DISABLED)
+
+        # P5: Interview Questions
+        if "interview_questions" in opts.ai_features:
+            iq_res = self.ai_service.generate_interview_questions(match_result, job)
+            ai_insights.interview_questions = FeatureResult(
+                feature="interview_questions",
+                status=iq_res.status,
+                data=iq_res.data.questions if iq_res.data else None,
+                error_code=iq_res.error_code,
+                prompt_id=iq_res.prompt_id,
+                prompt_version=iq_res.prompt_version,
+                model=iq_res.model,
+                provenance=iq_res.provenance,
+                dropped_items=iq_res.dropped_items,
+            )
+        else:
+            ai_insights.interview_questions = FeatureResult(feature="interview_questions", status=FeatureStatus.DISABLED)
+
     def analyze(
         self,
         filename: str,
@@ -170,23 +320,6 @@ class AnalysisService:
             9. Optional P2-P5 AI insights.
             10. Report assembly and validation.
             11. Optional persistence.
-
-        Args:
-            filename: Original name of uploaded resume file.
-            data: Raw file byte payload.
-            job: Job requirements to match against.
-            options: Optional analysis options (strategy, feature toggles, persistence).
-            reference_date: Optional reference date for experience calculations.
-
-        Returns:
-            Validated AnalysisReport instance.
-
-        Raises:
-            JobValidationError: If job specification is invalid.
-            FileValidationError: If file fails size/type/safety checks.
-            UnreadableFileError: If file text cannot be extracted.
-            EmptyResumeError: If extracted text contains no words.
-            ResumeAnalyzerError: For other domain-level analysis failures.
         """
         opts = options or AnalysisOptions()
         ref_date = reference_date or date.today()
@@ -201,8 +334,7 @@ class AnalysisService:
         # Stage 4: Deterministic Parsing
         parser = ResumeParser(index=self.skill_index)
         candidate = parser.parse(loaded_resume, reference_date=ref_date)
-        quality_warnings = assess_parse_quality(candidate)
-        candidate.parse_warnings.extend(quality_warnings)
+        candidate.parse_warnings.extend(assess_parse_quality(candidate))
 
         ai_insights = AIInsights()
 
@@ -221,74 +353,13 @@ class AnalysisService:
                 provenance=extraction_res.provenance,
                 dropped_items=extraction_res.dropped_items,
             )
-
-            if extraction_res.status in (FeatureStatus.OK, FeatureStatus.PARTIAL) and extraction_res.data:
-                # Merge Rules: Rule-based always wins
-                # 1. Email: rule-based only (never touch)
-                # 2. Name: AI name used only if rule-based is None
-                if candidate.name is None and extraction_res.data.name:
-                    candidate.name = extraction_res.data.name
-
-                # 3. Skills: union; AI-only marked EXTRACTED_AI; deduplicated by canonical/normalized name
-                existing_keys = {
-                    s.canonical_name or normalize_skill(s.name) for s in candidate.skills
-                }
-                for ai_sk in extraction_res.data.skills:
-                    norm = normalize_skill(ai_sk.name)
-                    canon = self.skill_index.get_canonical(norm)
-                    key = canon or norm
-                    if key not in existing_keys:
-                        category = self.skill_index.get_category(canon) if canon else None
-                        candidate.skills.append(
-                            Skill(
-                                name=ai_sk.name,
-                                canonical_name=canon,
-                                category=category,
-                                category_provenance=Provenance.EXTRACTED_AI if category else None,
-                                provenance=Provenance.EXTRACTED_AI,
-                                mentions=ai_sk.mentions,
-                            )
-                        )
-                        existing_keys.add(key)
-
-                # 4. Experience: AI entries added only when rule-based found zero entries
-                if not candidate.experience and extraction_res.data.experience:
-                    new_exp: list[ExperienceEntry] = []
-                    for e in extraction_res.data.experience:
-                        dur = compute_duration_months(e.start, e.end, e.is_current, reference_date=ref_date)
-                        new_exp.append(
-                            ExperienceEntry(
-                                job_title=e.job_title,
-                                company=e.company,
-                                start=e.start,
-                                end=e.end,
-                                is_current=e.is_current,
-                                duration_months=dur,
-                                provenance=Provenance.EXTRACTED_AI,
-                            )
-                        )
-                    candidate.experience = new_exp
-                    candidate.total_experience_years = total_experience_years(new_exp, reference_date=ref_date)
-
-                # 5. Education: AI entries added only if rule-based found zero entries
-                if not candidate.education and extraction_res.data.education:
-                    new_edu: list[EducationEntry] = []
-                    for edu in extraction_res.data.education:
-                        lvl = detect_education_level(edu.degree) if edu.degree else EducationLevel.UNSPECIFIED
-                        new_edu.append(
-                            EducationEntry(
-                                degree=edu.degree,
-                                level=lvl,
-                                field_of_study=edu.field_of_study,
-                                institution=edu.institution,
-                                provenance=Provenance.EXTRACTED_AI,
-                            )
-                        )
-                    candidate.education = new_edu
-                    if new_edu:
-                        candidate.highest_education_level = max(e.level for e in new_edu)
+            self._merge_p1_extraction(candidate, extraction_res, ref_date)
         else:
-            status = FeatureStatus.DISABLED if (not self.settings.ai.enabled or not ai_available) else FeatureStatus.UNAVAILABLE
+            status = (
+                FeatureStatus.DISABLED
+                if (not self.settings.ai.enabled or not ai_available)
+                else FeatureStatus.UNAVAILABLE
+            )
             ai_insights.extraction_status = FeatureResult[None](
                 feature="extraction",
                 status=status,
@@ -310,90 +381,7 @@ class AnalysisService:
         score_result = strategy.score(match_result, job)
 
         # Stage 9: Optional AI Insights (P2 - P5)
-        if ai_available and self.ai_service:
-            # P2: Categorization
-            if "categorization" in opts.ai_features:
-                unrecognized = [s.name for s in candidate.skills if not s.category]
-                cat_res = self.ai_service.categorize_skills(
-                    unrecognized,
-                    allowed_categories=self.skill_index.categories,
-                )
-                ai_insights.categorization = FeatureResult(
-                    feature="categorization",
-                    status=cat_res.status,
-                    data=cat_res.data.categories if cat_res.data else None,
-                    error_code=cat_res.error_code,
-                    prompt_id=cat_res.prompt_id,
-                    prompt_version=cat_res.prompt_version,
-                    model=cat_res.model,
-                    provenance=cat_res.provenance,
-                    dropped_items=cat_res.dropped_items,
-                )
-            else:
-                ai_insights.categorization = FeatureResult(
-                    feature="categorization",
-                    status=FeatureStatus.DISABLED,
-                )
-
-            # P3: Explanation
-            if "explanation" in opts.ai_features:
-                exp_res = self.ai_service.explain_match(match_result, score_result, job)
-                ai_insights.explanation = exp_res
-            else:
-                ai_insights.explanation = FeatureResult(
-                    feature="explanation",
-                    status=FeatureStatus.DISABLED,
-                )
-
-            # P4: Recommendations
-            if "recommendations" in opts.ai_features:
-                rec_res = self.ai_service.generate_recommendations(match_result, job)
-                ai_insights.recommendations = FeatureResult(
-                    feature="recommendations",
-                    status=rec_res.status,
-                    data=rec_res.data.recommendations if rec_res.data else None,
-                    error_code=rec_res.error_code,
-                    prompt_id=rec_res.prompt_id,
-                    prompt_version=rec_res.prompt_version,
-                    model=rec_res.model,
-                    provenance=rec_res.provenance,
-                    dropped_items=rec_res.dropped_items,
-                )
-            else:
-                ai_insights.recommendations = FeatureResult(
-                    feature="recommendations",
-                    status=FeatureStatus.DISABLED,
-                )
-
-            # P5: Interview Questions
-            if "interview_questions" in opts.ai_features:
-                iq_res = self.ai_service.generate_interview_questions(match_result, job)
-                ai_insights.interview_questions = FeatureResult(
-                    feature="interview_questions",
-                    status=iq_res.status,
-                    data=iq_res.data.questions if iq_res.data else None,
-                    error_code=iq_res.error_code,
-                    prompt_id=iq_res.prompt_id,
-                    prompt_version=iq_res.prompt_version,
-                    model=iq_res.model,
-                    provenance=iq_res.provenance,
-                    dropped_items=iq_res.dropped_items,
-                )
-            else:
-                ai_insights.interview_questions = FeatureResult(
-                    feature="interview_questions",
-                    status=FeatureStatus.DISABLED,
-                )
-        else:
-            disabled_or_unavail = (
-                FeatureStatus.DISABLED
-                if (not self.settings.ai.enabled or (self.ai_service and isinstance(self.ai_service.provider, NullProvider)))
-                else FeatureStatus.UNAVAILABLE
-            )
-            ai_insights.categorization = FeatureResult(feature="categorization", status=disabled_or_unavail)
-            ai_insights.explanation = FeatureResult(feature="explanation", status=disabled_or_unavail)
-            ai_insights.recommendations = FeatureResult(feature="recommendations", status=disabled_or_unavail)
-            ai_insights.interview_questions = FeatureResult(feature="interview_questions", status=disabled_or_unavail)
+        self._run_ai_insights(opts, candidate, job, match_result, score_result, ai_insights)
 
         # Stage 10: Assemble Report
         report = ReportBuilder.build(

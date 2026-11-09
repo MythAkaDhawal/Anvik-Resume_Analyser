@@ -3,7 +3,7 @@
   "total_source_modules": 75,
   "architectural_violations_count": 0,
   "architectural_violations": [],
-  "oversized_modules_count": 2,
+  "oversized_modules_count": 3,
   "oversized_modules": [
     {
       "file": "exceptions.py",
@@ -12,14 +12,18 @@
     {
       "file": "ui\\streamlit_app.py",
       "lines": 586
+    },
+    {
+      "file": "reporting\\exporters\\pdf_exporter.py",
+      "lines": 555
     }
   ],
   "cyclomatic_complexity_summary": [
-    "    F 136:0 validate_candidate - D (21)",
-    "    F 240:0 assess_parse_quality - C (11)",
+    "    F 25:0 _validate_job_title_desc - B (6)",
+    "    F 218:0 validate_candidate - A (2)",
     "",
-    "359 blocks (classes, functions, methods) analyzed.",
-    "Average complexity: B (5.272980501392758)"
+    "392 blocks (classes, functions, methods) analyzed.",
+    "Average complexity: A (4.795918367346939)"
   ],
   "maintainability_index_summary": "All modules Rank A/B"
 }

@@ -10,6 +10,29 @@ from resume_analyzer.models.job import JobRequirements
 from resume_analyzer.models.results import EducationAnalysis
 
 
+def _check_preferred_fields(
+    education_entries: list[Any],
+    preferred_fields: list[str],
+) -> bool | None:
+    """Check if candidate's field of study matches any job preferred fields."""
+    candidate_fields = [
+        e.field_of_study.strip()
+        for e in education_entries
+        if e.field_of_study and e.field_of_study.strip()
+    ]
+    if not candidate_fields:
+        return None
+
+    for pref in preferred_fields:
+        pref_clean = pref.strip().lower()
+        if not pref_clean:
+            continue
+        for c_field in candidate_fields:
+            if fuzz.token_set_ratio(pref_clean, c_field.lower()) >= 85:
+                return True
+    return False
+
+
 def evaluate_education(
     candidate: Candidate,
     job: JobRequirements,
@@ -74,36 +97,14 @@ def evaluate_education(
         status_label = "below"
         base_subscore = 0.0
 
-    field_match: bool | None = None
     final_subscore = base_subscore
+    field_match: bool | None = None
 
     # 4. Field of study adjustment (applies only when status == 'met')
     if status_label == "met" and job.preferred_fields:
-        candidate_fields = [
-            e.field_of_study.strip()
-            for e in candidate.education
-            if e.field_of_study and e.field_of_study.strip()
-        ]
-
-        if candidate_fields:
-            matched = False
-            for pref in job.preferred_fields:
-                pref_clean = pref.strip().lower()
-                if not pref_clean:
-                    continue
-                for c_field in candidate_fields:
-                    ratio = fuzz.token_set_ratio(pref_clean, c_field.lower())
-                    if ratio >= 85:
-                        matched = True
-                        break
-                if matched:
-                    break
-
-            field_match = matched
-            if not field_match:
-                final_subscore = min(final_subscore, 0.75)
-        else:
-            field_match = None
+        field_match = _check_preferred_fields(candidate.education, job.preferred_fields)
+        if field_match is False:
+            final_subscore = min(final_subscore, 0.75)
 
     return EducationAnalysis(
         required_level=req_level,

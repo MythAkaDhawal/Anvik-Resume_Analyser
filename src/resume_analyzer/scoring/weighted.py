@@ -54,76 +54,79 @@ class WeightedScoringStrategy(ScoringStrategy):
                 key="scoring.weights",
             )
 
-    def score(self, match: MatchResult, job: JobRequirements) -> ScoreResult:
-        """Calculate weighted score, evaluate dimensions, and assess data coverage."""
-        flags: list[str] = []
+    def _resolve_dim(
+        self,
+        name: str,
+        weight: float,
+        status_str: str,
+        subscore: float | None,
+    ) -> tuple[str, float, ComponentStatus, float | None]:
+        """Resolve dimension status and effective subscore given unknown policy."""
+        if status_str == "not_required":
+            return name, weight, ComponentStatus.NOT_APPLICABLE, None
+        if status_str == "unknown":
+            if self.unknown_policy == "zero":
+                return name, weight, ComponentStatus.EVALUATED, 0.0
+            return name, weight, ComponentStatus.UNKNOWN, None
+        return name, weight, ComponentStatus.EVALUATED, subscore or 0.0
 
-        # 1. Determine status and subscore for each of the 4 dimensions
-        dim_data: list[tuple[str, float, ComponentStatus, float | None]] = []
+    def _build_component(
+        self,
+        name: str,
+        weight: float,
+        status: ComponentStatus,
+        subscore: float | None,
+        sum_w_evaluated: float,
+    ) -> ScoreComponent:
+        if status == ComponentStatus.EVALUATED and sum_w_evaluated > 0.0:
+            renorm_w = weight / sum_w_evaluated
+            pts = round(100.0 * renorm_w * (subscore or 0.0), 1)
+            explanation = f"Weight {weight:.2f} (effective {renorm_w:.2f}) x {subscore:.4f}"
+        elif status == ComponentStatus.UNKNOWN:
+            pts = None
+            explanation = "Candidate data unknown; excluded under active policy"
+        else:
+            pts = None
+            explanation = "Dimension not applicable to position requirements"
 
-        # Dimension 1: required_skills (always evaluated)
-        dim_data.append(
-            (
-                "required_skills",
-                self.weights.required_skills,
-                ComponentStatus.EVALUATED,
-                match.required_credit,
-            )
+        return ScoreComponent(
+            name=name,  # type: ignore[arg-type]
+            status=status,
+            weight=weight,
+            subscore=subscore,
+            points=pts,
+            explanation=explanation,
         )
 
-        # Dimension 2: experience
-        exp_weight = self.weights.experience
-        if match.experience.status == "not_required":
-            dim_data.append(("experience", exp_weight, ComponentStatus.NOT_APPLICABLE, None))
-        elif match.experience.status == "unknown":
-            if self.unknown_policy == "zero":
-                dim_data.append(("experience", exp_weight, ComponentStatus.EVALUATED, 0.0))
-            else:
-                dim_data.append(("experience", exp_weight, ComponentStatus.UNKNOWN, None))
-        else:
-            dim_data.append(
-                (
-                    "experience",
-                    exp_weight,
-                    ComponentStatus.EVALUATED,
-                    match.experience.subscore or 0.0,
-                )
-            )
+    def _collect_scoring_flags(
+        self,
+        match: MatchResult,
+        coverage: float,
+    ) -> list[str]:
+        flags: list[str] = []
+        if self.check_missing_required_skills(match):
+            flags.append("MISSING_REQUIRED_SKILLS")
+        if self.unknown_policy == "zero" and (
+            match.experience.status == "unknown" or match.education.status == "unknown"
+        ):
+            flags.append("UNKNOWN_TREATED_AS_ZERO")
+        if coverage < 1.0:
+            flags.append("INCOMPLETE_DATA")
+        return flags
 
-        # Dimension 3: education
-        edu_weight = self.weights.education
-        if match.education.status == "not_required":
-            dim_data.append(("education", edu_weight, ComponentStatus.NOT_APPLICABLE, None))
-        elif match.education.status == "unknown":
-            if self.unknown_policy == "zero":
-                dim_data.append(("education", edu_weight, ComponentStatus.EVALUATED, 0.0))
-            else:
-                dim_data.append(("education", edu_weight, ComponentStatus.UNKNOWN, None))
-        else:
-            dim_data.append(
-                (
-                    "education",
-                    edu_weight,
-                    ComponentStatus.EVALUATED,
-                    match.education.subscore or 0.0,
-                )
-            )
+    def score(self, match: MatchResult, job: JobRequirements) -> ScoreResult:
+        """Calculate weighted score, evaluate dimensions, and assess data coverage."""
+        dim_data: list[tuple[str, float, ComponentStatus, float | None]] = [
+            ("required_skills", self.weights.required_skills, ComponentStatus.EVALUATED, match.required_credit),
+            self._resolve_dim("experience", self.weights.experience, match.experience.status, match.experience.subscore),
+            self._resolve_dim("education", self.weights.education, match.education.status, match.education.subscore),
+        ]
 
-        # Dimension 4: optional_skills
-        opt_weight = self.weights.optional_skills
         if not job.optional_skills or match.optional_credit is None:
-            dim_data.append(("optional_skills", opt_weight, ComponentStatus.NOT_APPLICABLE, None))
+            dim_data.append(("optional_skills", self.weights.optional_skills, ComponentStatus.NOT_APPLICABLE, None))
         else:
-            dim_data.append(
-                (
-                    "optional_skills",
-                    opt_weight,
-                    ComponentStatus.EVALUATED,
-                    match.optional_credit,
-                )
-            )
+            dim_data.append(("optional_skills", self.weights.optional_skills, ComponentStatus.EVALUATED, match.optional_credit))
 
-        # 2. Renormalization & score calculation
         evaluated_dims = [d for d in dim_data if d[2] == ComponentStatus.EVALUATED]
         unknown_dims = [d for d in dim_data if d[2] == ComponentStatus.UNKNOWN]
 
@@ -138,55 +141,17 @@ class WeightedScoringStrategy(ScoringStrategy):
 
         total_score = round(raw_score, 1)
 
-        # 3. Calculate data coverage
         if self.unknown_policy == "zero":
             coverage = 1.0
         else:
             total_applicable = sum_w_evaluated + sum_w_unknown
-            if total_applicable > 0.0:
-                coverage = round(sum_w_evaluated / total_applicable, 4)
-            else:
-                coverage = 1.0
+            coverage = round(sum_w_evaluated / total_applicable, 4) if total_applicable > 0.0 else 1.0
 
-        # 4. Construct components with individual point contributions
-        components: list[ScoreComponent] = []
-        for name, weight, status, subscore in dim_data:
-            if status == ComponentStatus.EVALUATED and sum_w_evaluated > 0.0:
-                renorm_w = weight / sum_w_evaluated
-                pts = round(100.0 * renorm_w * (subscore or 0.0), 1)
-                explanation = (
-                    f"Weight {weight:.2f} (effective {renorm_w:.2f}) x {subscore:.4f}"
-                )
-            elif status == ComponentStatus.UNKNOWN:
-                pts = None
-                explanation = "Candidate data unknown; excluded under active policy"
-            else:
-                pts = None
-                explanation = "Dimension not applicable to position requirements"
-
-            components.append(
-                ScoreComponent(
-                    name=name,  # type: ignore[arg-type]
-                    status=status,
-                    weight=weight,
-                    subscore=subscore,
-                    points=pts,
-                    explanation=explanation,
-                )
-            )
-
-        # 5. Diagnostic flags
-        if self.check_missing_required_skills(match):
-            flags.append("MISSING_REQUIRED_SKILLS")
-
-        if self.unknown_policy == "zero" and (
-            match.experience.status == "unknown" or match.education.status == "unknown"
-        ):
-            flags.append("UNKNOWN_TREATED_AS_ZERO")
-
-        if coverage < 1.0:
-            flags.append("INCOMPLETE_DATA")
-
+        components = [
+            self._build_component(name, weight, status, subscore, sum_w_evaluated)
+            for name, weight, status, subscore in dim_data
+        ]
+        flags = self._collect_scoring_flags(match, coverage)
         fit_band = fit_band_for(total_score, self.bands)
 
         return ScoreResult(

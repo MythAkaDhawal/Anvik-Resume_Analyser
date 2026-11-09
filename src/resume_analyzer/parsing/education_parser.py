@@ -94,9 +94,35 @@ DEGREE_KEYWORDS: list[tuple[EducationLevel, list[str], list[str]]] = [
     ),
 ]
 
+# Precompile degree regex patterns once at import time
+COMPILED_DEGREE_PATTERNS: list[tuple[EducationLevel, list[re.Pattern[str]], list[re.Pattern[str]]]] = [
+    (
+        level,
+        [re.compile(p, re.IGNORECASE) for p in ci],
+        [re.compile(p) for p in cs],
+    )
+    for level, ci, cs in DEGREE_KEYWORDS
+]
+
 INSTITUTION_KEYWORDS = re.compile(
     r"(?i)\b(?:university|college|institute|school|academy|polytechnic)\b"
 )
+
+
+def _extract_institution_from_lines(entry_lines: list[str], primary_line: str) -> str | None:
+    """Extract education institution by scanning lines for institution keywords."""
+    for el in entry_lines:
+        if not INSTITUTION_KEYWORDS.search(el):
+            continue
+        inst_cand = re.sub(r"^[#\s\-*•]+", "", el).strip()
+        if el == primary_line:
+            parts = re.split(r",\s*|\s*\|\s*|\s+-\s+", inst_cand)
+            for p in parts:
+                if INSTITUTION_KEYWORDS.search(p):
+                    return p.strip()
+        else:
+            return inst_cand
+    return None
 
 
 def parse_education(
@@ -160,23 +186,7 @@ def parse_education(
         if not field_of_study and len(entry_lines) > 1:
             field_of_study = _extract_field_of_study(entry_lines[1], "")
 
-        # Institution extraction: search for institution keywords across entry lines
-        institution: str | None = None
-        for el in entry_lines:
-            if INSTITUTION_KEYWORDS.search(el):
-                # Clean punctuation
-                inst_cand = re.sub(r"^[#\s\-*•]+", "", el).strip()
-                # If primary line contains both degree and institution, split
-                if el == primary_line:
-                    parts = re.split(r",\s*|\s*\|\s*|\s+-\s+", inst_cand)
-                    for p in parts:
-                        if INSTITUTION_KEYWORDS.search(p):
-                            institution = p.strip()
-                            break
-                else:
-                    institution = inst_cand
-                if institution:
-                    break
+        institution = _extract_institution_from_lines(entry_lines, primary_line)
 
         entries.append(
             EducationEntry(
@@ -200,16 +210,16 @@ def detect_education_level(degree: str) -> EducationLevel:
 
 def _match_degree_level(line: str) -> tuple[EducationLevel, str]:
     """Test a line against degree keyword patterns in priority order."""
-    for level, ci_patterns, cs_patterns in DEGREE_KEYWORDS:
+    for level, ci_patterns, cs_patterns in COMPILED_DEGREE_PATTERNS:
         # 1. Case-insensitive matches
         for pat in ci_patterns:
-            m = re.search(pat, line, re.IGNORECASE)
+            m = pat.search(line)
             if m:
                 return level, m.group(0)
 
         # 2. Case-sensitive matches (for short 2-3 char abbreviations like BS, MS, BE, ME)
         for pat in cs_patterns:
-            m = re.search(pat, line)
+            m = pat.search(line)
             if m:
                 return level, m.group(0)
 

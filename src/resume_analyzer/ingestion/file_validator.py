@@ -185,6 +185,38 @@ def _fallback_validate_pdf(data: bytes, settings: FileSettings) -> None:
         )
 
 
+def _check_docx_infolist_safety(
+    infolist: list[zipfile.ZipInfo],
+    max_uncompressed_bytes: int,
+    max_uncompressed_mb: int,
+) -> None:
+    """Validate archive member counts, individual compression ratios, and total size."""
+    if len(infolist) > 2000:
+        raise UnsafeArchiveError(
+            f"Archive member count ({len(infolist)}) exceeds safety limit of 2000 entries."
+        )
+
+    total_uncompressed = 0
+    for info in infolist:
+        total_uncompressed += info.file_size
+        if info.compress_size > 0:
+            ratio = info.file_size / info.compress_size
+            if ratio > 100:
+                raise UnsafeArchiveError(
+                    f"Archive member '{info.filename}' compression ratio ({ratio:.1f}:1) exceeds safety limit of 100:1."
+                )
+        elif info.file_size > 1024:
+            raise UnsafeArchiveError(
+                f"Archive member '{info.filename}' has excessive uncompressed size with zero compression."
+            )
+
+    if total_uncompressed > max_uncompressed_bytes:
+        raise UnsafeArchiveError(
+            f"Total uncompressed size ({total_uncompressed / (1024 * 1024):.1f} MB) "
+            f"exceeds limit of {max_uncompressed_mb} MB."
+        )
+
+
 def _validate_docx(data: bytes, settings: FileSettings) -> None:
     """Validate DOCX zip archive safety, structure, and compression ratios."""
     # Check ZIP local file header signature PK\x03\x04
@@ -208,36 +240,12 @@ def _validate_docx(data: bytes, settings: FileSettings) -> None:
                         "Macro-enabled DOCX files (vbaProject.bin) are not permitted."
                     )
 
-            # Archive safety: Maximum member count limit
-            infolist = zf.infolist()
-            if len(infolist) > 2000:
-                raise UnsafeArchiveError(
-                    f"Archive member count ({len(infolist)}) exceeds safety limit of 2000 entries."
-                )
-
-            # Archive safety: Total uncompressed size and compression ratio bounds
             max_uncompressed = settings.max_docx_uncompressed_mb * 1024 * 1024
-            total_uncompressed = 0
-
-            for info in infolist:
-                total_uncompressed += info.file_size
-
-                if info.compress_size > 0:
-                    ratio = info.file_size / info.compress_size
-                    if ratio > 100:
-                        raise UnsafeArchiveError(
-                            f"Archive member '{info.filename}' compression ratio ({ratio:.1f}:1) exceeds safety limit of 100:1."
-                        )
-                elif info.file_size > 1024:
-                    raise UnsafeArchiveError(
-                        f"Archive member '{info.filename}' has excessive uncompressed size with zero compression."
-                    )
-
-            if total_uncompressed > max_uncompressed:
-                raise UnsafeArchiveError(
-                    f"Total uncompressed size ({total_uncompressed / (1024 * 1024):.1f} MB) "
-                    f"exceeds limit of {settings.max_docx_uncompressed_mb} MB."
-                )
+            _check_docx_infolist_safety(
+                zf.infolist(),
+                max_uncompressed,
+                settings.max_docx_uncompressed_mb,
+            )
 
     except (zipfile.BadZipFile, zipfile.LargeZipFile) as err:
         raise UnreadableFileError(f"Corrupted or invalid DOCX archive: {err}") from err

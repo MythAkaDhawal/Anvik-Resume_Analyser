@@ -55,3 +55,24 @@ def test_normalizer_and_fuzzy_cache_hits_and_clearing() -> None:
     assert normalize_skill.cache_info().hits == 0
     assert fuzzy_similarity.cache_info().hits == 0
 
+
+def test_skill_index_and_taxonomy_caching() -> None:
+    """UT-CACHE-05: Verify SkillIndex and Taxonomy caching and reuse across AnalysisService."""
+    from resume_analyzer.services.analysis_service import AnalysisService, DEFAULT_TAXONOMY_PATH
+    from resume_analyzer.skills.skill_index import get_skill_index
+    from resume_analyzer.skills.taxonomy import _load_taxonomy_cached, clear_taxonomy_cache
+
+    clear_taxonomy_cache()
+    get_skill_index.cache_clear()
+
+    idx1 = get_skill_index(DEFAULT_TAXONOMY_PATH)
+    idx2 = get_skill_index(DEFAULT_TAXONOMY_PATH)
+    assert idx1 is idx2
+    assert get_skill_index.cache_info().hits >= 1
+
+    svc1 = AnalysisService()
+    svc2 = AnalysisService()
+    assert svc1.skill_index is svc2.skill_index
+    assert get_skill_index.cache_info().hits >= 2
+
+

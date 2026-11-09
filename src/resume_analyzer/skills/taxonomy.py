@@ -71,6 +71,80 @@ class SkillTaxonomy(BaseModel):
         return _load_taxonomy_cached(str(Path(path).resolve()))
 
 
+def _validate_skill_aliases(
+    canonical: str,
+    c_norm: str,
+    aliases: Any,
+    seen_aliases: dict[str, str],
+) -> list[str]:
+    """Validate and deduplicate aliases for a single canonical skill."""
+    cleaned_aliases: list[str] = []
+    if isinstance(aliases, list):
+        for a in aliases:
+            a_str = str(a).strip()
+            if not a_str:
+                continue
+            a_norm = normalize_skill(a_str)
+            if a_norm == c_norm:
+                continue
+            if a_norm in seen_aliases:
+                prev_owner = seen_aliases[a_norm]
+                raise ConfigurationError(
+                    f"Alias collision: '{a_str}' for skill '{canonical}' "
+                    f"collides with alias for '{prev_owner}'.",
+                    key="skills.alias_collision",
+                )
+            seen_aliases[a_norm] = canonical
+            cleaned_aliases.append(a_str)
+    return cleaned_aliases
+
+
+def _validate_taxonomy_item(
+    idx: int,
+    item: Any,
+    allowed_categories: set[str],
+    seen_canonicals: dict[str, str],
+    seen_aliases: dict[str, str],
+) -> SkillTaxonomyEntry:
+    """Validate a single raw skill entry dictionary from taxonomy JSON."""
+    if not isinstance(item, dict):
+        raise ConfigurationError(
+            f"Skill item at index {idx} must be an object.",
+            key=f"skills[{idx}]",
+        )
+
+    canonical = item.get("canonical", "").strip()
+    category = item.get("category", "").strip()
+    aliases = item.get("aliases", [])
+
+    if not canonical:
+        raise ConfigurationError(
+            f"Skill at index {idx} has an empty canonical name.",
+            key=f"skills[{idx}].canonical",
+        )
+
+    if category not in allowed_categories:
+        raise ConfigurationError(
+            f"Skill '{canonical}' references undeclared category '{category}'.",
+            key=f"skills[{idx}].category",
+        )
+
+    c_norm = normalize_skill(canonical)
+    if c_norm in seen_canonicals:
+        raise ConfigurationError(
+            f"Duplicate canonical skill '{canonical}' collides with '{seen_canonicals[c_norm]}'.",
+            key="skills.duplicate_canonical",
+        )
+    seen_canonicals[c_norm] = canonical
+
+    cleaned_aliases = _validate_skill_aliases(canonical, c_norm, aliases, seen_aliases)
+    return SkillTaxonomyEntry(
+        canonical=canonical,
+        category=category,
+        aliases=cleaned_aliases,
+    )
+
+
 @lru_cache(maxsize=4)
 def _load_taxonomy_cached(resolved_path_str: str) -> SkillTaxonomy:
     """Internal LRU-cached loader for skill taxonomies."""
@@ -113,75 +187,17 @@ def _load_taxonomy_cached(resolved_path_str: str) -> SkillTaxonomy:
 
     seen_canonicals: dict[str, str] = {}
     seen_aliases: dict[str, str] = {}
-    validated_entries: list[SkillTaxonomyEntry] = []
+    validated_entries = [
+        _validate_taxonomy_item(idx, item, allowed_categories, seen_canonicals, seen_aliases)
+        for idx, item in enumerate(skills_raw)
+    ]
 
-    for idx, item in enumerate(skills_raw):
-        if not isinstance(item, dict):
-            raise ConfigurationError(
-                f"Skill item at index {idx} must be an object.",
-                key=f"skills[{idx}]",
-            )
-
-        canonical = item.get("canonical", "").strip()
-        category = item.get("category", "").strip()
-        aliases = item.get("aliases", [])
-
-        if not canonical:
-            raise ConfigurationError(
-                f"Skill at index {idx} has an empty canonical name.",
-                key=f"skills[{idx}].canonical",
-            )
-
-        if category not in allowed_categories:
-            raise ConfigurationError(
-                f"Skill '{canonical}' references undeclared category '{category}'.",
-                key=f"skills[{idx}].category",
-            )
-
-        # Check duplicate canonicals
-        c_norm = normalize_skill(canonical)
-        if c_norm in seen_canonicals:
-            raise ConfigurationError(
-                f"Duplicate canonical skill '{canonical}' collides with '{seen_canonicals[c_norm]}'.",
-                key="skills.duplicate_canonical",
-            )
-        seen_canonicals[c_norm] = canonical
-
-        # Check alias collisions
-        cleaned_aliases: list[str] = []
-        if isinstance(aliases, list):
-            for a in aliases:
-                a_str = str(a).strip()
-                if not a_str:
-                    continue
-                a_norm = normalize_skill(a_str)
-                if a_norm == c_norm:
-                    continue  # Self-alias is redundant
-                if a_norm in seen_aliases:
-                    prev_owner = seen_aliases[a_norm]
-                    raise ConfigurationError(
-                        f"Alias collision: '{a_str}' for skill '{canonical}' "
-                        f"collides with alias for '{prev_owner}'.",
-                        key="skills.alias_collision",
-                    )
-                seen_aliases[a_norm] = canonical
-                cleaned_aliases.append(a_str)
-
-        validated_entries.append(
-            SkillTaxonomyEntry(
-                canonical=canonical,
-                category=category,
-                aliases=cleaned_aliases,
-            )
-        )
-
-    # Validate confusable pairs
     raw_confusables = raw_data.get("confusable_pairs", [])
-    validated_confusables: list[list[str]] = []
-    if isinstance(raw_confusables, list):
-        for pair in raw_confusables:
-            if isinstance(pair, (list, tuple)) and len(pair) == 2:
-                validated_confusables.append([str(pair[0]), str(pair[1])])
+    validated_confusables = [
+        [str(pair[0]), str(pair[1])]
+        for pair in raw_confusables
+        if isinstance(pair, (list, tuple)) and len(pair) == 2
+    ]
 
     return SkillTaxonomy(
         schema_version=str(raw_data.get("schema_version", "1.0")),

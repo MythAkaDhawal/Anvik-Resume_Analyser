@@ -47,6 +47,11 @@ DATE_RANGE_REGEX = re.compile(
     r"(?i)\b((?:[a-z]{3,9}\.?\s+\d{4})|(?:\d{1,2}[./\-]\d{4})|(?:\d{4}))\s*(?:[-–—]|to|until|till)\s*((?:[a-z]{3,9}\.?\s+\d{4})|(?:\d{1,2}[./\-]\d{4})|(?:\d{4})|present|current|now|ongoing|till date|to date)\b"
 )
 
+# Precompiled date fragment patterns for high-throughput normalization
+NUM_DATE_RE = re.compile(r"^(\d{1,2})[./\-](\d{4})$")
+NAMED_DATE_RE = re.compile(r"^([a-z]{3,9})\.?\s+(\d{4})$")
+YEAR_RE = re.compile(r"^(\d{4})$")
+
 TITLE_LEXICON = {
     "engineer",
     "developer",
@@ -80,14 +85,14 @@ def parse_date_fragment(frag: str, reference_date: date) -> tuple[date | None, b
         return date(reference_date.year, reference_date.month, 1), True
 
     # Case 1: Numeric month and year (e.g., 01/2020, 1-2020, 03.2022)
-    m_num = re.match(r"^(\d{1,2})[./\-](\d{4})$", norm)
+    m_num = NUM_DATE_RE.match(norm)
     if m_num:
         m, y = int(m_num.group(1)), int(m_num.group(2))
         if 1 <= m <= 12 and 1950 <= y <= 2099:
             return date(y, m, 1), False
 
     # Case 2: Named month and year (e.g., Jan 2020, January 2020, Jan. 2020)
-    m_named = re.match(r"^([a-z]{3,9})\.?\s+(\d{4})$", norm)
+    m_named = NAMED_DATE_RE.match(norm)
     if m_named:
         name_str, y_str = m_named.group(1), m_named.group(2)
         if name_str in MONTH_NAME_MAP:
@@ -97,7 +102,7 @@ def parse_date_fragment(frag: str, reference_date: date) -> tuple[date | None, b
                 return date(y, m, 1), False
 
     # Case 3: Year only (e.g., 2020) -> July 1 midpoint per specification
-    m_year = re.match(r"^(\d{4})$", norm)
+    m_year = YEAR_RE.match(norm)
     if m_year:
         y = int(m_year.group(1))
         if 1950 <= y <= 2099:
@@ -259,6 +264,47 @@ def compute_duration_months(
     )
 
 
+def _extract_valid_intervals(
+    entries: list[ExperienceEntry],
+    reference_date: date,
+    count_internships: bool,
+) -> list[tuple[date, date]]:
+    """Extract valid, sanitized start and end date intervals from entries."""
+    valid_intervals: list[tuple[date, date]] = []
+    ref_future_bound = date(reference_date.year + 1, reference_date.month, reference_date.day)
+
+    for entry in entries:
+        if not count_internships and entry.job_title and "intern" in entry.job_title.lower():
+            continue
+        if not entry.start or entry.start > ref_future_bound:
+            continue
+
+        end_date = entry.end or (reference_date if entry.is_current else None)
+        if not end_date or end_date < entry.start:
+            continue
+
+        valid_intervals.append((entry.start, end_date))
+
+    return valid_intervals
+
+
+def _merge_date_intervals(intervals: list[tuple[date, date]]) -> list[tuple[date, date]]:
+    """Sort and merge overlapping or contiguous date ranges."""
+    if not intervals:
+        return []
+    sorted_intervals = sorted(intervals, key=lambda x: (x[0], x[1]))
+    merged: list[tuple[date, date]] = [sorted_intervals[0]]
+
+    for current_start, current_end in sorted_intervals[1:]:
+        last_start, last_end = merged[-1]
+        if current_start <= last_end:
+            merged[-1] = (last_start, max(last_end, current_end))
+        else:
+            merged.append((current_start, current_end))
+
+    return merged
+
+
 def total_experience_years(
     entries: list[ExperienceEntry],
     reference_date: date,
@@ -277,48 +323,13 @@ def total_experience_years(
     Returns:
         Total experience years as float, or None if no valid dates were present.
     """
-    valid_intervals: list[tuple[date, date]] = []
-
-    for entry in entries:
-        if not count_internships and entry.job_title and "intern" in entry.job_title.lower():
-            continue
-
-        if not entry.start:
-            continue
-
-        # Exclude start dates more than 1 year in the future
-        ref_future_bound = date(reference_date.year + 1, reference_date.month, reference_date.day)
-        if entry.start > ref_future_bound:
-            continue
-
-        end_date = entry.end or (reference_date if entry.is_current else None)
-        if not end_date:
-            continue
-
-        if end_date < entry.start:
-            continue
-
-        valid_intervals.append((entry.start, end_date))
-
+    valid_intervals = _extract_valid_intervals(entries, reference_date, count_internships)
     if not valid_intervals:
         return None
 
-    # Merge overlapping or touching intervals
-    valid_intervals.sort(key=lambda x: (x[0], x[1]))
-    merged: list[tuple[date, date]] = [valid_intervals[0]]
-
-    for current_start, current_end in valid_intervals[1:]:
-        last_start, last_end = merged[-1]
-        if current_start <= last_end:
-            # Overlapping or touching
-            merged[-1] = (last_start, max(last_end, current_end))
-        else:
-            merged.append((current_start, current_end))
-
-    total_months = 0
-    for start, end in merged:
-        m = (end.year - start.year) * 12 + (end.month - start.month)
-        total_months += max(0, m)
-
-    total_years = round(total_months / 12.0, 1)
-    return total_years
+    merged = _merge_date_intervals(valid_intervals)
+    total_months = sum(
+        max(0, (end.year - start.year) * 12 + (end.month - start.month))
+        for start, end in merged
+    )
+    return round(total_months / 12.0, 1)

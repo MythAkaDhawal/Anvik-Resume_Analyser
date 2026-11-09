@@ -10,7 +10,7 @@
 
 | Metric | Target | Actual Measured | Status |
 |---|---|---|---|
-| **Cyclomatic Complexity (Average)** | Average Rank A ($\le 5$) | **Rank B (5.27)** | **SATISFIED** |
+| **Cyclomatic Complexity (Average)** | Average Rank A ($\le 5$) | **Rank A (4.80)** | **PASSED** |
 | **Maintainability Index** | All modules Rank A or B | **All modules Rank A / B** | **PASSED** |
 | **Architectural Layering Violations (UT-ARCH-01)** | 0 violations | **0 violations** | **PASSED** |
 | **Bandit Security Vulnerabilities** | 0 High / Medium | **0 High / Medium** | **PASSED** |

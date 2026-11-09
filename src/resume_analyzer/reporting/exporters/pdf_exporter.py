@@ -104,93 +104,17 @@ class PDFExporter(Exporter):
         """Initialize PDF exporter and ensure Unicode font is registered."""
         self.font_name = _register_unicode_font()
 
-    def render_bytes(self, report: AnalysisReport) -> bytes:
-        """Render AnalysisReport to PDF byte buffer."""
-        buffer = io.BytesIO()
-
-        doc = SimpleDocTemplate(
-            buffer,
-            pagesize=A4,
-            leftMargin=36,
-            rightMargin=36,
-            topMargin=36,
-            bottomMargin=40,
-        )
-
-        styles = getSampleStyleSheet()
-
-        title_style = ParagraphStyle(
-            "ReportTitle",
-            parent=styles["Heading1"],
-            fontName=self.font_name,
-            fontSize=18,
-            leading=22,
-            textColor=colors.HexColor("#1e3a8a"),
-        )
-        subtitle_style = ParagraphStyle(
-            "ReportSubtitle",
-            parent=styles["Normal"],
-            fontName=self.font_name,
-            fontSize=9,
-            leading=12,
-            textColor=colors.HexColor("#64748b"),
-        )
-        h2_style = ParagraphStyle(
-            "SectionH2",
-            parent=styles["Heading2"],
-            fontName=self.font_name,
-            fontSize=12,
-            leading=16,
-            textColor=colors.HexColor("#1e3a8a"),
-            spaceBefore=12,
-            spaceAfter=4,
-        )
-        body_style = ParagraphStyle(
-            "Body",
-            parent=styles["Normal"],
-            fontName=self.font_name,
-            fontSize=8.5,
-            leading=11.5,
-            textColor=colors.HexColor("#0f172a"),
-        )
-        bold_style = ParagraphStyle(
-            "BodyBold",
-            parent=body_style,
-            fontName=self.font_name,
-            fontSize=8.5,
-            leading=11.5,
-            textColor=colors.HexColor("#0f172a"),
-        )
-        notice_style = ParagraphStyle(
-            "NoticeStyle",
-            parent=body_style,
-            fontName=self.font_name,
-            fontSize=8,
-            leading=11,
-            textColor=colors.HexColor("#1e40af"),
-        )
-        alert_style = ParagraphStyle(
-            "AlertStyle",
-            parent=body_style,
-            fontName=self.font_name,
-            fontSize=8,
-            leading=11,
-            textColor=colors.HexColor("#92400e"),
-        )
-
-        story: list[Any] = []
-
-        # Header: Title & Metadata
+    def _build_meta_and_notice(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
         cand_display = report.candidate.name or report.candidate.candidate_id
-        story.append(Paragraph(f"Resume Analysis Report: {_escape(cand_display)}", title_style))
+        items.append(Paragraph(f"Resume Analysis Report: {_escape(cand_display)}", styles["title"]))
         created_str = report.created_at.strftime("%Y-%m-%d %H:%M UTC")
         meta_line = f"Report ID: {report.report_id}  &bull;  Date: {created_str}  &bull;  App Version: {report.app_version}"
-        story.append(Paragraph(meta_line, subtitle_style))
-        story.append(Spacer(1, 8))
+        items.append(Paragraph(meta_line, styles["subtitle"]))
+        items.append(Spacer(1, 8))
 
-        # Legal / Human-Review Notice box
         notice_table = Table(
-            [[Paragraph(f"<b>Notice:</b> {_escape(report.human_review_notice)}", notice_style)]],
+            [[Paragraph(f"<b>Notice:</b> {_escape(report.human_review_notice)}", styles["notice"])]],
             colWidths=[A4[0] - 72],
         )
         notice_table.setStyle(
@@ -200,11 +124,16 @@ class PDFExporter(Exporter):
                 ("PADDING", (0, 0), (-1, -1), 6),
             ])
         )
-        story.append(notice_table)
-        story.append(Spacer(1, 8))
+        items.append(notice_table)
+        items.append(Spacer(1, 8))
+        return items
 
-        # 1. Candidate Information
-        story.append(Paragraph("1. Candidate Information", h2_style))
+    def _build_candidate_and_job_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        h2_style = styles["h2"]
+
+        items.append(Paragraph("1. Candidate Information", h2_style))
         cand_data = [
             [Paragraph("<b>Candidate ID:</b>", body_style), Paragraph(report.candidate.candidate_id, body_style)],
             [Paragraph("<b>Candidate Name:</b>", body_style), Paragraph(_escape(report.candidate.name or "Not detected"), body_style)],
@@ -217,10 +146,9 @@ class PDFExporter(Exporter):
             ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
             ("PADDING", (0, 0), (-1, -1), 4),
         ]))
-        story.append(cand_table)
+        items.append(cand_table)
 
-        # 2. Job Requirements
-        story.append(Paragraph("2. Job Requirements", h2_style))
+        items.append(Paragraph("2. Job Requirements", h2_style))
         req_skills_str = ", ".join(report.job.required_skills)
         opt_skills_str = ", ".join(report.job.optional_skills) if report.job.optional_skills else "None"
         job_data = [
@@ -237,10 +165,15 @@ class PDFExporter(Exporter):
             ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
             ("PADDING", (0, 0), (-1, -1), 4),
         ]))
-        story.append(job_table)
+        items.append(job_table)
+        return items
 
-        # 3. Overall Match Score
-        story.append(Paragraph("3. Overall Match Score", h2_style))
+    def _build_score_and_flags_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        h2_style = styles["h2"]
+
+        items.append(Paragraph("3. Overall Match Score", h2_style))
         score_data = [
             [
                 Paragraph("<b>Total Score:</b>", body_style),
@@ -259,119 +192,161 @@ class PDFExporter(Exporter):
             ("ALIGN", (0, 0), (-1, -1), "CENTER"),
             ("PADDING", (0, 0), (-1, -1), 5),
         ]))
-        story.append(score_table)
+        items.append(score_table)
 
         if report.flags:
             flag_items = "<br/>".join([f"&bull; <b>{_escape(f.code)}:</b> {_escape(f.message)}" for f in report.flags])
             flags_table = Table(
-                [[Paragraph(f"<b>Review Flags:</b><br/>{flag_items}", alert_style)]],
+                [[Paragraph(f"<b>Review Flags:</b><br/>{flag_items}", styles["alert"])]],
                 colWidths=[A4[0] - 72],
             )
             flags_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fffbeb")),
-                ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#fcd34d")),
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fef3c7")),
+                ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#fde68a")),
                 ("PADDING", (0, 0), (-1, -1), 5),
             ]))
-            story.append(Spacer(1, 4))
-            story.append(flags_table)
+            items.append(Spacer(1, 4))
+            items.append(flags_table)
 
-        # 4. Score Component Breakdown
-        story.append(Paragraph("4. Score Breakdown", h2_style))
+        return items
+
+    def _build_score_breakdown_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        items.append(Paragraph("4. Score Component Breakdown", styles["h2"]))
         comp_rows: list[list[Any]] = [
             [
-                Paragraph("<b>Component</b>", body_style),
+                Paragraph("<b>Dimension</b>", body_style),
+                Paragraph("<b>Status</b>", body_style),
                 Paragraph("<b>Weight</b>", body_style),
                 Paragraph("<b>Subscore</b>", body_style),
                 Paragraph("<b>Points</b>", body_style),
-                Paragraph("<b>Calculation Details</b>", body_style),
+                Paragraph("<b>Explanation</b>", body_style),
             ]
         ]
-        for c in report.score.components:
-            sub = f"{c.subscore:.2f}" if c.subscore is not None else "N/A"
-            pts = f"{c.points:.1f}" if c.points is not None else "0.0"
+        for comp in report.score.components:
+            sub = f"{comp.subscore:.2f}" if comp.subscore is not None else "—"
+            pts = f"{comp.points:.1f}" if comp.points is not None else "—"
             comp_rows.append([
-                Paragraph(_escape(c.name), body_style),
-                Paragraph(f"{c.weight * 100:.0f}%", body_style),
+                Paragraph(comp.name.replace("_", " ").title(), body_style),
+                Paragraph(comp.status.value, body_style),
+                Paragraph(f"{comp.weight * 100:.0f}%", body_style),
                 Paragraph(sub, body_style),
                 Paragraph(pts, body_style),
-                Paragraph(_escape(c.explanation), body_style),
+                Paragraph(_escape(comp.explanation or "—"), body_style),
             ])
-        comp_table = Table(comp_rows, colWidths=[85, 45, 50, 45, A4[0] - 72 - 225])
+        comp_table = Table(
+            comp_rows,
+            colWidths=[
+                (A4[0] - 72) * 0.20,
+                (A4[0] - 72) * 0.15,
+                (A4[0] - 72) * 0.10,
+                (A4[0] - 72) * 0.12,
+                (A4[0] - 72) * 0.10,
+                (A4[0] - 72) * 0.33,
+            ],
+        )
         comp_table.setStyle(TableStyle([
             ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-            ("PADDING", (0, 0), (-1, -1), 3),
+            ("PADDING", (0, 0), (-1, -1), 3.5),
         ]))
-        story.append(comp_table)
+        items.append(comp_table)
+        return items
 
-        # 5. Matched Skills
-        story.append(Paragraph("5. Matched Skills", h2_style))
-        matched = ReportBuilder.get_matched_skills(report)
+    def _build_skills_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        items.append(Paragraph("5. Skill Match Analysis (Job Requirements)", styles["h2"]))
         match_rows: list[list[Any]] = [
             [
-                Paragraph("<b>Job Requirement</b>", body_style),
+                Paragraph("<b>Target Skill</b>", body_style),
                 Paragraph("<b>Type</b>", body_style),
                 Paragraph("<b>Matched Candidate Skill</b>", body_style),
                 Paragraph("<b>Match Type</b>", body_style),
-                Paragraph("<b>Similarity</b>", body_style),
                 Paragraph("<b>Credit</b>", body_style),
             ]
         ]
-        for m in matched:
+        for sm in report.match.skill_matches:
+            target_str = _escape(sm.target)
+            matched_str = _escape(sm.matched_candidate_skill or "—")
+            req_label = "Required" if sm.is_required else "Optional"
             match_rows.append([
-                Paragraph(_escape(m.target), body_style),
-                Paragraph("Required" if m.is_required else "Optional", body_style),
-                Paragraph(_escape(m.matched_candidate_skill or "—"), body_style),
-                Paragraph(_escape(m.match_type.value), body_style),
-                Paragraph(f"{m.similarity:.0f}%", body_style),
-                Paragraph(f"{m.credit:.2f}", body_style),
-            ])
-        if len(match_rows) == 1:
-            match_rows.append([Paragraph("No skills matched", body_style)] + [Paragraph("", body_style)] * 5)
-        m_col_w = (A4[0] - 72) / 6
-        matched_table = Table(match_rows, colWidths=[m_col_w] * 6)
-        matched_table.setStyle(TableStyle([
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
-            ("PADDING", (0, 0), (-1, -1), 3),
-        ]))
-        story.append(matched_table)
-
-        # 6. Missing Skills
-        story.append(Paragraph("6. Missing Skills", h2_style))
-        missing = ReportBuilder.get_missing_skills(report)
-        missing_rows: list[list[Any]] = [
-            [
-                Paragraph("<b>Missing Skill</b>", body_style),
-                Paragraph("<b>Requirement Type</b>", body_style),
-                Paragraph("<b>Credit</b>", body_style),
-            ]
-        ]
-        for m in missing:
-            req_label = "Required (Must-have)" if m.is_required else "Optional"
-            missing_rows.append([
-                Paragraph(_escape(m.target), body_style),
+                Paragraph(target_str, body_style),
                 Paragraph(req_label, body_style),
-                Paragraph("0.00", body_style),
+                Paragraph(matched_str, body_style),
+                Paragraph(sm.match_type.value, body_style),
+                Paragraph(f"{sm.credit * 100:.0f}%", body_style),
             ])
-        if len(missing_rows) == 1:
-            missing_rows.append([Paragraph("All required skills matched", body_style), Paragraph("", body_style), Paragraph("", body_style)])
-        miss_table = Table(missing_rows, colWidths=[(A4[0] - 72) * 0.5, (A4[0] - 72) * 0.3, (A4[0] - 72) * 0.2])
-        miss_table.setStyle(TableStyle([
+        match_table = Table(
+            match_rows,
+            colWidths=[
+                (A4[0] - 72) * 0.25,
+                (A4[0] - 72) * 0.15,
+                (A4[0] - 72) * 0.25,
+                (A4[0] - 72) * 0.20,
+                (A4[0] - 72) * 0.15,
+            ],
+        )
+        match_table.setStyle(TableStyle([
             ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
             ("PADDING", (0, 0), (-1, -1), 3),
         ]))
-        story.append(miss_table)
+        items.append(match_table)
 
-        # 7. Experience Analysis
-        story.append(Paragraph("7. Experience Analysis", h2_style))
+        items.append(Paragraph("6. Candidate Skills Inventory", styles["h2"]))
+        if not report.candidate.skills:
+            items.append(Paragraph("<i>No skills extracted from candidate profile.</i>", styles["subtitle"]))
+        else:
+            cand_skills_rows: list[list[Any]] = [
+                [
+                    Paragraph("<b>Skill Name</b>", body_style),
+                    Paragraph("<b>Canonical</b>", body_style),
+                    Paragraph("<b>Category</b>", body_style),
+                    Paragraph("<b>Provenance</b>", body_style),
+                    Paragraph("<b>Mentions</b>", body_style),
+                ]
+            ]
+            for sk in report.candidate.skills:
+                cand_skills_rows.append([
+                    Paragraph(_escape(sk.name), body_style),
+                    Paragraph(_escape(sk.canonical_name or "—"), body_style),
+                    Paragraph(_escape(sk.category or "Uncategorized"), body_style),
+                    Paragraph(sk.provenance.value, body_style),
+                    Paragraph(str(sk.mentions), body_style),
+                ])
+            cand_skills_table = Table(
+                cand_skills_rows,
+                colWidths=[
+                    (A4[0] - 72) * 0.30,
+                    (A4[0] - 72) * 0.25,
+                    (A4[0] - 72) * 0.20,
+                    (A4[0] - 72) * 0.15,
+                    (A4[0] - 72) * 0.10,
+                ],
+            )
+            cand_skills_table.setStyle(TableStyle([
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+                ("PADDING", (0, 0), (-1, -1), 3),
+            ]))
+            items.append(cand_skills_table)
+
+        return items
+
+    def _build_experience_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        h2_style = styles["h2"]
+
+        items.append(Paragraph("7. Experience Analysis", h2_style))
         exp_summary = (
-            f"Required: <b>{report.match.experience.required_years} yr(s)</b>  &bull;  "
-            f"Candidate: <b>{report.match.experience.candidate_years if report.match.experience.candidate_years is not None else 'Unknown'} yr(s)</b>  &bull;  "
+            f"Required: <b>{report.match.experience.required_years:.1f} yr(s)</b>  &bull;  "
+            f"Candidate: <b>{report.match.experience.candidate_years or 0.0:.1f} yr(s)</b>  &bull;  "
             f"Status: <b>{report.match.experience.status.upper()}</b>"
         )
-        story.append(Paragraph(exp_summary, body_style))
+        items.append(Paragraph(exp_summary, body_style))
         if report.candidate.experience:
             exp_rows: list[list[Any]] = [
                 [
@@ -395,17 +370,22 @@ class PDFExporter(Exporter):
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
                 ("PADDING", (0, 0), (-1, -1), 3),
             ]))
-            story.append(Spacer(1, 4))
-            story.append(exp_table)
+            items.append(Spacer(1, 4))
+            items.append(exp_table)
+        return items
 
-        # 8. Education Analysis
-        story.append(Paragraph("8. Education Analysis", h2_style))
+    def _build_education_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        h2_style = styles["h2"]
+
+        items.append(Paragraph("8. Education Analysis", h2_style))
         edu_summary = (
             f"Required Level: <b>{report.match.education.required_level.name}</b>  &bull;  "
             f"Candidate Level: <b>{report.match.education.candidate_level.name}</b>  &bull;  "
             f"Status: <b>{report.match.education.status.upper()}</b>"
         )
-        story.append(Paragraph(edu_summary, body_style))
+        items.append(Paragraph(edu_summary, body_style))
         if report.candidate.education:
             edu_rows: list[list[Any]] = [
                 [
@@ -428,57 +408,144 @@ class PDFExporter(Exporter):
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
                 ("PADDING", (0, 0), (-1, -1), 3),
             ]))
-            story.append(Spacer(1, 4))
-            story.append(edu_table)
+            items.append(Spacer(1, 4))
+            items.append(edu_table)
+        return items
 
-        # 9. Recommendations (AI-Generated)
-        story.append(Paragraph("9. Recommendations (AI-Generated &mdash; Not Verified)", h2_style))
+    def _build_ai_explanation_section(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        subtitle_style = styles["subtitle"]
+        h2_style = styles["h2"]
+
+        items.append(Paragraph("9. Recommendations (AI-Generated &mdash; Not Verified)", h2_style))
         if report.ai and report.ai.explanation and report.ai.explanation.status.value in ("ok", "partial") and report.ai.explanation.data:
-            story.append(Paragraph(f"<b>Summary:</b> {_escape(report.ai.explanation.data.summary)}", body_style))
-            if report.ai.explanation.data.strengths:
-                for s in report.ai.explanation.data.strengths:
-                    story.append(Paragraph(f"&bull; <b>Strength:</b> {_escape(s.point)}", body_style))
-            if report.ai.explanation.data.concerns:
-                for c in report.ai.explanation.data.concerns:
-                    story.append(Paragraph(f"&bull; <b>Focus Area:</b> {_escape(c.point)}", body_style))
+            items.append(Paragraph(f"<b>Summary:</b> {_escape(report.ai.explanation.data.summary)}", body_style))
+            for s in report.ai.explanation.data.strengths or []:
+                items.append(Paragraph(f"&bull; <b>Strength:</b> {_escape(s.point)}", body_style))
+            for c in report.ai.explanation.data.concerns or []:
+                items.append(Paragraph(f"&bull; <b>Focus Area:</b> {_escape(c.point)}", body_style))
         else:
             status_val = report.ai.explanation.status.value if report.ai and report.ai.explanation else "disabled"
-            story.append(Paragraph(f"<i>AI-generated content unavailable ({status_val}).</i>", subtitle_style))
+            items.append(Paragraph(f"<i>AI-generated content unavailable ({status_val}).</i>", subtitle_style))
 
         if report.ai and report.ai.recommendations and report.ai.recommendations.status.value in ("ok", "partial") and report.ai.recommendations.data:
-            story.append(Spacer(1, 4))
-            story.append(Paragraph("<b>Candidate Development Suggestions:</b>", body_style))
+            items.append(Spacer(1, 4))
+            items.append(Paragraph("<b>Candidate Development Suggestions:</b>", body_style))
             for r in report.ai.recommendations.data:
-                story.append(Paragraph(f"&bull; [<b>{r.priority.upper()}</b>] {_escape(r.action)} &mdash; <font color='#64748b'>{_escape(r.rationale)}</font>", body_style))
+                items.append(Paragraph(f"&bull; [<b>{r.priority.upper()}</b>] {_escape(r.action)} &mdash; <font color='#64748b'>{_escape(r.rationale)}</font>", body_style))
+        return items
 
-        # 10. Suitability Assessment
-        story.append(Paragraph("10. Hiring-Suitability Assessment", h2_style))
+    def _build_questions_and_appendix(self, report: AnalysisReport, styles: dict[str, ParagraphStyle]) -> list[Any]:
+        items: list[Any] = []
+        body_style = styles["body"]
+        subtitle_style = styles["subtitle"]
+        h2_style = styles["h2"]
+
+        items.append(Paragraph("10. Hiring-Suitability Assessment", h2_style))
         suitability_text = (
             f"Candidate profile demonstrates <b>{report.score.fit_band.value.upper()}</b> alignment with requirements based on deterministic scoring criteria "
             f"(Score: {report.score.total_score:.1f}/100, Coverage: {report.score.coverage * 100:.0f}%)."
         )
-        story.append(Paragraph(suitability_text, body_style))
+        items.append(Paragraph(suitability_text, body_style))
 
-        # 11. Interview Questions
-        story.append(Paragraph("11. Suggested Interview Questions (AI-Generated &mdash; Not Verified)", h2_style))
+        items.append(Paragraph("11. Suggested Interview Questions (AI-Generated &mdash; Not Verified)", h2_style))
         if report.ai and report.ai.interview_questions and report.ai.interview_questions.status.value in ("ok", "partial") and report.ai.interview_questions.data:
             for idx, q in enumerate(report.ai.interview_questions.data, start=1):
-                story.append(Paragraph(f"{idx}. <b>{_escape(q.question)}</b> <font color='#64748b'>({_escape(q.category)})</font>", body_style))
-                story.append(Paragraph(f"   Rationale: {_escape(q.rationale)}", subtitle_style))
+                items.append(Paragraph(f"{idx}. <b>{_escape(q.question)}</b> <font color='#64748b'>({_escape(q.category)})</font>", body_style))
+                items.append(Paragraph(f"   Rationale: {_escape(q.rationale)}", subtitle_style))
         else:
             status_val = report.ai.interview_questions.status.value if report.ai and report.ai.interview_questions else "disabled"
-            story.append(Paragraph(f"<i>AI-generated content unavailable ({status_val}).</i>", subtitle_style))
+            items.append(Paragraph(f"<i>AI-generated content unavailable ({status_val}).</i>", subtitle_style))
 
-        # 12. Appendix
-        story.append(Paragraph("12. Appendix &amp; System Limitations", h2_style))
+        items.append(Paragraph("12. Appendix &amp; System Limitations", h2_style))
         appendix_text = (
             "Scoring limitations: Lexical skill matching may miss semantic equivalents. "
             "Experience calculations assume continuous employment within month intervals. "
             "Educational attainment evaluates level hierarchy without institution ranking."
         )
-        story.append(Paragraph(appendix_text, subtitle_style))
+        items.append(Paragraph(appendix_text, subtitle_style))
+        return items
 
-        # Build PDF with custom NumberedCanvas
+    def render_bytes(self, report: AnalysisReport) -> bytes:
+        """Render AnalysisReport to PDF byte buffer."""
+        buffer = io.BytesIO()
+
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            leftMargin=36,
+            rightMargin=36,
+            topMargin=36,
+            bottomMargin=40,
+        )
+
+        sample_styles = getSampleStyleSheet()
+        body_style = ParagraphStyle(
+            "Body",
+            parent=sample_styles["Normal"],
+            fontName=self.font_name,
+            fontSize=8.5,
+            leading=11.5,
+            textColor=colors.HexColor("#0f172a"),
+        )
+        styles = {
+            "title": ParagraphStyle(
+                "ReportTitle",
+                parent=sample_styles["Heading1"],
+                fontName=self.font_name,
+                fontSize=18,
+                leading=22,
+                textColor=colors.HexColor("#1e3a8a"),
+            ),
+            "subtitle": ParagraphStyle(
+                "ReportSubtitle",
+                parent=sample_styles["Normal"],
+                fontName=self.font_name,
+                fontSize=9,
+                leading=12,
+                textColor=colors.HexColor("#64748b"),
+            ),
+            "h2": ParagraphStyle(
+                "SectionH2",
+                parent=sample_styles["Heading2"],
+                fontName=self.font_name,
+                fontSize=12,
+                leading=16,
+                textColor=colors.HexColor("#1e3a8a"),
+                spaceBefore=12,
+                spaceAfter=4,
+            ),
+            "body": body_style,
+            "notice": ParagraphStyle(
+                "NoticeStyle",
+                parent=body_style,
+                fontName=self.font_name,
+                fontSize=8,
+                leading=11,
+                textColor=colors.HexColor("#1e40af"),
+            ),
+            "alert": ParagraphStyle(
+                "AlertStyle",
+                parent=body_style,
+                fontName=self.font_name,
+                fontSize=8,
+                leading=11,
+                textColor=colors.HexColor("#92400e"),
+            ),
+        }
+
+        story: list[Any] = []
+        story.extend(self._build_meta_and_notice(report, styles))
+        story.extend(self._build_candidate_and_job_section(report, styles))
+        story.extend(self._build_score_and_flags_section(report, styles))
+        story.extend(self._build_score_breakdown_section(report, styles))
+        story.extend(self._build_skills_section(report, styles))
+        story.extend(self._build_experience_section(report, styles))
+        story.extend(self._build_education_section(report, styles))
+        story.extend(self._build_ai_explanation_section(report, styles))
+        story.extend(self._build_questions_and_appendix(report, styles))
+
         def canvas_maker(*args: Any, **kwargs: Any) -> NumberedCanvas:
             c = NumberedCanvas(*args, **kwargs)
             c.report_id_str = report.report_id
@@ -486,4 +553,3 @@ class PDFExporter(Exporter):
 
         doc.build(story, canvasmaker=canvas_maker)
         return buffer.getvalue()
-
