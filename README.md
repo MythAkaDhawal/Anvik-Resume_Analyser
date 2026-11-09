@@ -1,7 +1,12 @@
-# Intelligent Resume Analyzer — AI-Powered Smart Hiring Assistant
+# ANVIK — Intelligent Talent Analysis
+
+<div align="center">
+  <img src="assets/anvik_logo.png" alt="ANVIK Logo" width="480"/>
+  <p><em>Precision Candidate Evaluation & Decision Support Architecture</em></p>
+</div>
 
 > **Status: Fully Implemented & Verified (Release v1.0.0).** All 15 implementation phases,
-> deterministic core parsing, taxonomy matching, scoring strategies, GenAI provider adapters,
+> official ANVIK product branding, deterministic core parsing, taxonomy matching, scoring strategies, GenAI provider adapters,
 > multi-format exporters (HTML, PDF, Excel), Streamlit UI, and benchmark evaluation suites are
 > 100% complete, verified with 192 automated tests, and cleared for submission.
 >
@@ -11,10 +16,29 @@
 
 ---
 
-## 1. Project description
+## 1. Product identity & design philosophy
 
-The Intelligent Resume Analyzer is a Python application that helps a human reviewer screen
-candidates faster and more consistently. It reads resumes (PDF, DOCX, TXT), extracts structured
+**ANVIK** is an intelligent talent analysis and decision-support system engineered for senior hiring managers, technical talent leads, and talent intelligence teams.
+
+Rather than treating talent acquisition as an ungrounded generative exercise or a generic SaaS dashboard, ANVIK pairs a **rigorous deterministic analysis engine** with **calibrated AI-assisted advisory synthesis**. Every calculation, skill match, and score breakdown is 100% traceable, explainable, and audit-ready.
+
+### Visual design & brand tokens
+
+The ANVIK visual system embodies restraint, clarity, and precision:
+
+| Token | Hex | Role in Application |
+|---|---|---|
+| **Carbon Ink** | `#171817` | Primary dark surface, sidebar base, and high-contrast foundations |
+| **Warm Ivory** | `#E9E2D2` | Primary typography, crisp vector linework, and high-legibility foreground |
+| **Oxidised Copper** | `#B66F4B` | Primary action accent, focus indicators, and key metric emphasis |
+| **Aged Graphite** | `#343633` | Elevated card surfaces, structural borders, and container frames |
+| **Muted Moss** | `#77765D` | Supporting indicators, matched criteria, and neutral evaluation badges |
+
+---
+
+## 2. Project description
+
+ANVIK helps a human reviewer screen candidates faster, more objectively, and with zero hallucination risk. It reads resumes (PDF, DOCX, TXT), extracts structured
 information, compares each candidate with a job's requirements, computes an **interpretable
 0–100 alignment score**, and optionally uses a Generative AI (GenAI) provider to write
 explanations, improvement suggestions, and interview questions.
@@ -31,7 +55,7 @@ Three kinds of output are always kept separate and labelled (the **provenance mo
 The application **never makes hiring decisions**. Its output is decision *support* and must be
 reviewed by a human.
 
-## 2. Objectives
+## 3. Objectives
 
 1. Accept and read candidate resumes (PDF, DOCX, TXT).
 2. Extract name, e-mail, skills, experience, and education into a typed data model.

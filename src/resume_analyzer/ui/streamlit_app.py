@@ -18,7 +18,10 @@ from resume_analyzer.services.analysis_service import AnalysisOptions
 from resume_analyzer.storage.feedback_store import FeedbackStore
 from resume_analyzer.storage.result_store import ResultStore
 from resume_analyzer.ui.components import (
+    apply_custom_theme,
     render_ai_insights_view,
+    render_anvik_brand_banner,
+    render_anvik_sidebar_brand,
     render_experience_education_view,
     render_export_downloads,
     render_feedback_widget,
@@ -39,8 +42,8 @@ from resume_analyzer.ui.state import (
 logger = logging.getLogger(__name__)
 
 st.set_page_config(
-    page_title="Intelligent Resume Analyzer",
-    page_icon="📄",
+    page_title="ANVIK — Intelligent Talent Analysis",
+    page_icon="✦",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -49,10 +52,10 @@ st.set_page_config(
 def main() -> None:
     """Main Streamlit application entry point."""
     init_session_state()
+    apply_custom_theme()
 
     # --- Sidebar Navigation ---
-    st.sidebar.title("Resume Analyzer")
-    st.sidebar.caption("AI-Powered Hiring Assistant")
+    render_anvik_sidebar_brand()
 
     # Ensure sidebar radio matches current_page
     if (
@@ -71,6 +74,22 @@ def main() -> None:
 
     st.sidebar.divider()
     render_human_review_notice()
+
+    # Sidebar active summary
+    job_val = st.session_state.get("job")
+    rep_count = len(st.session_state.get("reports", []))
+    ai_on = st.session_state.get("options", AnalysisOptions()).ai_enabled
+    st.sidebar.markdown(
+        f"""
+        <div style="font-size: 0.8rem; color: #A39E93; line-height: 1.6; padding: 4px 0;">
+          <div><strong>Role:</strong> {job_val.title if job_val else "<em>Not configured</em>"}</div>
+          <div><strong>Ranked:</strong> {rep_count} candidates</div>
+          <div><strong>Engine:</strong> Deterministic Core</div>
+          <div><strong>AI Augmentation:</strong> {"Active (P1–P5)" if ai_on else "Off (Offline Core)"}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     current_page = st.session_state["current_page"]
 
@@ -91,6 +110,7 @@ def main() -> None:
 # -----------------------------------------------------------------------------
 def render_job_page() -> None:
     """Render Job Requirements definition page."""
+    render_anvik_brand_banner(compact=False)
     st.title("Step 1: Define Job Requirements")
     st.write(
         "Enter target job role specifications. All resume matching and scoring are executed "
@@ -243,6 +263,7 @@ def render_job_page() -> None:
 # -----------------------------------------------------------------------------
 def render_resumes_page() -> None:
     """Render resume file upload and batch analysis launch page."""
+    render_anvik_brand_banner(compact=True)
     st.title("Step 2: Upload Resumes")
 
     job: JobRequirements | None = st.session_state.get("job")
@@ -331,6 +352,7 @@ def render_resumes_page() -> None:
 # -----------------------------------------------------------------------------
 def render_results_page() -> None:
     """Render candidate ranking and detailed scorecard view."""
+    render_anvik_brand_banner(compact=True)
     st.title("Step 3: Screening Results & Ranking")
 
     reports: list[AnalysisReport] = st.session_state.get("reports", [])
@@ -451,6 +473,7 @@ def render_results_page() -> None:
 # -----------------------------------------------------------------------------
 def render_reports_page() -> None:
     """Render export page for individual reports and batch Excel workbooks."""
+    render_anvik_brand_banner(compact=True)
     st.title("Step 4: Export Reports")
 
     reports: list[AnalysisReport] = st.session_state.get("reports", [])
@@ -501,6 +524,7 @@ def render_reports_page() -> None:
 # -----------------------------------------------------------------------------
 def render_history_page() -> None:
     """Render historical analysis viewer, retention manager, and feedback diagnostics (FR-28, NFR-19)."""
+    render_anvik_brand_banner(compact=True)
     st.title("Step 5: History & Persistence")
     st.caption(
         "Manage saved analyses, reload past evaluations, configure data retention, and review feedback."

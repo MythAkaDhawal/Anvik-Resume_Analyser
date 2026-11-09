@@ -85,7 +85,11 @@ class NumberedCanvas(canvas.Canvas):
         self.setFillColor(colors.HexColor("#64748b"))
 
         # Footer text
-        left_text = f"Report ID: {self.report_id_str}" if self.report_id_str else ""
+        left_text = (
+            f"ANVIK Talent Intelligence  &bull;  Report ID: {self.report_id_str}"
+            if self.report_id_str
+            else "ANVIK Talent Intelligence"
+        )
         right_text = f"Page {self._pageNumber} of {page_count}"
 
         self.drawString(36, 20, left_text)
@@ -110,11 +114,12 @@ class PDFExporter(Exporter):
         cand_display = report.candidate.name or report.candidate.candidate_id
         items.append(
             Paragraph(
-                f"Resume Analysis Report: {_escape(cand_display)}", styles["title"]
+                f"ANVIK &mdash; Candidate Evaluation Report: {_escape(cand_display)}",
+                styles["title"],
             )
         )
         created_str = report.created_at.strftime("%Y-%m-%d %H:%M UTC")
-        meta_line = f"Report ID: {report.report_id}  &bull;  Date: {created_str}  &bull;  App Version: {report.app_version}"
+        meta_line = f"ANVIK Intelligent Talent Analysis  &bull;  Report ID: {report.report_id}  &bull;  Date: {created_str}  &bull;  v{report.app_version}"
         items.append(Paragraph(meta_line, styles["subtitle"]))
         items.append(Spacer(1, 8))
 
@@ -122,7 +127,7 @@ class PDFExporter(Exporter):
             [
                 [
                     Paragraph(
-                        f"<b>Notice:</b> {_escape(report.human_review_notice)}",
+                        f"<b>Compliance Notice:</b> {_escape(report.human_review_notice)}",
                         styles["notice"],
                     )
                 ]
@@ -132,8 +137,8 @@ class PDFExporter(Exporter):
         notice_table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eff6ff")),
-                    ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#bfdbfe")),
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F7F5F0")),
+                    ("BOX", (0, 0), (-1, -1), 1.0, colors.HexColor("#B66F4B")),
                     ("PADDING", (0, 0), (-1, -1), 6),
                 ]
             )
@@ -702,7 +707,7 @@ class PDFExporter(Exporter):
             fontName=self.font_name,
             fontSize=8.5,
             leading=11.5,
-            textColor=colors.HexColor("#0f172a"),
+            textColor=colors.HexColor("#171817"),
         )
         styles = {
             "title": ParagraphStyle(
@@ -711,7 +716,7 @@ class PDFExporter(Exporter):
                 fontName=self.font_name,
                 fontSize=18,
                 leading=22,
-                textColor=colors.HexColor("#1e3a8a"),
+                textColor=colors.HexColor("#B66F4B"),
             ),
             "subtitle": ParagraphStyle(
                 "ReportSubtitle",
@@ -719,7 +724,7 @@ class PDFExporter(Exporter):
                 fontName=self.font_name,
                 fontSize=9,
                 leading=12,
-                textColor=colors.HexColor("#64748b"),
+                textColor=colors.HexColor("#77765D"),
             ),
             "h2": ParagraphStyle(
                 "SectionH2",
@@ -727,7 +732,7 @@ class PDFExporter(Exporter):
                 fontName=self.font_name,
                 fontSize=12,
                 leading=16,
-                textColor=colors.HexColor("#1e3a8a"),
+                textColor=colors.HexColor("#B66F4B"),
                 spaceBefore=12,
                 spaceAfter=4,
             ),
@@ -738,7 +743,7 @@ class PDFExporter(Exporter):
                 fontName=self.font_name,
                 fontSize=8,
                 leading=11,
-                textColor=colors.HexColor("#1e40af"),
+                textColor=colors.HexColor("#171817"),
             ),
             "alert": ParagraphStyle(
                 "AlertStyle",
@@ -746,7 +751,7 @@ class PDFExporter(Exporter):
                 fontName=self.font_name,
                 fontSize=8,
                 leading=11,
-                textColor=colors.HexColor("#92400e"),
+                textColor=colors.HexColor("#B66F4B"),
             ),
         }
 

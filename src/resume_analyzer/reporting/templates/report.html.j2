@@ -7,21 +7,21 @@
   <title>Analysis Report - {{ report.candidate.name or report.candidate.candidate_id }}</title>
   <style>
     :root {
-      --primary: #1e3a8a;
-      --secondary: #3b82f6;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --strong-fit: #166534;
-      --strong-fit-bg: #dcfce7;
-      --mod-fit: #854d0e;
-      --mod-fit-bg: #fef9c3;
-      --lim-fit: #9a3412;
-      --lim-fit-bg: #ffedd5;
-      --low-fit: #991b1b;
-      --low-fit-bg: #fee2e2;
+      --primary: #B66F4B;
+      --secondary: #77765D;
+      --bg: #171817;
+      --card-bg: #1E201E;
+      --text: #E9E2D2;
+      --muted: #A39E93;
+      --border: #353835;
+      --strong-fit: #A8A78D;
+      --strong-fit-bg: #282A26;
+      --mod-fit: #C97D56;
+      --mod-fit-bg: #2B211D;
+      --lim-fit: #B89257;
+      --lim-fit-bg: #2B261D;
+      --low-fit: #A85A5A;
+      --low-fit-bg: #2B1D1D;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -37,10 +37,11 @@
       background: var(--card-bg);
       padding: 32px;
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
     }
-    h1, h2, h3 { color: var(--primary); margin-top: 24px; margin-bottom: 12px; }
-    h1 { border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-top: 0; }
+    h1, h2, h3 { color: var(--text); margin-top: 24px; margin-bottom: 12px; }
+    h1 { border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-top: 0; color: var(--primary); }
     h2 { font-size: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
     .badge {
       display: inline-block;
@@ -51,26 +52,27 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .badge-rule { background: #e0f2fe; color: #0369a1; }
-    .badge-ai-extracted { background: #ede9fe; color: #6d28d9; }
-    .badge-computed { background: #f1f5f9; color: #475569; }
-    .badge-ai-generated { background: #fef3c7; color: #b45309; }
-    .fit-strong { background: var(--strong-fit-bg); color: var(--strong-fit); }
-    .fit-moderate { background: var(--mod-fit-bg); color: var(--mod-fit); }
-    .fit-limited { background: var(--lim-fit-bg); color: var(--lim-fit); }
-    .fit-low { background: var(--low-fit-bg); color: var(--low-fit); }
+    .badge-rule { background: #282A28; color: #E9E2D2; border: 1px solid var(--border); }
+    .badge-ai-extracted { background: #28242A; color: #D4BEE4; border: 1px solid #4A3E52; }
+    .badge-computed { background: #222522; color: #A8A78D; border: 1px solid var(--secondary); }
+    .badge-ai-generated { background: #2B211D; color: #C97D56; border: 1px solid var(--primary); }
+    .fit-strong { background: var(--strong-fit-bg); color: var(--strong-fit); border: 1px solid var(--secondary); }
+    .fit-moderate { background: var(--mod-fit-bg); color: var(--mod-fit); border: 1px solid var(--primary); }
+    .fit-limited { background: var(--lim-fit-bg); color: var(--lim-fit); border: 1px solid #7A6237; }
+    .fit-low { background: var(--low-fit-bg); color: var(--low-fit); border: 1px solid #7A3737; }
     .alert-box {
-      background: #eff6ff;
-      border-left: 4px solid var(--secondary);
+      background: #242624;
+      border-left: 4px solid var(--primary);
       padding: 12px 16px;
       margin: 16px 0;
       border-radius: 0 4px 4px 0;
       font-size: 0.9rem;
+      color: var(--text);
     }
     .alert-warning {
-      background: #fffbeb;
-      border-left-color: #f59e0b;
-      color: #92400e;
+      background: #2B261D;
+      border-left-color: #B89257;
+      color: #E9E2D2;
     }
     table {
       width: 100%;
@@ -84,11 +86,11 @@
       border: 1px solid var(--border);
     }
     th {
-      background-color: #f8fafc;
+      background-color: #1A1C1A;
       font-weight: 600;
       color: var(--muted);
     }
-    tr:nth-child(even) { background-color: #fcfdfe; }
+    tr:nth-child(even) { background-color: #222422; }
     .score-summary {
       display: flex;
       gap: 16px;
@@ -100,7 +102,7 @@
       border: 1px solid var(--border);
       border-radius: 6px;
       text-align: center;
-      background: #f8fafc;
+      background: #1A1C1A;
     }
     .score-value {
       font-size: 2rem;
@@ -111,6 +113,7 @@
       font-size: 0.8rem;
       color: var(--muted);
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
     .item-list { padding-left: 20px; }
     .footer {
@@ -127,9 +130,33 @@
   <div class="container">
     <!-- Section 0: Header -->
     <header>
-      <h1>Resume Analysis Report</h1>
-      <p style="color: var(--muted); margin: 0 0 12px 0;">
-        Report ID: <code>{{ report.report_id }}</code> &bull; Date: {{ report.created_at.strftime("%Y-%m-%d %H:%M UTC") }} &bull; Version: {{ report.app_version }}
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <svg viewBox="0 0 360 360" width="46" height="46" style="flex-shrink:0;">
+            <polygon points="180,15 330,165 180,315 30,165" fill="none" stroke="#E9E2D2" stroke-width="3" stroke-linejoin="round" />
+            <polygon points="180,27 318,165 180,303 42,165" fill="none" stroke="#E9E2D2" stroke-width="1.2" stroke-linejoin="round" />
+            <line x1="180" y1="35" x2="180" y2="90" stroke="#E9E2D2" stroke-width="2" />
+            <line x1="180" y1="240" x2="180" y2="295" stroke="#E9E2D2" stroke-width="2" />
+            <path d="M 52,165 Q 180,85 308,165" fill="none" stroke="#E9E2D2" stroke-width="2.8" />
+            <path d="M 52,165 Q 180,245 308,165" fill="none" stroke="#E9E2D2" stroke-width="2.8" />
+            <circle cx="180" cy="165" r="42" fill="none" stroke="#E9E2D2" stroke-width="2.2" />
+            <circle cx="180" cy="165" r="20" fill="none" stroke="#E9E2D2" stroke-width="1.8" />
+            <circle cx="180" cy="165" r="10" fill="#171817" stroke="#E9E2D2" stroke-width="1.6" />
+            <circle cx="180" cy="165" r="4" fill="#B66F4B" />
+          </svg>
+          <div>
+            <div style="font-size: 1.4rem; font-weight: 700; letter-spacing: 0.18em; color: var(--text); line-height: 1.1;">ANVIK</div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--primary); font-weight: 600;">Intelligent Talent Analysis</div>
+          </div>
+        </div>
+        <div style="text-align: right; font-size: 0.8rem; color: var(--muted);">
+          <div>Report: <code>{{ report.report_id }}</code></div>
+          <div>Date: {{ report.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</div>
+        </div>
+      </div>
+      <h1 style="border: none; padding: 0; margin: 0 0 8px 0;">Candidate Evaluation Report</h1>
+      <p style="color: var(--muted); margin: 0 0 14px 0;">
+        Target Role: <strong>{{ report.job.title if report.job else "Target Role Unspecified" }}</strong> &bull; Candidate: <strong>{{ report.candidate.name or "Anonymous" }}</strong>
       </p>
       <div class="alert-box">
         <strong>Notice:</strong> {{ report.human_review_notice }}
@@ -471,7 +498,7 @@
     </section>
 
     <div class="footer">
-      Generated by Intelligent Resume Analyzer v{{ report.app_version }} &bull; Report ID: {{ report.report_id }}
+      Generated by ANVIK &bull; Intelligent Talent Analysis v{{ report.app_version }} &bull; Report ID: {{ report.report_id }}
     </div>
   </div>
 </body>

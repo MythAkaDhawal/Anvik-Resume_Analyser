@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #171817; }
+      .line-main { stroke: #E9E2D2; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .line-fine { stroke: #E9E2D2; stroke-width: 1.4; fill: none; stroke-linecap: round; }
+      .accent { stroke: #B66F4B; fill: #B66F4B; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" class="bg" />
+
+  <!-- Outer and Inner Diamonds -->
+  <polygon points="200,25 355,180 200,335 45,180" class="line-main" />
+  <polygon points="200,37 343,180 200,323 57,180" class="line-fine" stroke-width="1.0" />
+
+  <!-- Vertical Ticks Top & Bottom -->
+  <line x1="200" y1="45" x2="200" y2="100" class="line-fine" stroke-width="1.8" />
+  <line x1="165" y1="85" x2="165" y2="115" class="line-fine" stroke-width="1.4" />
+  <line x1="235" y1="85" x2="235" y2="115" class="line-fine" stroke-width="1.4" />
+
+  <line x1="200" y1="260" x2="200" y2="315" class="line-fine" stroke-width="1.8" />
+  <line x1="165" y1="245" x2="165" y2="275" class="line-fine" stroke-width="1.4" />
+  <line x1="235" y1="245" x2="235" y2="275" class="line-fine" stroke-width="1.4" />
+
+  <!-- Eye Almond Contour -->
+  <path d="M 72,180 Q 200,95 328,180" class="line-main" stroke-width="2.5" />
+  <path d="M 72,180 Q 200,265 328,180" class="line-main" stroke-width="2.5" />
+
+  <!-- Inner eyelid margin lines -->
+  <path d="M 95,180 Q 200,112 305,180" class="line-fine" stroke-width="1.2" />
+  <path d="M 95,180 Q 200,248 305,180" class="line-fine" stroke-width="1.2" />
+
+  <!-- Iris Structure -->
+  <circle cx="200" cy="180" r="45" class="line-main" stroke-width="2.2" />
+  <circle cx="200" cy="180" r="22" class="line-main" stroke-width="1.8" />
+  
+  <!-- Radial Spokes -->
+  <g opacity="0.95">
+      <line x1="222.00" y1="180.00" x2="245.00" y2="180.00" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="221.25" y1="185.69" x2="243.47" y2="191.65" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="219.05" y1="191.00" x2="238.97" y2="202.50" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="215.56" y1="195.56" x2="231.82" y2="211.82" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="211.00" y1="199.05" x2="222.50" y2="218.97" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="205.69" y1="201.25" x2="211.65" y2="223.47" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="200.00" y1="202.00" x2="200.00" y2="225.00" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="194.31" y1="201.25" x2="188.35" y2="223.47" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="189.00" y1="199.05" x2="177.50" y2="218.97" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="184.44" y1="195.56" x2="168.18" y2="211.82" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="180.95" y1="191.00" x2="161.03" y2="202.50" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="178.75" y1="185.69" x2="156.53" y2="191.65" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="178.00" y1="180.00" x2="155.00" y2="180.00" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="178.75" y1="174.31" x2="156.53" y2="168.35" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="180.95" y1="169.00" x2="161.03" y2="157.50" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="184.44" y1="164.44" x2="168.18" y2="148.18" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="189.00" y1="160.95" x2="177.50" y2="141.03" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="194.31" y1="158.75" x2="188.35" y2="136.53" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="200.00" y1="158.00" x2="200.00" y2="135.00" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="205.69" y1="158.75" x2="211.65" y2="136.53" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="211.00" y1="160.95" x2="222.50" y2="141.03" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="215.56" y1="164.44" x2="231.82" y2="148.18" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="219.05" y1="169.00" x2="238.97" y2="157.50" stroke="#E9E2D2" stroke-width="1.5" />
+      <line x1="221.25" y1="174.31" x2="243.47" y2="168.35" stroke="#E9E2D2" stroke-width="1.5" />
+  </g>
+
+  <!-- Central Pupil with Ring and Core -->
+  <circle cx="200" cy="180" r="11" fill="#171817" stroke="#E9E2D2" stroke-width="1.6" />
+  <circle cx="200" cy="180" r="4" fill="#E9E2D2" />
+
+  <!-- Wordmark 'A N V I K' -->
+  <g transform="translate(54, 405)">
+    <!-- A without bar -->
+    <path d="M 0,32 L 18,0 L 36,32" class="line-main" stroke-width="3.2" />
+    <!-- N -->
+    <path d="M 65,32 L 65,0 L 97,32 L 97,0" class="line-main" stroke-width="3.2" />
+    <!-- V with Copper Accent -->
+    <path d="M 125,0 L 143,32 L 161,0" stroke="#B66F4B" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- I -->
+    <line x1="193" y1="0" x2="193" y2="32" class="line-main" stroke-width="3.2" />
+    <!-- K -->
+    <path d="M 223,0 L 223,32 M 255,0 L 223,17 L 255,32" class="line-main" stroke-width="3.2" />
+  </g>
+
+  <!-- Bottom Divider with Star -->
+  <g transform="translate(0, 442)">
+    <line x1="65" y1="0" x2="180" y2="0" stroke="#E9E2D2" stroke-width="1.2" opacity="0.7" />
+    <!-- 4-point Diamond Star -->
+    <polygon points="200,-7 205,0 200,7 195,0" fill="#B66F4B" />
+    <line x1="220" y1="0" x2="335" y2="0" stroke="#E9E2D2" stroke-width="1.2" opacity="0.7" />
+  </g>
+</svg>

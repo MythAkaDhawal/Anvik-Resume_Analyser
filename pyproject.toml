@@ -43,7 +43,7 @@ resume-analyzer = "resume_analyzer.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["*.j2"]
+"*" = ["*.j2", "*.png", "*.svg", "*.ico"]
 
 [tool.black]
 line-length = 88

@@ -23,13 +23,13 @@ from resume_analyzer.reporting.exporters.base import Exporter, register_exporter
 
 logger = logging.getLogger(__name__)
 
-HEADER_FILL = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
-HEADER_FONT = Font(name="Calibri", size=10, bold=True, color="0F172A")
-SECTION_FONT = Font(name="Calibri", size=11, bold=True, color="1E3A8A")
-BOLD_FONT = Font(name="Calibri", size=9.5, bold=True, color="0F172A")
-BODY_FONT = Font(name="Calibri", size=9.5, color="0F172A")
-MUTED_FONT = Font(name="Calibri", size=9, color="64748B", italic=True)
-THIN_SIDE = Side(border_style="thin", color="E2E8F0")
+HEADER_FILL = PatternFill(start_color="171817", end_color="171817", fill_type="solid")
+HEADER_FONT = Font(name="Calibri", size=10, bold=True, color="E9E2D2")
+SECTION_FONT = Font(name="Calibri", size=11, bold=True, color="B66F4B")
+BOLD_FONT = Font(name="Calibri", size=9.5, bold=True, color="171817")
+BODY_FONT = Font(name="Calibri", size=9.5, color="171817")
+MUTED_FONT = Font(name="Calibri", size=9, color="77765D", italic=True)
+THIN_SIDE = Side(border_style="thin", color="D1D5DB")
 BORDER = Border(left=THIN_SIDE, right=THIN_SIDE, top=THIN_SIDE, bottom=THIN_SIDE)
 
 
