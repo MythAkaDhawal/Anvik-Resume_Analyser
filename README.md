@@ -152,6 +152,24 @@ python -m resume_analyzer.cli --help                       # CLI
 pytest                                                     # tests
 ```
 
+### 8.1 Deployment on Streamlit Community Cloud
+
+The application is natively built for **Streamlit Community Cloud**:
+
+1. Sign in to [Streamlit Community Cloud](https://share.streamlit.io/) with your GitHub account.
+2. Click **"New app"**.
+3. Choose your repository: `MythAkaDhawal/Resume_Analyser` (or your repository URL).
+4. Set **Branch**: `main`.
+5. Set **Main file path**: `src/resume_analyzer/ui/streamlit_app.py`.
+6. *(Optional)* In **Advanced settings** &rarr; **Secrets**, configure any desired API keys for GenAI features:
+   ```toml
+   GEMINI_API_KEY = "your-gemini-api-key"
+   # Or for OpenAI-compatible endpoint:
+   # OPENAI_API_KEY = "your-openai-api-key"
+   ```
+   *(If omitted, the app runs in 100% deterministic offline mode with AI features gracefully marked as unavailable).*
+7. Click **"Deploy!"**. Streamlit Community Cloud automatically provisions the container, installs dependencies from `requirements.txt`, and serves the application with persistent WebSocket support.
+
 ## 9. Example usage (planned interface)
 
 Example `job.json` (illustrative):
