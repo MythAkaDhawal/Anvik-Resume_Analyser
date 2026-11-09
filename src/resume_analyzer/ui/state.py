@@ -32,6 +32,10 @@ def init_session_state() -> None:
         )
     if "current_page" not in st.session_state:
         st.session_state["current_page"] = "1 Job"
+    if "nav_radio" not in st.session_state:
+        st.session_state["nav_radio"] = "1 Job"
+    if "_last_synced_page" not in st.session_state:
+        st.session_state["_last_synced_page"] = "1 Job"
     if "selected_report_idx" not in st.session_state:
         st.session_state["selected_report_idx"] = 0
 
@@ -40,7 +44,6 @@ def set_page(page: str) -> None:
     """Transition to the specified UI page."""
     if page in PAGES:
         st.session_state["current_page"] = page
-        st.session_state["nav_radio"] = page
 
 
 def clear_results() -> None:

@@ -57,20 +57,22 @@ def main() -> None:
     # --- Sidebar Navigation ---
     render_anvik_sidebar_brand()
 
-    # Ensure sidebar radio matches current_page
-    if (
-        "nav_radio" not in st.session_state
-        or st.session_state["nav_radio"] != st.session_state["current_page"]
-    ):
+    # Synchronize programmatic navigation with sidebar radio
+    if st.session_state.get("_last_synced_page") != st.session_state["current_page"]:
         st.session_state["nav_radio"] = st.session_state["current_page"]
+        st.session_state["_last_synced_page"] = st.session_state["current_page"]
 
-    selected_nav = st.sidebar.radio(
+    def _on_nav_change() -> None:
+        st.session_state["current_page"] = st.session_state["nav_radio"]
+        st.session_state["_last_synced_page"] = st.session_state["nav_radio"]
+
+    st.sidebar.radio(
         "Workflow Steps",
         PAGES,
-        index=PAGES.index(st.session_state["current_page"]),
         key="nav_radio",
+        on_change=_on_nav_change,
     )
-    st.session_state["current_page"] = selected_nav
+    st.session_state["current_page"] = st.session_state["nav_radio"]
 
     st.sidebar.divider()
     render_human_review_notice()
@@ -118,6 +120,19 @@ def render_job_page() -> None:
     )
 
     existing_job: JobRequirements | None = st.session_state.get("job")
+
+    if existing_job:
+        c_status, c_fwd = st.columns([3, 1])
+        with c_status:
+            st.info(
+                f"Currently configured role: **{existing_job.title}** "
+                f"({len(existing_job.required_skills)} required skill{'s' if len(existing_job.required_skills) != 1 else ''}). "
+                "Update below or proceed to candidate resumes."
+            )
+        with c_fwd:
+            if st.button("Proceed to Upload Resumes ➡️", key="btn_fwd_step2_top", use_container_width=True):
+                set_page("2 Resumes")
+                st.rerun()
 
     with st.form("job_form"):
         title = st.text_input(
@@ -207,7 +222,9 @@ def render_job_page() -> None:
                 ai_p5 = st.checkbox("P5: Interview Questions", value=True)
 
         submitted = st.form_submit_button(
-            "Save & Validate Job Requirements", use_container_width=True
+            "Save & Proceed to Upload Resumes ➡️",
+            type="primary",
+            use_container_width=True,
         )
 
     if submitted:
@@ -246,12 +263,8 @@ def render_job_page() -> None:
                     ai_recommendations=ai_p4 if ai_master else False,
                     ai_interview_questions=ai_p5 if ai_master else False,
                 )
-                st.success(
-                    f"Job requirements for '{job_obj.title}' saved successfully!"
-                )
-                if st.button("Proceed to Upload Resumes ➡️"):
-                    set_page("2 Resumes")
-                    st.rerun()
+                set_page("2 Resumes")
+                st.rerun()
             except Exception as e:
                 st.error(f"Invalid Job Requirements: {e}")
 
@@ -276,9 +289,15 @@ def render_resumes_page() -> None:
             st.rerun()
         return
 
-    st.info(
-        f"Target Role: **{job.title}** ({len(job.required_skills)} required skills)"
-    )
+    c_job_info, c_job_edit = st.columns([3, 1])
+    with c_job_info:
+        st.info(
+            f"Target Role: **{job.title}** ({len(job.required_skills)} required skills)"
+        )
+    with c_job_edit:
+        if st.button("⬅️ Edit Job (Step 1)", key="btn_edit_job_step2", use_container_width=True):
+            set_page("1 Job")
+            st.rerun()
 
     uploaded_files = st.file_uploader(
         "Select candidate resumes (.pdf, .docx, .txt)",
@@ -293,7 +312,7 @@ def render_resumes_page() -> None:
         for idx, f in enumerate(uploaded_files):
             cols[idx % 3].caption(f"📄 {f.name} ({f.size / 1024:.1f} KB)")
 
-    col_run, col_clear = st.columns([2, 1])
+    col_run, col_clear, col_back = st.columns([2, 1, 1])
     with col_run:
         run_clicked = st.button(
             "🚀 Run Analysis", type="primary", use_container_width=True
@@ -302,6 +321,10 @@ def render_resumes_page() -> None:
         if st.button("Clear Past Results", use_container_width=True):
             clear_results()
             st.success("Results cleared.")
+    with col_back:
+        if st.button("⬅️ Back to Step 1", key="btn_back_step1_footer", use_container_width=True):
+            set_page("1 Job")
+            st.rerun()
 
     if run_clicked:
         if not uploaded_files:
@@ -463,9 +486,24 @@ def render_results_page() -> None:
     render_feedback_widget(active_report)
 
     st.divider()
-    if st.button("Proceed to Export Reports ➡️"):
-        set_page("4 Reports")
-        st.rerun()
+    c_nav_back, c_nav_fwd = st.columns(2)
+    with c_nav_back:
+        if st.button(
+            "⬅️ Back to Step 2: Upload Resumes",
+            key="btn_back_step2",
+            use_container_width=True,
+        ):
+            set_page("2 Resumes")
+            st.rerun()
+    with c_nav_fwd:
+        if st.button(
+            "Proceed to Export Reports ➡️",
+            key="btn_fwd_step4",
+            type="primary",
+            use_container_width=True,
+        ):
+            set_page("4 Reports")
+            st.rerun()
 
 
 # -----------------------------------------------------------------------------
@@ -517,6 +555,26 @@ def render_reports_page() -> None:
     render_export_downloads(active_report)
     st.divider()
     render_scoring_limitations()
+
+    st.divider()
+    c_rep_back, c_rep_fwd = st.columns(2)
+    with c_rep_back:
+        if st.button(
+            "⬅️ Back to Step 3: Screening Results",
+            key="btn_back_step3",
+            use_container_width=True,
+        ):
+            set_page("3 Results")
+            st.rerun()
+    with c_rep_fwd:
+        if st.button(
+            "Proceed to History & Diagnostics ➡️",
+            key="btn_fwd_step5",
+            type="primary",
+            use_container_width=True,
+        ):
+            set_page("5 History")
+            st.rerun()
 
 
 # -----------------------------------------------------------------------------
@@ -663,6 +721,11 @@ def render_history_page() -> None:
             st.write("**Top Corrected Skills:**")
             for sk, cnt in fb_summary.top_corrected_skills:
                 st.write(f"- `{sk}` ({cnt} correction{'s' if cnt > 1 else ''})")
+
+    st.divider()
+    if st.button("⬅️ Back to Step 4: Export Reports", key="btn_back_step4"):
+        set_page("4 Reports")
+        st.rerun()
 
 
 if __name__ == "__main__":

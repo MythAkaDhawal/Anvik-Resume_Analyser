@@ -213,3 +213,72 @@ def test_it_06_streamlit_app_smoke() -> None:
 
     assert len(at.exception) == 0
     assert "Step 5: History & Persistence" in at.title[0].value
+
+
+def test_it_07_workflow_navigation_and_state_preservation() -> None:
+    """Verify end-to-end multi-step navigation, validation guards, and state preservation."""
+    app_path = (
+        Path(__file__).parent.parent.parent / "src/resume_analyzer/ui/streamlit_app.py"
+    ).resolve()
+    at = AppTest.from_file(str(app_path), default_timeout=15)
+    at.run()
+    assert len(at.exception) == 0
+    assert "Step 1: Define Job Requirements" in at.title[0].value
+
+    # 1. Empty submission displays validation errors and stays on Step 1
+    submit_btn = at.get("button")[0]
+    submit_btn.click().run()
+    assert len(at.exception) == 0
+    assert len(at.error) > 0
+    assert at.session_state["current_page"] == "1 Job"
+
+    # 2. Valid submission advances to Step 2
+    title_in = at.get("text_input")[0]
+    title_in.input("Staff Python Architect")
+    skills_in = at.get("text_area")[0]
+    skills_in.input("Python, FastAPI, Docker, PostgreSQL")
+    num_in = at.get("number_input")[0]
+    num_in.set_value(5.5)
+
+    submit_btn = at.get("button")[0]
+    submit_btn.click().run()
+    if "Step 2: Upload Resumes" not in at.title[0].value:
+        at.run()
+
+    assert len(at.exception) == 0
+    assert at.session_state["current_page"] == "2 Resumes"
+    assert "Step 2: Upload Resumes" in at.title[0].value
+    assert at.session_state["job"] is not None
+    assert at.session_state["job"].title == "Staff Python Architect"
+    assert at.session_state["job"].min_experience_years == 5.5
+
+    # 3. Back navigation to Step 1 preserves all entered fields
+    back_btns = [b for b in at.button if "Back to Step 1" in b.label or "Edit Job" in b.label]
+    assert len(back_btns) > 0
+    back_btns[0].click().run()
+    if "Step 1: Define Job Requirements" not in at.title[0].value:
+        at.run()
+
+    assert len(at.exception) == 0
+    assert at.session_state["current_page"] == "1 Job"
+    assert "Step 1: Define Job Requirements" in at.title[0].value
+    assert at.get("text_input")[0].value == "Staff Python Architect"
+    assert "FastAPI" in at.get("text_area")[0].value
+    assert at.get("number_input")[0].value == 5.5
+
+    # 4. Advance back to Step 2 via top proceed button
+    proceed_btns = [b for b in at.button if "Proceed to Upload Resumes" in b.label]
+    assert len(proceed_btns) > 0
+    proceed_btns[0].click().run()
+    if "Step 2: Upload Resumes" not in at.title[0].value:
+        at.run()
+
+    assert len(at.exception) == 0
+    assert at.session_state["current_page"] == "2 Resumes"
+    assert "Step 2: Upload Resumes" in at.title[0].value
+
+    # 5. Sidebar radio navigation
+    at.sidebar.radio[0].set_value("1 Job").run()
+    assert at.session_state["current_page"] == "1 Job"
+    at.sidebar.radio[0].set_value("2 Resumes").run()
+    assert at.session_state["current_page"] == "2 Resumes"
